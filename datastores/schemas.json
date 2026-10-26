@@ -1,0 +1,53 @@
+[
+  {
+    "name": "conversation_memory_store",
+    "description": "Multi-turn LLM thread memory, session state, and user interaction history.",
+    "spec": [
+      { "name": "customerId", "type": "text", "label": "Customer ID", "required": true },
+      { "name": "sessionId", "type": "text", "label": "Session ID", "required": true },
+      { "name": "query", "type": "text", "label": "Last Query" },
+      { "name": "response", "type": "text", "label": "Agent Response" },
+      { "name": "confidence", "type": "number", "label": "Confidence Score" },
+      { "name": "timestamp", "type": "date", "label": "Updated At" }
+    ]
+  },
+  {
+    "name": "idempotency_cache_store",
+    "description": "Atomic deduplication locks and event TTL tracking for webhook pipelines.",
+    "spec": [
+      { "name": "key", "type": "text", "label": "Idempotency Key", "required": true },
+      { "name": "status", "type": "text", "label": "Processing Status (PROCESSING|COMPLETED)", "required": true },
+      { "name": "receivedAt", "type": "date", "label": "Received At" },
+      { "name": "completedAt", "type": "date", "label": "Completed At" }
+    ]
+  },
+  {
+    "name": "dead_letter_queue_store",
+    "description": "Dead Letter Queue (DLQ) capturing poison pills and fatal failure payloads for replay.",
+    "spec": [
+      { "name": "key", "type": "text", "label": "Event ID / Correlation Key", "required": true },
+      { "name": "failedModule", "type": "text", "label": "Failed Module Identifier", "required": true },
+      { "name": "errorMessage", "type": "text", "label": "Error Stack Trace" },
+      { "name": "rawPayload", "type": "text", "label": "Raw Event Payload" },
+      { "name": "failedAt", "type": "date", "label": "Failure Timestamp" }
+    ]
+  },
+  {
+    "name": "sync_cursor_store",
+    "description": "High-watermark timestamp cursors and differential sync checkpoints.",
+    "spec": [
+      { "name": "key", "type": "text", "label": "Cursor Name", "required": true },
+      { "name": "lastSyncedTimestamp", "type": "number", "label": "Unix Timestamp High-Watermark" },
+      { "name": "recordsProcessed", "type": "number", "label": "Records Processed in Last Batch" },
+      { "name": "lastSyncDate", "type": "date", "label": "Last Successful Run ISO" }
+    ]
+  },
+  {
+    "name": "rate_limiter_store",
+    "description": "Sliding token-bucket request counters per 1-minute time window.",
+    "spec": [
+      { "name": "key", "type": "text", "label": "Window Key (e.g. YYYYMMDDHHmm)", "required": true },
+      { "name": "requestCount", "type": "number", "label": "Consumed Request Tokens" }
+    ]
+  }
+]

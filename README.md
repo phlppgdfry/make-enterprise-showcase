@@ -3,11 +3,25 @@
 [![CI Blueprint Validation](https://img.shields.io/badge/CI-15%2F15%20Passing-success?style=for-the-badge&logo=githubactions)](https://github.com)
 [![Make.com CLI](https://img.shields.io/badge/@makehq%2Fcli-v1.4.0-0078D4?style=for-the-badge&logo=node.js)](https://www.npmjs.com/package/@makehq/cli)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Make%20Server-8A2BE2?style=for-the-badge)](https://github.com/integromat/make-mcp-server)
+[![Make Custom App](https://img.shields.io/badge/Make%20App%20SDK-v1.0-orange?style=for-the-badge)](./apps/enterprise-circuit-breaker)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-An enterprise-grade portfolio of production Make.com (Integromat) automation blueprints, architectural patterns, and AI agent orchestrations designed for high-scale enterprise environments.
+An enterprise-grade portfolio of production Make.com (Integromat) automation blueprints, custom integration apps, and AI agent orchestrations designed for high-scale enterprise environments.
 
 Targeted for **Zone `eu1.make.com`** and organizations running mission-critical integration workloads.
+
+---
+
+## ⚡ Quickstart: Try It In Your Terminal
+
+Run the interactive runtime pipeline simulator right now:
+
+```bash
+git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
+cd make-enterprise-showcase
+npm test         # Run 15/15 schema & blueprint validation tests
+npm run simulate # Run live interactive scenario execution simulation
+```
 
 ---
 
@@ -23,7 +37,18 @@ Targeted for **Zone `eu1.make.com`** and organizations running mission-critical 
 
 ---
 
-## 📐 Architecture Diagrams
+## 🛠️ Make Custom App: Enterprise Circuit Breaker & Guard
+
+Senior Make architects do not rely solely on third-party public apps. This repository includes a production-ready custom Make integration app created with the **Make Apps SDK**:
+
+👉 **[Enterprise Circuit Breaker & Guard App](./apps/enterprise-circuit-breaker)**
+- **Guarded Request Action (`guarded-request`)**: Prevents cascading failures with `CLOSED` -> `OPEN` -> `HALF-OPEN` circuit transitions.
+- **HMAC Verification Action (`verify-hmac`)**: Constant-time cryptographic signature validation to protect against webhook timing attacks.
+- Deployable to any Make organization using `make-cli sdk-apps`.
+
+---
+
+## 📐 Architecture Visualizations
 
 ### 1. Autonomous AI Agent with Tool Calling & Human-in-the-Loop
 ```mermaid
@@ -56,6 +81,19 @@ flowchart TD
 
 ---
 
+## 📊 How to View in Your Make.com Dashboard
+
+To see these scenarios visual and interactive inside your Make organization ([eu1.make.com/organization/9433554/dashboard](https://eu1.make.com/organization/9433554/dashboard)):
+
+1. Open **Make.com** -> **Scenarios** -> **Create a new scenario**.
+2. Click the **`...`** (More options) menu in the bottom canvas toolbar -> **Import Blueprint**.
+3. Choose any `blueprint.json` from `./blueprints/` and save.
+4. (Optional) Run `npm run setup-datastores` to auto-provision all required Data Stores via `make-cli`.
+
+Detailed walkthrough available in [MAKE-DASHBOARD-IMPORT-GUIDE.md](./docs/MAKE-DASHBOARD-IMPORT-GUIDE.md).
+
+---
+
 ## 🏛️ Senior Engineering Principles
 
 1. **Deterministic Idempotency**: All mutating webhooks utilize an atomic lock pattern in Make Data Store with an auto-expiring TTL to prevent race conditions and duplicate operations.
@@ -75,70 +113,12 @@ This repository is integrated with official Make developer tools:
 - **`mcp-server-make`** (`@makehq/mcp-server`): Model Context Protocol server exposing Make workflows to AI coding assistants (Claude Code, Gemini CLI, Cursor, Windsurf).
 - **Make Scenario Skills**: 5 specialized skills installed in `~/.agents/skills/` and `~/.gemini/skills/` (`make-scenario-reference`, `make-scenario-explore`, `make-scenario-building`, `make-scenario-operations`, `make-endpoints`).
 
-### Quick Commands
-
-```bash
-# Run schema and blueprint validation test suite
-npm test
-
-# Deploy or validate against Make.com
-npm run deploy
-
-# Log in to Make CLI
-make-cli login
-
-# Check authenticated user details
-make-cli whoami --zone eu1.make.com
-```
-
----
-
-## 🧪 Automated Validation Suite
-
-Every blueprint in this repository is strictly validated against Make's module schema, node connectivity, and execution integrity:
-
-```bash
-$ npm test
-
-====================================================
-🔍 Running Make.com Senior Blueprint Validation Suite
-====================================================
-
-📦 Scenario: [01-ai-agent-autonomous-triage]
-  ✅ blueprint.json: Valid UI format (5 top-level nodes)
-  ✅ scenario-create.json: Valid MCP/CLI format (9 modules)
-  ✅ README.md: Architecture documentation verified
-
-📦 Scenario: [02-idempotent-webhook-dlq-engine]
-  ✅ blueprint.json: Valid UI format (4 top-level nodes)
-  ✅ scenario-create.json: Valid MCP/CLI format (11 modules)
-  ✅ README.md: Architecture documentation verified
-
-📦 Scenario: [03-bidirectional-crm-billing-reconciliation]
-  ✅ blueprint.json: Valid UI format (8 top-level nodes)
-  ✅ scenario-create.json: Valid MCP/CLI format (8 modules)
-  ✅ README.md: Architecture documentation verified
-
-📦 Scenario: [04-self-healing-etl-rate-limit-governor]
-  ✅ blueprint.json: Valid UI format (8 top-level nodes)
-  ✅ scenario-create.json: Valid MCP/CLI format (11 modules)
-  ✅ README.md: Architecture documentation verified
-
-📦 Scenario: [05-rag-vector-knowledge-dispatcher]
-  ✅ blueprint.json: Valid UI format (5 top-level nodes)
-  ✅ scenario-create.json: Valid MCP/CLI format (5 modules)
-  ✅ README.md: Architecture documentation verified
-
-====================================================
-Validation Summary: 15/15 Passed (0 Failed)
-====================================================
-🚀 All scenarios passed senior-level production validation!
-```
-
 ---
 
 ## 📖 In-Depth Documentation
-- [Enterprise Architectural Patterns](./docs/ENTERPRISE-PATTERNS.md)
+- [How to Import into Make Dashboard](./docs/MAKE-DASHBOARD-IMPORT-GUIDE.md)
+- [Enterprise Architectural Patterns & Error Directives](./docs/ENTERPRISE-PATTERNS.md)
+- [ROI, TCO & Operation Cost Optimization Guide](./docs/ROI-AND-COST-OPTIMIZATION.md)
 - [Security, Compliance & GDPR Governance](./docs/SECURITY-AND-GOVERNANCE.md)
 - [Make CLI & MCP Setup Guide](./docs/CLI-AND-MCP-GUIDE.md)
 

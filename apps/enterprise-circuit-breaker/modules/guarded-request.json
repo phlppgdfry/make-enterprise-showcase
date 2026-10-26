@@ -1,0 +1,80 @@
+{
+  "name": "guarded-request",
+  "label": "Execute Guarded Request",
+  "description": "Wraps downstream HTTP mutations with circuit breaker evaluation and automatic fallback.",
+  "type": "action",
+  "connection": "api-key",
+  "communication": {
+    "url": "/circuit-breaker/execute",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer {{connection.apiKey}}",
+      "X-Cluster-Zone": "{{connection.clusterZone}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "serviceKey": "{{parameters.serviceKey}}",
+      "targetUrl": "{{parameters.targetUrl}}",
+      "httpMethod": "{{parameters.httpMethod}}",
+      "payload": "{{parameters.payload}}",
+      "failureThreshold": "{{ifempty(parameters.failureThreshold, 5)}}",
+      "resetTimeoutSeconds": "{{ifempty(parameters.resetTimeoutSeconds, 30)}}"
+    },
+    "response": {
+      "output": {
+        "status": "{{body.status}}",
+        "circuitState": "{{body.circuitState}}",
+        "executionLatencyMs": "{{body.latencyMs}}",
+        "data": "{{body.data}}",
+        "fallbackTriggered": "{{body.fallbackTriggered}}"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "name": "serviceKey",
+      "type": "text",
+      "label": "Service Identifier",
+      "required": true,
+      "help": "Unique key representing the downstream service (e.g. stripe-billing, hubspot-crm)."
+    },
+    {
+      "name": "targetUrl",
+      "type": "url",
+      "label": "Target Endpoint URL",
+      "required": true
+    },
+    {
+      "name": "httpMethod",
+      "type": "select",
+      "label": "HTTP Method",
+      "required": true,
+      "options": [
+        { "value": "GET", "label": "GET" },
+        { "value": "POST", "label": "POST" },
+        { "value": "PUT", "label": "PUT" },
+        { "value": "PATCH", "label": "PATCH" },
+        { "value": "DELETE", "label": "DELETE" }
+      ]
+    },
+    {
+      "name": "payload",
+      "type": "any",
+      "label": "Request Body / Payload"
+    },
+    {
+      "name": "failureThreshold",
+      "type": "number",
+      "label": "Failure Trip Threshold",
+      "default": 5,
+      "help": "Number of consecutive failures before opening the circuit breaker."
+    },
+    {
+      "name": "resetTimeoutSeconds",
+      "type": "number",
+      "label": "Reset Timeout (Seconds)",
+      "default": 30,
+      "help": "Time to remain in OPEN state before attempting HALF-OPEN health probe."
+    }
+  ]
+}

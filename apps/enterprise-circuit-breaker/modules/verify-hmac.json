@@ -1,0 +1,48 @@
+{
+  "name": "verify-hmac",
+  "label": "Verify HMAC-SHA256 Signature",
+  "description": "Cryptographically validates incoming webhook signatures using constant-time evaluation to prevent timing attacks.",
+  "type": "action",
+  "connection": "api-key",
+  "communication": {
+    "url": "/crypto/verify-hmac",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer {{connection.apiKey}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "rawBody": "{{parameters.rawBody}}",
+      "signature": "{{parameters.signature}}",
+      "secret": "{{parameters.secret}}",
+      "algorithm": "sha256"
+    },
+    "response": {
+      "output": {
+        "isValid": "{{body.isValid}}",
+        "verifiedAt": "{{body.timestamp}}",
+        "keyId": "{{body.keyId}}"
+      }
+    }
+  },
+  "parameters": [
+    {
+      "name": "rawBody",
+      "type": "text",
+      "label": "Raw Webhook Body",
+      "required": true
+    },
+    {
+      "name": "signature",
+      "type": "text",
+      "label": "Incoming Signature Header",
+      "required": true
+    },
+    {
+      "name": "secret",
+      "type": "text",
+      "label": "Signing Secret Key",
+      "required": true
+    }
+  ]
+}

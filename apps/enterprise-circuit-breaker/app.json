@@ -1,0 +1,10 @@
+{
+  "name": "enterprise-circuit-breaker",
+  "label": "Enterprise Circuit Breaker & Guard",
+  "description": "Enterprise-grade resilient call wrapper with state-tripping, rate-limiting, and automatic failover.",
+  "version": 1,
+  "theme": "#6366F1",
+  "baseUrl": "https://guard.enterprise.internal/v1",
+  "author": "Philippe Godfroy",
+  "license": "MIT"
+}

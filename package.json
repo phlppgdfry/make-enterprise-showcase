@@ -6,6 +6,8 @@
   "scripts": {
     "test": "node scripts/validate-blueprints.js",
     "validate": "node scripts/validate-blueprints.js",
+    "simulate": "node scripts/simulate.js",
+    "setup-datastores": "node scripts/setup-datastores.js",
     "deploy": "./scripts/make-deploy.sh",
     "export": "./scripts/make-export.sh"
   },

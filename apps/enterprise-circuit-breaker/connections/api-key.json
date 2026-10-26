@@ -1,0 +1,25 @@
+{
+  "name": "api-key",
+  "label": "Enterprise Guard Secret Connection",
+  "type": "key",
+  "parameters": [
+    {
+      "name": "apiKey",
+      "type": "text",
+      "label": "Enterprise API Key",
+      "required": true,
+      "help": "Provide the guard cluster API secret for authentication."
+    },
+    {
+      "name": "clusterZone",
+      "type": "select",
+      "label": "Cluster Zone",
+      "required": true,
+      "options": [
+        { "value": "eu-central-1", "label": "EU Central (Frankfurt)" },
+        { "value": "eu-west-1", "label": "EU West (Ireland)" },
+        { "value": "us-east-1", "label": "US East (N. Virginia)" }
+      ]
+    }
+  ]
+}
