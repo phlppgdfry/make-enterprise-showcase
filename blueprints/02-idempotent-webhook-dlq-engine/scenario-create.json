@@ -1,0 +1,193 @@
+{
+  "name": "02 - High-Throughput Idempotent Webhook Engine & Dead Letter Queue (DLQ)",
+  "scheduling": { "type": "immediately" },
+  "modules": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "root": "main",
+      "label": "Signed Event Ingest Gateway",
+      "config": {}
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "follows": 1,
+      "label": "Extract Headers & Idempotency Key",
+      "config": {
+        "mapper": {
+          "idempotencyKey": "{{1.headers.x-idempotency-key}}",
+          "signature": "{{1.headers.x-signature-sha256}}",
+          "payload": "{{1.body}}"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "follows": 2,
+      "label": "Check Idempotency Cache",
+      "config": {
+        "parameters": {
+          "datastore": "idempotency_cache_store"
+        },
+        "mapper": {
+          "key": "{{2.idempotencyKey}}"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:Router",
+      "version": 1,
+      "follows": 3,
+      "label": "Idempotency Gate Router"
+    },
+    {
+      "id": 5,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parent": {
+        "moduleId": 4,
+        "kind": "route",
+        "index": 0,
+        "label": "Duplicate Event (Fast-Path ACK)",
+        "filter": {
+          "name": "Key Exists in Cache",
+          "conditions": [
+            [
+              { "a": "{{3.key}}", "o": "exists" }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "mapper": {
+          "status": 200,
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"status\":\"cached_ack\",\"message\":\"Event already processed\",\"idempotencyKey\":\"{{2.idempotencyKey}}\"}"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "parent": {
+        "moduleId": 4,
+        "kind": "route",
+        "index": 1,
+        "label": "New Event: Acquire Processing Lock",
+        "filter": {
+          "name": "Key Does Not Exist",
+          "conditions": [
+            [
+              { "a": "{{3.key}}", "o": "doesNotExist" }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "parameters": {
+          "datastore": "idempotency_cache_store"
+        },
+        "mapper": {
+          "key": "{{2.idempotencyKey}}",
+          "status": "PROCESSING",
+          "receivedAt": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 6,
+      "label": "Core Mutation: Downstream ERP Dispatch",
+      "config": {
+        "mapper": {
+          "url": "https://erp.enterprise.internal/api/v2/orders/ingest",
+          "method": "POST",
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "X-Correlation-ID", "value": "{{2.idempotencyKey}}" }
+          ],
+          "body": "{{2.payload}}"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "parent": {
+        "moduleId": 7,
+        "kind": "error",
+        "label": "DLQ: Store Poison Pill & Alert"
+      },
+      "config": {
+        "parameters": {
+          "datastore": "dead_letter_queue_store"
+        },
+        "mapper": {
+          "key": "{{2.idempotencyKey}}",
+          "failedModule": "ERP_DISPATCH_7",
+          "errorMessage": "{{error.message}}",
+          "rawPayload": "{{2.payload}}",
+          "failedAt": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "slack:ActionCreateMessage",
+      "version": 1,
+      "follows": 8,
+      "label": "PagerDuty / Slack P1 DLQ Alert",
+      "config": {
+        "mapper": {
+          "channel": "C08DEAD-LETTER-QUEUE",
+          "text": "🔥 *P1 ALERT: Poison Event Routed to Dead Letter Queue*\n*Idempotency Key:* `{{2.idempotencyKey}}`\n*Error:* {{error.message}}\n*DLQ Record:* `dead_letter_queue_store/{{2.idempotencyKey}}`\n*Action:* Inspect and replay via Make CLI."
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "datastore:UpdateRecord",
+      "version": 1,
+      "follows": 7,
+      "label": "Commit Idempotency State: COMPLETED",
+      "config": {
+        "parameters": {
+          "datastore": "idempotency_cache_store"
+        },
+        "mapper": {
+          "key": "{{2.idempotencyKey}}",
+          "status": "COMPLETED",
+          "completedAt": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "follows": 10,
+      "label": "Synchronous 201 Created Response",
+      "config": {
+        "mapper": {
+          "status": 201,
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"status\":\"processed\",\"idempotencyKey\":\"{{2.idempotencyKey}}\",\"timestamp\":\"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}\"}"
+        }
+      }
+    }
+  ]
+}

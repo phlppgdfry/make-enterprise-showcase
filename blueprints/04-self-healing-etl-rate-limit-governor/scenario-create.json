@@ -1,0 +1,181 @@
+{
+  "name": "04 - Self-Healing ETL Pipeline with Rate-Limit Governor & Transaction Rollback",
+  "scheduling": { "type": "immediately" },
+  "modules": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "root": "main",
+      "label": "High-Volume ETL Ingestion Hook",
+      "config": {}
+    },
+    {
+      "id": 2,
+      "module": "json:ActionParseJSON",
+      "version": 1,
+      "follows": 1,
+      "label": "Strict JSON Schema Validation",
+      "config": {
+        "mapper": {
+          "json": "{{1.body}}"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "follows": 2,
+      "label": "Check Token Bucket Rate Limiter",
+      "config": {
+        "parameters": {
+          "datastore": "rate_limiter_store"
+        },
+        "mapper": {
+          "key": "etl_rate_window_{{formatDate(now; \"YYYYMMDDHHmm\")}}"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:Router",
+      "version": 1,
+      "follows": 3,
+      "label": "Rate Limit Throttle Router"
+    },
+    {
+      "id": 5,
+      "module": "util:ActionSleep",
+      "version": 1,
+      "parent": {
+        "moduleId": 4,
+        "kind": "route",
+        "index": 0,
+        "label": "Governor: Dynamic Backpressure Delay",
+        "filter": {
+          "name": "Token Bucket Limit Exceeded (> 250 req/min)",
+          "conditions": [
+            [
+              { "a": "{{ifempty(3.requestCount; 0)}}", "o": "number:greaterThan", "b": 250 }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "mapper": {
+          "delay": 5
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "datastore:UpdateRecord",
+      "version": 1,
+      "parent": {
+        "moduleId": 4,
+        "kind": "route",
+        "index": 1,
+        "label": "Normal Flow: Increment Rate Counter",
+        "filter": {
+          "name": "Within Rate Window",
+          "conditions": [
+            [
+              { "a": "{{ifempty(3.requestCount; 0)}}", "o": "number:lessThanOrEqual", "b": 250 }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "parameters": {
+          "datastore": "rate_limiter_store"
+        },
+        "mapper": {
+          "key": "etl_rate_window_{{formatDate(now; \"YYYYMMDDHHmm\")}}",
+          "requestCount": "{{add(ifempty(3.requestCount; 0); 1)}}"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "builtin:Iterator",
+      "version": 1,
+      "follows": 4,
+      "label": "Iterate Batch Data Records",
+      "config": {
+        "mapper": {
+          "array": "{{2.items}}"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 7,
+      "label": "Atomic Warehouse Ingest (ClickHouse / Snowflake)",
+      "config": {
+        "mapper": {
+          "url": "https://warehouse.enterprise.internal/v1/stream/ingest",
+          "method": "POST",
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"batchId\":\"{{1.batchId}}\",\"recordId\":\"{{7.id}}\",\"payload\":{{7.data}}}"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parent": {
+        "moduleId": 8,
+        "kind": "error",
+        "label": "Compensating Transaction: Rollback Batch"
+      },
+      "config": {
+        "mapper": {
+          "url": "https://warehouse.enterprise.internal/v1/stream/rollback",
+          "method": "POST",
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"batchId\":\"{{1.batchId}}\",\"failedRecord\":\"{{7.id}}\",\"reason\":\"{{error.message}}\"}"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "builtin:ArrayAggregator",
+      "version": 1,
+      "follows": 8,
+      "label": "Collate Ingested Record IDs",
+      "config": {
+        "mapper": {
+          "sourceModule": 7,
+          "row": {
+            "recordId": "{{7.id}}",
+            "status": "INGESTED"
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "follows": 10,
+      "label": "Webhook ACK with Ingestion Telemetry",
+      "config": {
+        "mapper": {
+          "status": 200,
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"batchId\":\"{{1.batchId}}\",\"recordsIngested\":{{length(10.array)}},\"status\":\"success\"}"
+        }
+      }
+    }
+  ]
+}

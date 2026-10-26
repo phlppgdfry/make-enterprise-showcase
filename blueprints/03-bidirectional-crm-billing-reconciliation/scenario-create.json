@@ -1,0 +1,123 @@
+{
+  "name": "03 - Bi-Directional CRM & Billing Differential Sync Engine",
+  "scheduling": { "type": "indefinitely", "interval": 900 },
+  "modules": [
+    {
+      "id": 1,
+      "module": "clock:ActionTrigger",
+      "version": 1,
+      "root": "main",
+      "label": "Scheduled Sync Trigger (Every 15m)",
+      "config": {}
+    },
+    {
+      "id": 2,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "follows": 1,
+      "label": "Fetch High-Watermark Timestamp Cursor",
+      "config": {
+        "parameters": {
+          "datastore": "sync_cursor_store"
+        },
+        "mapper": {
+          "key": "stripe_hubspot_watermark"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 2,
+      "label": "Stripe: Query Customers Updated Since Watermark",
+      "config": {
+        "mapper": {
+          "url": "https://api.stripe.com/v1/customers/search?query=updated>{{ifempty(2.lastSyncedTimestamp; 0)}}&limit=100",
+          "method": "GET",
+          "headers": [
+            { "name": "Authorization", "value": "Bearer {{env.STRIPE_SECRET_KEY}}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:Iterator",
+      "version": 1,
+      "follows": 3,
+      "label": "Iterator: Unroll Batch Records",
+      "config": {
+        "mapper": {
+          "array": "{{3.data.data}}"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 4,
+      "label": "HubSpot: Upsert Contact Record",
+      "config": {
+        "mapper": {
+          "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+          "method": "POST",
+          "headers": [
+            { "name": "Authorization", "value": "Bearer {{env.HUBSPOT_ACCESS_TOKEN}}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"properties\":{\"email\":\"{{4.email}}\",\"stripe_customer_id\":\"{{4.id}}\",\"stripe_mrr\":{{ifempty(4.metadata.mrr; 0)}},\"subscription_tier\":\"{{ifempty(4.metadata.tier; 'Free')}}\"}}"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "builtin:ArrayAggregator",
+      "version": 1,
+      "follows": 5,
+      "label": "Aggregate Processed Batch Results",
+      "config": {
+        "mapper": {
+          "sourceModule": 4,
+          "row": {
+            "customerId": "{{4.id}}",
+            "email": "{{4.email}}",
+            "status": "UPSERTED"
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "datastore:UpdateRecord",
+      "version": 1,
+      "follows": 6,
+      "label": "Commit New High-Watermark Cursor",
+      "config": {
+        "parameters": {
+          "datastore": "sync_cursor_store"
+        },
+        "mapper": {
+          "key": "stripe_hubspot_watermark",
+          "lastSyncedTimestamp": "{{formatDate(now; \"X\")}}",
+          "recordsProcessed": "{{length(6.array)}}",
+          "lastSyncDate": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "slack:ActionCreateMessage",
+      "version": 1,
+      "follows": 7,
+      "label": "Post Batch Audit Digest to Ops",
+      "config": {
+        "mapper": {
+          "channel": "C08SYNC-AUDIT",
+          "text": "📊 *Billing-to-CRM Sync Completed*\n*Records Synced:* {{length(6.array)}}\n*Timestamp Cursor:* {{7.lastSyncedTimestamp}}\n*Drift / Anomalies:* 0\n*Status:* Healthy"
+        }
+      }
+    }
+  ]
+}

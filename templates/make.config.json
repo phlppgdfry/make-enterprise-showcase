@@ -1,0 +1,41 @@
+{
+  "zone": "eu1.make.com",
+  "organizationId": 9433554,
+  "defaultSettings": {
+    "roundtrips": 1,
+    "maxErrors": 3,
+    "autoCommit": true,
+    "autoCommitTriggerLast": true,
+    "sequential": false,
+    "confidential": false,
+    "dataloss": false,
+    "dlq": true
+  },
+  "datastores": [
+    {
+      "name": "conversation_memory_store",
+      "description": "Multi-turn LLM thread memory and session state",
+      "sizeMb": 50
+    },
+    {
+      "name": "idempotency_cache_store",
+      "description": "Atomic deduplication locks and event TTL tracking",
+      "sizeMb": 100
+    },
+    {
+      "name": "dead_letter_queue_store",
+      "description": "Dead Letter Queue for failed payloads and poison pills",
+      "sizeMb": 100
+    },
+    {
+      "name": "sync_cursor_store",
+      "description": "High-watermark timestamp cursors for differential ETL",
+      "sizeMb": 10
+    },
+    {
+      "name": "rate_limiter_store",
+      "description": "Sliding token-bucket request counters per minute window",
+      "sizeMb": 20
+    }
+  ]
+}

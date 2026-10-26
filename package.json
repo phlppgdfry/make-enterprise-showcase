@@ -1,0 +1,25 @@
+{
+  "name": "make-enterprise-showcase",
+  "version": "1.0.0",
+  "description": "Production-Grade Enterprise Make.com Automation & AI Agent Portfolio Showcase",
+  "main": "scripts/validate-blueprints.js",
+  "scripts": {
+    "test": "node scripts/validate-blueprints.js",
+    "validate": "node scripts/validate-blueprints.js",
+    "deploy": "./scripts/make-deploy.sh",
+    "export": "./scripts/make-export.sh"
+  },
+  "keywords": [
+    "make",
+    "makehq",
+    "integromat",
+    "automation",
+    "mcp",
+    "ai-agents",
+    "blueprints",
+    "enterprise-architecture",
+    "workflow-automation"
+  ],
+  "author": "Philippe Godfroy",
+  "license": "MIT"
+}

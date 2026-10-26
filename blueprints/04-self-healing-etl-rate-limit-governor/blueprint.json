@@ -1,0 +1,181 @@
+{
+  "name": "04 - Self-Healing ETL Pipeline with Rate-Limit Governor & Transaction Rollback",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0, "name": "High-Volume ETL Ingestion Hook" }
+      }
+    },
+    {
+      "id": 2,
+      "module": "json:ActionParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{1.body}}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0, "name": "Strict JSON Schema Validation" }
+      }
+    },
+    {
+      "id": 3,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "parameters": {
+        "datastore": "rate_limiter_store"
+      },
+      "mapper": {
+        "key": "etl_rate_window_{{formatDate(now; \"YYYYMMDDHHmm\")}}"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0, "name": "Check Token Bucket Rate Limiter" }
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:Router",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 900, "y": 0, "name": "Rate Limit Throttle Router" }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "util:ActionSleep",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "delay": 5
+              },
+              "filter": {
+                "name": "Rate Window > 250 req/min",
+                "conditions": [
+                  [
+                    { "a": "{{ifempty(3.requestCount; 0)}}", "o": "number:greaterThan", "b": 250 }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": { "x": 1200, "y": -150, "name": "Governor: Dynamic Backpressure Delay" }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "datastore:UpdateRecord",
+              "version": 1,
+              "parameters": {
+                "datastore": "rate_limiter_store"
+              },
+              "mapper": {
+                "key": "etl_rate_window_{{formatDate(now; \"YYYYMMDDHHmm\")}}",
+                "requestCount": "{{add(ifempty(3.requestCount; 0); 1)}}"
+              },
+              "filter": {
+                "name": "Within Rate Window",
+                "conditions": [
+                  [
+                    { "a": "{{ifempty(3.requestCount; 0)}}", "o": "number:lessThanOrEqual", "b": 250 }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": { "x": 1200, "y": 150, "name": "Normal Flow: Increment Rate Counter" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "module": "builtin:Iterator",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{2.items}}"
+      },
+      "metadata": {
+        "designer": { "x": 1500, "y": 0, "name": "Iterate Batch Data Records" }
+      }
+    },
+    {
+      "id": 8,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "url": "https://warehouse.enterprise.internal/v1/stream/ingest",
+        "method": "POST",
+        "headers": [
+          { "name": "Content-Type", "value": "application/json" }
+        ],
+        "body": "{\"batchId\":\"{{1.batchId}}\",\"recordId\":\"{{7.id}}\",\"payload\":{{7.data}}}"
+      },
+      "metadata": {
+        "designer": { "x": 1800, "y": 0, "name": "Atomic Warehouse Ingest" }
+      }
+    },
+    {
+      "id": 10,
+      "module": "builtin:ArrayAggregator",
+      "version": 1,
+      "parameters": {
+        "feeder": 7
+      },
+      "mapper": {
+        "row": {
+          "recordId": "{{7.id}}",
+          "status": "INGESTED"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 2100, "y": 0, "name": "Collate Ingested Record IDs" }
+      }
+    },
+    {
+      "id": 11,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "headers": [
+          { "name": "Content-Type", "value": "application/json" }
+        ],
+        "body": "{\"batchId\":\"{{1.batchId}}\",\"recordsIngested\":{{length(10.array)}},\"status\":\"success\"}"
+      },
+      "metadata": {
+        "designer": { "x": 2400, "y": 0, "name": "Webhook ACK with Ingestion Telemetry" }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": true
+    },
+    "designer": { "orphans": [] }
+  }
+}

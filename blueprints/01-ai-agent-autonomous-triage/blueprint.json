@@ -1,0 +1,147 @@
+{
+  "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0, "name": "Incoming Omnichannel Webhook" },
+        "restore": {},
+        "parameters": [],
+        "expect": []
+      }
+    },
+    {
+      "id": 2,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "parameters": {
+        "datastore": "conversation_memory_store"
+      },
+      "mapper": {
+        "key": "{{1.customerId}}_{{1.sessionId}}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0, "name": "Fetch Conversation Memory" }
+      }
+    },
+    {
+      "id": 3,
+      "module": "ai-local-agent:RunLocalAIAgent",
+      "version": 1,
+      "parameters": {
+        "makeConnectionId": 10001
+      },
+      "mapper": {
+        "systemPrompt": "You are an Enterprise Autonomous Support Engineer. You resolve customer requests using available tools. If confidence is below 85% or an action involves refund/cancellation > $100, escalate to human-in-the-loop with detailed rationale. Always return structured JSON with: resolution, confidenceScore, escalated, actionTaken.",
+        "message": "{{1.query}}",
+        "threadId": "{{1.sessionId}}",
+        "history": "{{2.history}}"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0, "name": "Reasoning Core: Autonomous Agent" }
+      }
+    },
+    {
+      "id": 6,
+      "module": "builtin:Router",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 900, "y": 0, "name": "Confidence & Risk Gateway" }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "slack:ActionCreateMessage",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "channel": "C08ENTERPRISE-ALERT",
+                "text": "🚨 *Human-in-the-Loop Approval Required*\n*Customer:* {{1.customerId}}\n*Query:* {{1.query}}\n*Agent Evaluation:* {{3.resolution}}\n*Confidence:* {{3.confidenceScore}}%"
+              },
+              "filter": {
+                "name": "Confidence < 85% or Escalated True",
+                "conditions": [
+                  [
+                    { "a": "{{3.confidenceScore}}", "o": "number:lessThan", "b": 85 }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": { "x": 1200, "y": -150, "name": "Escalate to Human Review (Slack)" }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 8,
+              "module": "datastore:AddRecord",
+              "version": 1,
+              "parameters": {
+                "datastore": "conversation_memory_store"
+              },
+              "mapper": {
+                "key": "{{1.customerId}}_{{1.sessionId}}",
+                "query": "{{1.query}}",
+                "response": "{{3.resolution}}",
+                "confidence": "{{3.confidenceScore}}",
+                "timestamp": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+              },
+              "filter": {
+                "name": "Confidence >= 85%",
+                "conditions": [
+                  [
+                    { "a": "{{3.confidenceScore}}", "o": "number:greaterThanOrEqual", "b": 85 }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": { "x": 1200, "y": 150, "name": "Store Memory in Data Store" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "headers": [
+          { "name": "Content-Type", "value": "application/json" }
+        ],
+        "body": "{\"status\":\"success\",\"sessionId\":\"{{1.sessionId}}\",\"escalated\":{{if(3.confidenceScore < 85; true; false)}},\"resolution\":\"{{3.resolution}}\",\"confidence\":{{3.confidenceScore}}}"
+      },
+      "metadata": {
+        "designer": { "x": 1500, "y": 0, "name": "Synchronous API Response" }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": true
+    },
+    "designer": { "orphans": [] }
+  }
+}

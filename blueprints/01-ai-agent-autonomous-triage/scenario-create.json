@@ -1,0 +1,170 @@
+{
+  "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+  "scheduling": { "type": "immediately" },
+  "modules": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "root": "main",
+      "label": "Incoming Omnichannel Webhook",
+      "config": {}
+    },
+    {
+      "id": 2,
+      "module": "datastore:GetRecord",
+      "version": 1,
+      "follows": 1,
+      "label": "Fetch Conversation Memory",
+      "config": {
+        "parameters": {
+          "datastore": "conversation_memory_store"
+        },
+        "mapper": {
+          "key": "{{1.customerId}}_{{1.sessionId}}"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "ai-local-agent:RunLocalAIAgent",
+      "version": 1,
+      "follows": 2,
+      "label": "Reasoning Core: Autonomous Agent",
+      "config": {
+        "parameters": {
+          "makeConnectionId": 10001
+        },
+        "mapper": {
+          "systemPrompt": "You are an Enterprise Autonomous Support Engineer. You resolve customer requests using available tools. If confidence is below 85% or an action involves refund/cancellation > $100, escalate to human-in-the-loop with detailed rationale. Always return structured JSON with: resolution, confidenceScore, escalated, actionTaken.",
+          "message": "{{1.query}}",
+          "threadId": "{{1.sessionId}}",
+          "history": "{{2.history}}"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parent": {
+        "moduleId": 3,
+        "kind": "tool",
+        "index": 0,
+        "label": "Query CRM & Billing Status",
+        "description": "Inspects current customer subscription tier, billing status, and open tickets."
+      },
+      "config": {
+        "mapper": {
+          "url": "https://api.stripe.com/v1/customers/{{1.customerId}}",
+          "method": "GET",
+          "headers": [
+            { "name": "Authorization", "value": "Bearer {{env.STRIPE_SECRET_KEY}}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parent": {
+        "moduleId": 3,
+        "kind": "tool",
+        "index": 1,
+        "label": "Execute Database Action",
+        "description": "Performs account operations such as license upgrades, password resets, or tier adjustments."
+      },
+      "config": {
+        "mapper": {
+          "url": "https://api.internal.enterprise/v1/accounts/{{1.customerId}}/operations",
+          "method": "POST",
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"action\": \"{{3.toolAction}}\", \"parameters\": {{3.toolParams}}}"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "builtin:Router",
+      "version": 1,
+      "follows": 3,
+      "label": "Confidence & Risk Gateway"
+    },
+    {
+      "id": 7,
+      "module": "slack:ActionCreateMessage",
+      "version": 1,
+      "parent": {
+        "moduleId": 6,
+        "kind": "route",
+        "index": 0,
+        "label": "Escalate to Human-in-the-Loop",
+        "filter": {
+          "name": "Confidence < 85% or Escalated True",
+          "conditions": [
+            [
+              { "a": "{{3.confidenceScore}}", "o": "number:lessThan", "b": 85 },
+              { "a": "{{3.escalated}}", "o": "boolean:equals", "b": true }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "mapper": {
+          "channel": "C08ENTERPRISE-ALERT",
+          "text": "🚨 *Human-in-the-Loop Approval Required*\n*Customer:* {{1.customerId}}\n*Query:* {{1.query}}\n*Agent Evaluation:* {{3.resolution}}\n*Confidence:* {{3.confidenceScore}}%\n*Approve action:* https://ops.enterprise.internal/review/{{1.sessionId}}"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "parent": {
+        "moduleId": 6,
+        "kind": "route",
+        "index": 1,
+        "label": "Automated Resolution Path",
+        "filter": {
+          "name": "Confidence >= 85%",
+          "conditions": [
+            [
+              { "a": "{{3.confidenceScore}}", "o": "number:greaterThanOrEqual", "b": 85 }
+            ]
+          ]
+        }
+      },
+      "config": {
+        "parameters": {
+          "datastore": "conversation_memory_store"
+        },
+        "mapper": {
+          "key": "{{1.customerId}}_{{1.sessionId}}",
+          "query": "{{1.query}}",
+          "response": "{{3.resolution}}",
+          "confidence": "{{3.confidenceScore}}",
+          "timestamp": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "follows": 6,
+      "label": "Synchronous API Response",
+      "config": {
+        "mapper": {
+          "status": 200,
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"status\":\"success\",\"sessionId\":\"{{1.sessionId}}\",\"escalated\":{{if(3.confidenceScore < 85; true; false)}},\"resolution\":\"{{3.resolution}}\",\"confidence\":{{3.confidenceScore}}}"
+        }
+      }
+    }
+  ]
+}

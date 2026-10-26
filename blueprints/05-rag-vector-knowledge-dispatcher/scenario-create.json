@@ -1,0 +1,82 @@
+{
+  "name": "05 - Multi-Tenant Enterprise Knowledge RAG Engine",
+  "scheduling": { "type": "immediately" },
+  "modules": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "root": "main",
+      "label": "Inbound Semantic Query Hook",
+      "config": {}
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 1,
+      "label": "OpenAI: Compute Text Embeddings (1536-dim)",
+      "config": {
+        "mapper": {
+          "url": "https://api.openai.com/v1/embeddings",
+          "method": "POST",
+          "headers": [
+            { "name": "Authorization", "value": "Bearer {{env.OPENAI_API_KEY}}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"input\": \"{{1.query}}\", \"model\": \"text-embedding-3-small\"}"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "follows": 2,
+      "label": "Pinecone: Query Vector Index with Tenant Isolation",
+      "config": {
+        "mapper": {
+          "url": "https://{{env.PINECONE_INDEX_HOST}}/query",
+          "method": "POST",
+          "headers": [
+            { "name": "Api-Key", "value": "{{env.PINECONE_API_KEY}}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"vector\": {{2.data.data[1].embedding}}, \"topK\": 5, \"includeMetadata\": true, \"filter\": {\"tenant_id\": \"{{1.tenantId}}\"}}"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "ai-local-agent:RunLocalAIAgent",
+      "version": 1,
+      "follows": 3,
+      "label": "Synthesize Grounded Answer with Citations",
+      "config": {
+        "parameters": {
+          "makeConnectionId": 10001
+        },
+        "mapper": {
+          "systemPrompt": "You are an enterprise knowledge retrieval engine. Formulate a concise, verified response strictly based on the provided context chunks. Include explicit source citation URLs or document IDs. If context does not contain the answer, return 'INSUFFICIENT_CONTEXT' with confidenceScore 0. Format: JSON {answer: string, citations: string[], confidenceScore: number}",
+          "message": "Query: {{1.query}}\n\nRetrieved Context: {{3.data.matches}}"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "follows": 4,
+      "label": "Stream Grounded Answer with Citations",
+      "config": {
+        "mapper": {
+          "status": 200,
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\"query\":\"{{1.query}}\",\"tenantId\":\"{{1.tenantId}}\",\"result\":{{4.response}},\"matchesCount\":{{length(3.data.matches)}}}"
+        }
+      }
+    }
+  ]
+}
