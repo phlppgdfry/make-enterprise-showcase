@@ -3,136 +3,87 @@
   "flow": [
     {
       "id": 1,
-      "module": "clock:ActionTrigger",
+      "module": "gateway:CustomWebHook",
       "version": 1,
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Scheduled Sync Trigger (Every 15m)" }
+        "designer": { "x": 0, "y": 0, "name": "Batch Sync Webhook Trigger" }
       }
     },
     {
       "id": 2,
-      "module": "datastore:GetRecord",
+      "module": "builtin:BasicFeeder",
       "version": 1,
-      "parameters": {
-        "datastore": "sync_cursor_store"
-      },
+      "parameters": {},
       "mapper": {
-        "key": "stripe_hubspot_watermark"
+        "array": "{{1.customers}}"
       },
       "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "Fetch High-Watermark Cursor" }
+        "designer": { "x": 300, "y": 0, "name": "Iterator: Unroll Customer Batch" }
       }
     },
     {
       "id": 3,
-      "module": "http:ActionSendRequest",
-      "version": 1,
+      "module": "hubspotcrm:createContact",
+      "version": 2,
       "parameters": {},
       "mapper": {
-        "url": "https://api.stripe.com/v1/customers/search?query=updated>{{ifempty(2.lastSyncedTimestamp; 0)}}&limit=100",
-        "method": "GET",
-        "headers": [
-          { "name": "Authorization", "value": "Bearer {{env.STRIPE_SECRET_KEY}}" }
-        ]
+        "email": "{{2.email}}",
+        "firstname": "{{2.name}}"
       },
       "metadata": {
-        "designer": { "x": 600, "y": 0, "name": "Stripe: Query Updated Customers" }
+        "designer": { "x": 600, "y": 0, "name": "HubSpot: Upsert Contact Record" }
       }
     },
     {
       "id": 4,
-      "module": "builtin:Iterator",
-      "version": 1,
-      "parameters": {},
-      "mapper": {
-        "array": "{{3.data.data}}"
-      },
-      "metadata": {
-        "designer": { "x": 900, "y": 0, "name": "Iterator: Unroll Batch Records" }
-      }
-    },
-    {
-      "id": 5,
-      "module": "http:ActionSendRequest",
-      "version": 1,
-      "parameters": {},
-      "mapper": {
-        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
-        "method": "POST",
-        "headers": [
-          { "name": "Authorization", "value": "Bearer {{env.HUBSPOT_ACCESS_TOKEN}}" },
-          { "name": "Content-Type", "value": "application/json" }
-        ],
-        "body": "{\"properties\":{\"email\":\"{{4.email}}\",\"stripe_customer_id\":\"{{4.id}}\",\"stripe_mrr\":{{ifempty(4.metadata.mrr; 0)}},\"subscription_tier\":\"{{ifempty(4.metadata.tier; 'Free')}}\"}}"
-      },
-      "metadata": {
-        "designer": { "x": 1200, "y": 0, "name": "HubSpot: Upsert Contact Record" }
-      }
-    },
-    {
-      "id": 6,
-      "module": "builtin:ArrayAggregator",
+      "module": "builtin:BasicAggregator",
       "version": 1,
       "parameters": {
-        "feeder": 4
+        "feeder": 2
       },
       "mapper": {
         "row": {
-          "customerId": "{{4.id}}",
-          "email": "{{4.email}}",
+          "email": "{{2.email}}",
           "status": "UPSERTED"
         }
       },
       "metadata": {
-        "designer": { "x": 1500, "y": 0, "name": "Aggregate Processed Batch Results" }
+        "designer": { "x": 900, "y": 0, "name": "Aggregate Batch Results" }
       }
     },
     {
-      "id": 7,
-      "module": "datastore:UpdateRecord",
-      "version": 1,
-      "parameters": {
-        "datastore": "sync_cursor_store"
-      },
-      "mapper": {
-        "key": "stripe_hubspot_watermark",
-        "lastSyncedTimestamp": "{{formatDate(now; \"X\")}}",
-        "recordsProcessed": "{{length(6.array)}}",
-        "lastSyncDate": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
-      },
-      "metadata": {
-        "designer": { "x": 1800, "y": 0, "name": "Commit New High-Watermark Cursor" }
-      }
-    },
-    {
-      "id": 8,
-      "module": "slack:ActionCreateMessage",
-      "version": 1,
+      "id": 5,
+      "module": "slack:CreateMessage",
+      "version": 4,
       "parameters": {},
       "mapper": {
         "channel": "C08SYNC-AUDIT",
-        "text": "📊 *Billing-to-CRM Sync Completed*\n*Records Synced:* {{length(6.array)}}\n*Timestamp Cursor:* {{7.lastSyncedTimestamp}}\n*Drift / Anomalies:* 0\n*Status:* Healthy"
+        "text": "📊 *Billing-to-CRM Sync Completed*\n*Records Synced:* {{length(4.array)}}\n*Status:* Healthy"
       },
       "metadata": {
-        "designer": { "x": 2100, "y": 0, "name": "Post Batch Audit Digest to Ops" }
+        "designer": { "x": 1200, "y": 0, "name": "Post Audit Digest to Slack" }
+      }
+    },
+    {
+      "id": 6,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "headers": [
+          { "name": "Content-Type", "value": "application/json" }
+        ],
+        "body": "{\"status\":\"synced\",\"count\":{{length(4.array)}}}"
+      },
+      "metadata": {
+        "designer": { "x": 1500, "y": 0, "name": "Synchronous Batch Summary Response" }
       }
     }
   ],
   "metadata": {
-    "instant": false,
-    "version": 1,
-    "scenario": {
-      "roundtrips": 1,
-      "maxErrors": 3,
-      "autoCommit": true,
-      "autoCommitTriggerLast": true,
-      "sequential": true,
-      "confidential": false,
-      "dataloss": false,
-      "dlq": true
-    },
-    "designer": { "orphans": [] }
+    "version": 1
   }
 }

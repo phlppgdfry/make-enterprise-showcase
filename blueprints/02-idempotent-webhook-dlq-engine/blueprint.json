@@ -8,51 +8,23 @@
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Signed Event Ingest Gateway" }
+        "designer": { "x": 0, "y": 0, "name": "Signed Event Ingestion Gateway" }
       }
     },
     {
       "id": 2,
-      "module": "builtin:BasicFeeder",
-      "version": 1,
-      "parameters": {},
-      "mapper": {
-        "idempotencyKey": "{{1.headers.x-idempotency-key}}",
-        "signature": "{{1.headers.x-signature-sha256}}",
-        "payload": "{{1.body}}"
-      },
-      "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "Extract Headers & Idempotency Key" }
-      }
-    },
-    {
-      "id": 3,
-      "module": "datastore:GetRecord",
-      "version": 1,
-      "parameters": {
-        "datastore": "idempotency_cache_store"
-      },
-      "mapper": {
-        "key": "{{2.idempotencyKey}}"
-      },
-      "metadata": {
-        "designer": { "x": 600, "y": 0, "name": "Check Idempotency Cache" }
-      }
-    },
-    {
-      "id": 4,
-      "module": "builtin:Router",
+      "module": "builtin:BasicRouter",
       "version": 1,
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 900, "y": 0, "name": "Idempotency Gate Router" }
+        "designer": { "x": 300, "y": 0, "name": "Idempotency Evaluation Router" }
       },
       "routes": [
         {
           "flow": [
             {
-              "id": 5,
+              "id": 3,
               "module": "gateway:WebhookRespond",
               "version": 1,
               "parameters": {},
@@ -61,18 +33,18 @@
                 "headers": [
                   { "name": "Content-Type", "value": "application/json" }
                 ],
-                "body": "{\"status\":\"cached_ack\",\"message\":\"Event already processed\",\"idempotencyKey\":\"{{2.idempotencyKey}}\"}"
+                "body": "{\"status\":\"cached_ack\",\"message\":\"Event already processed\",\"idempotencyKey\":\"{{1.headers.`x-idempotency-key`}}\"}"
               },
               "filter": {
-                "name": "Key Exists in Cache",
+                "name": "Duplicate Key Filter",
                 "conditions": [
                   [
-                    { "a": "{{3.key}}", "o": "exists" }
+                    { "a": "{{1.headers.`x-duplicate-flag`}}", "o": "boolean:equals", "b": true }
                   ]
                 ]
               },
               "metadata": {
-                "designer": { "x": 1200, "y": -150, "name": "Duplicate Event (Fast-Path ACK)" }
+                "designer": { "x": 600, "y": -150, "name": "Duplicate Fast-Path ACK (200)" }
               }
             }
           ]
@@ -80,65 +52,20 @@
         {
           "flow": [
             {
-              "id": 6,
-              "module": "datastore:AddRecord",
-              "version": 1,
-              "parameters": {
-                "datastore": "idempotency_cache_store"
-              },
-              "mapper": {
-                "key": "{{2.idempotencyKey}}",
-                "status": "PROCESSING",
-                "receivedAt": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
-              },
-              "filter": {
-                "name": "Key Does Not Exist",
-                "conditions": [
-                  [
-                    { "a": "{{3.key}}", "o": "doesNotExist" }
-                  ]
-                ]
-              },
-              "metadata": {
-                "designer": { "x": 1200, "y": 150, "name": "New Event: Acquire Processing Lock" }
-              }
-            },
-            {
-              "id": 7,
-              "module": "http:ActionSendRequest",
+              "id": 4,
+              "module": "stripe:CreateCharge",
               "version": 1,
               "parameters": {},
               "mapper": {
-                "url": "https://erp.enterprise.internal/api/v2/orders/ingest",
-                "method": "POST",
-                "headers": [
-                  { "name": "Content-Type", "value": "application/json" },
-                  { "name": "X-Correlation-ID", "value": "{{2.idempotencyKey}}" }
-                ],
-                "body": "{{2.payload}}"
+                "amount": "{{1.amount}}",
+                "currency": "eur"
               },
               "metadata": {
-                "designer": { "x": 1500, "y": 150, "name": "Core Mutation: Downstream ERP Dispatch" }
+                "designer": { "x": 600, "y": 150, "name": "Core Financial Mutation (Stripe)" }
               }
             },
             {
-              "id": 10,
-              "module": "datastore:UpdateRecord",
-              "version": 1,
-              "parameters": {
-                "datastore": "idempotency_cache_store"
-              },
-              "mapper": {
-                "key": "{{2.idempotencyKey}}",
-                "status": "COMPLETED",
-                "completedAt": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}"
-              },
-              "metadata": {
-                "designer": { "x": 1800, "y": 150, "name": "Commit Idempotency State: COMPLETED" }
-              }
-            },
-            {
-              "id": 11,
+              "id": 5,
               "module": "gateway:WebhookRespond",
               "version": 1,
               "parameters": {},
@@ -147,10 +74,10 @@
                 "headers": [
                   { "name": "Content-Type", "value": "application/json" }
                 ],
-                "body": "{\"status\":\"processed\",\"idempotencyKey\":\"{{2.idempotencyKey}}\",\"timestamp\":\"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}\"}"
+                "body": "{\"status\":\"processed\",\"idempotencyKey\":\"{{1.headers.`x-idempotency-key`}}\"}"
               },
               "metadata": {
-                "designer": { "x": 2100, "y": 150, "name": "Synchronous 201 Created Response" }
+                "designer": { "x": 900, "y": 150, "name": "Synchronous 201 Created Response" }
               }
             }
           ]
@@ -159,18 +86,6 @@
     }
   ],
   "metadata": {
-    "instant": true,
-    "version": 1,
-    "scenario": {
-      "roundtrips": 1,
-      "maxErrors": 3,
-      "autoCommit": true,
-      "autoCommitTriggerLast": true,
-      "sequential": false,
-      "confidential": false,
-      "dataloss": false,
-      "dlq": true
-    },
-    "designer": { "orphans": [] }
+    "version": 1
   }
 }

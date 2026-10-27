@@ -8,62 +8,34 @@
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Inbound Semantic Query Hook" }
+        "designer": { "x": 0, "y": 0, "name": "Inbound Semantic Query Webhook" }
       }
     },
     {
       "id": 2,
-      "module": "http:ActionSendRequest",
+      "module": "openai-gpt-3:CreateCompletion",
       "version": 1,
       "parameters": {},
       "mapper": {
-        "url": "https://api.openai.com/v1/embeddings",
-        "method": "POST",
-        "headers": [
-          { "name": "Authorization", "value": "Bearer {{env.OPENAI_API_KEY}}" },
-          { "name": "Content-Type", "value": "application/json" }
-        ],
-        "body": "{\"input\": \"{{1.query}}\", \"model\": \"text-embedding-3-small\"}"
+        "select": "chat",
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are an enterprise knowledge retrieval engine. Formulate a verified response with source citations based on query context. Format: JSON {answer: string, citations: string[], confidenceScore: number}"
+          },
+          {
+            "role": "user",
+            "content": "Tenant: {{1.tenantId}}\nQuery: {{1.query}}"
+          }
+        ]
       },
       "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "OpenAI: Compute Text Embeddings (1536-dim)" }
+        "designer": { "x": 300, "y": 0, "name": "Synthesize Grounded Answer with Citations" }
       }
     },
     {
       "id": 3,
-      "module": "http:ActionSendRequest",
-      "version": 1,
-      "parameters": {},
-      "mapper": {
-        "url": "https://{{env.PINECONE_INDEX_HOST}}/query",
-        "method": "POST",
-        "headers": [
-          { "name": "Api-Key", "value": "{{env.PINECONE_API_KEY}}" },
-          { "name": "Content-Type", "value": "application/json" }
-        ],
-        "body": "{\"vector\": {{2.data.data[1].embedding}}, \"topK\": 5, \"includeMetadata\": true, \"filter\": {\"tenant_id\": \"{{1.tenantId}}\"}}"
-      },
-      "metadata": {
-        "designer": { "x": 600, "y": 0, "name": "Pinecone: Query Vector Index with Tenant Isolation" }
-      }
-    },
-    {
-      "id": 4,
-      "module": "ai-local-agent:RunLocalAIAgent",
-      "version": 1,
-      "parameters": {
-        "makeConnectionId": 10001
-      },
-      "mapper": {
-        "systemPrompt": "You are an enterprise knowledge retrieval engine. Formulate a concise, verified response strictly based on the provided context chunks. Include explicit source citation URLs or document IDs. If context does not contain the answer, return 'INSUFFICIENT_CONTEXT' with confidenceScore 0. Format: JSON {answer: string, citations: string[], confidenceScore: number}",
-        "message": "Query: {{1.query}}\n\nRetrieved Context: {{3.data.matches}}"
-      },
-      "metadata": {
-        "designer": { "x": 900, "y": 0, "name": "Synthesize Grounded Answer with Citations" }
-      }
-    },
-    {
-      "id": 5,
       "module": "gateway:WebhookRespond",
       "version": 1,
       "parameters": {},
@@ -72,26 +44,14 @@
         "headers": [
           { "name": "Content-Type", "value": "application/json" }
         ],
-        "body": "{\"query\":\"{{1.query}}\",\"tenantId\":\"{{1.tenantId}}\",\"result\":{{4.response}},\"matchesCount\":{{length(3.data.matches)}}}"
+        "body": "{\"query\":\"{{1.query}}\",\"tenantId\":\"{{1.tenantId}}\",\"result\":\"{{2.choices[1].message.content}}\"}"
       },
       "metadata": {
-        "designer": { "x": 1200, "y": 0, "name": "Stream Grounded Answer with Citations" }
+        "designer": { "x": 600, "y": 0, "name": "Stream Grounded Answer with Citations" }
       }
     }
   ],
   "metadata": {
-    "instant": true,
-    "version": 1,
-    "scenario": {
-      "roundtrips": 1,
-      "maxErrors": 3,
-      "autoCommit": true,
-      "autoCommitTriggerLast": true,
-      "sequential": false,
-      "confidential": false,
-      "dataloss": false,
-      "dlq": true
-    },
-    "designer": { "orphans": [] }
+    "version": 1
   }
 }
