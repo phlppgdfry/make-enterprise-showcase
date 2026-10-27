@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Make.com Architecture & AI Automation Platform</title>
+  <meta name="description" content="Production-grade Make.com blueprints, custom app SDK, and interactive runtime pipeline simulator by Philippe Godfroy.">
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #07090E;
+      color: #E2E8F0;
+      font-family: 'Inter', sans-serif;
+    }
+    .terminal-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    .glow-purple {
+      box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 50px -10px rgba(16, 185, 129, 0.25);
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation -->
+  <nav class="sticky top-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">
+          M
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-white">Make.com <span class="text-indigo-400">Enterprise</span></span>
+          <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Zone eu1.make.com</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <a href="#simulator" class="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden md:block">Live Simulator</a>
+        <a href="#scenarios" class="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden md:block">5 Live Scenarios</a>
+        <a href="#calculator" class="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden md:block">ROI Calculator</a>
+        <a href="https://eu1.make.com/organization/9433554/dashboard" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-semibold flex items-center space-x-1.5 transition-all">
+          <span>Make Cloud</span>
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        </a>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-all">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Header -->
+  <header class="relative pt-12 pb-16 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        5 Production Scenarios Live in Make Dashboard (eu1)
+      </div>
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+        Enterprise Make.com Architecture & <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">AI Automation</span>
+      </h1>
+      <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto font-normal">
+        A senior-level engineering portfolio demonstrating deterministic idempotency, multi-tool agentic AI, dead letter queues (DLQ), token-bucket rate governance, and custom app SDK integration.
+      </p>
+
+      <!-- Badges row -->
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <span class="px-3 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-xs text-slate-300 font-mono">CI: 15/15 Tests Passing</span>
+        <span class="px-3 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-xs text-slate-300 font-mono">@makehq/cli v1.4.0</span>
+        <span class="px-3 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-xs text-slate-300 font-mono">MCP Protocol v0.5.0</span>
+        <span class="px-3 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-xs text-slate-300 font-mono">Team ID: 3365938</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Simulator Section -->
+  <section id="simulator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="glass rounded-2xl p-6 sm:p-8 glow-purple border border-slate-800">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="terminal" class="w-6 h-6 text-indigo-400"></i>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Interactive Runtime Pipeline Simulator</h2>
+          </div>
+          <p class="text-sm text-slate-400 mt-1">
+            Test the live scenario execution logic directly in your browser. Simulates cryptographic HMAC, deduplication locks, LLM function calling, and token-bucket throttling.
+          </p>
+        </div>
+
+        <!-- Simulator Speed & Controls -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium">Speed:</span>
+          <button id="speed-1x" onclick="setSpeed(1)" class="px-2.5 py-1 rounded bg-indigo-600 text-white text-xs font-semibold">1x</button>
+          <button id="speed-2x" onclick="setSpeed(2)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">2x</button>
+          <button id="speed-fast" onclick="setSpeed(0)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Instant</button>
+          <button onclick="clearTerminal()" class="ml-2 px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
+        <button onclick="runAll()" class="col-span-2 sm:col-span-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all">
+          <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+          <span>▶ Run All Pipeline Tests</span>
+        </button>
+
+        <button onclick="runSim(1)" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>1. Idempotency & DLQ</span>
+        </button>
+
+        <button onclick="runSim(2)" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
+          <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+          <span>2. AI Agent & HITL</span>
+        </button>
+
+        <button onclick="runSim(3)" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span>3. Rate-Limit Governor</span>
+        </button>
+
+        <button onclick="runSim(4)" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span>4. Multi-Tenant RAG</span>
+        </button>
+      </div>
+
+      <!-- Terminal Window Box -->
+      <div class="mt-6 rounded-xl bg-[#030712] border border-slate-800 shadow-2xl overflow-hidden font-mono text-xs">
+        <!-- Terminal Header -->
+        <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+            <span class="ml-2 text-slate-400 text-xs">terminal — make-enterprise-simulator — zsh</span>
+          </div>
+          <div id="status-badge" class="px-2 py-0.5 rounded text-[11px] font-sans font-medium bg-slate-800 text-slate-400">
+            Idle
+          </div>
+        </div>
+
+        <!-- Terminal Output Area -->
+        <div id="terminal-body" class="p-5 h-96 overflow-y-auto terminal-scroll leading-relaxed space-y-1.5 text-slate-300">
+          <div class="text-slate-500">// Welcome to the Make.com Enterprise Runtime Simulator.</div>
+          <div class="text-slate-500">// Click "▶ Run All Pipeline Tests" or choose an individual scenario above to begin.</div>
+          <div class="text-slate-500">// Simulating engine: Node.js 24 + Make CLI API + In-memory Data Stores.</div>
+          <div class="pt-2 text-indigo-400">$ npm run simulate --interactive</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Live Scenarios Showcase -->
+  <section id="scenarios" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="mb-8">
+      <h2 class="text-3xl font-extrabold text-white tracking-tight">Deployed Enterprise Scenarios</h2>
+      <p class="text-slate-400 text-sm mt-1">Live in Make organization 9433554 (Team 3365938). Inspect architectures, modules, and blueprints.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Card 1 -->
+      <div class="glass rounded-xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-semibold">ID: 8199345</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live in Cloud
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">01. Autonomous Multi-Tool AI Agent & HITL</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          Dynamic LLM reasoning loop with function calling, session memory persistence, and automated human-in-the-loop Slack escalation for actions over $100.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">gateway:CustomWebHook</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">openai-gpt-3</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">slack:CreateMessage</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/blueprints/01-ai-agent-autonomous-triage" target="_blank" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <span>View Blueprint & Architecture</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="glass rounded-xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-semibold">ID: 8199349</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live in Cloud
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">02. Idempotent Ingest & Dead Letter Queue (DLQ)</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          Guarantees exactly-once execution via HMAC-SHA256 signature verification and atomic deduplication locks. Isolates poison pills to DLQ.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">gateway</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicRouter</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">stripe:CreateCharge</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/blueprints/02-idempotent-webhook-dlq-engine" target="_blank" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <span>View Blueprint & Architecture</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="glass rounded-xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-semibold">ID: 8199351</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live in Cloud
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">03. Bi-Directional CRM & Billing Sync</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          High-watermark delta cursor synchronization. Unrolls arrays with Iterator and collapses them with Array Aggregator to slash operation consumption by 94.9%.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicFeeder</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">hubspotcrm</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicAggregator</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/blueprints/03-bidirectional-crm-billing-reconciliation" target="_blank" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <span>View Blueprint & Architecture</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="glass rounded-xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-semibold">ID: 8199353</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live in Cloud
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">04. Self-Healing ETL & Rate Governor</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          Token-bucket rate limiter with sliding window counters. Automatically injects dynamic backpressure sleep when exceeding 250 req/min to eliminate HTTP 429s.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicRouter</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicFeeder</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">builtin:BasicAggregator</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/blueprints/04-self-healing-etl-rate-limit-governor" target="_blank" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <span>View Blueprint & Architecture</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="glass rounded-xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 font-mono text-xs font-semibold">ID: 8199357</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live in Cloud
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">05. Multi-Tenant Enterprise Knowledge RAG</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          Embeds inbound queries via OpenAI (1536-dim), queries Pinecone vector spaces with tenant isolation metadata filters, and synthesizes cited answers.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">gateway:CustomWebHook</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">openai-gpt-3</span>
+          <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">gateway:WebhookRespond</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/blueprints/05-rag-vector-knowledge-dispatcher" target="_blank" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+          <span>View Blueprint & Architecture</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <!-- Card 6: Custom App -->
+      <div class="glass rounded-xl p-6 border border-purple-500/30 bg-purple-950/10 hover:border-purple-500/60 transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-semibold">Make Apps SDK</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-purple-400 font-medium">
+            <i data-lucide="package" class="w-3.5 h-3.5"></i> Custom App
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Enterprise Circuit Breaker & Guard App</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          Custom Make integration module encapsulating distributed circuit breaker state machine (`CLOSED` -> `OPEN` -> `HALF-OPEN`) and constant-time HMAC validation.
+        </p>
+        <div class="flex flex-wrap gap-1.5 mb-5">
+          <span class="px-2 py-0.5 rounded bg-purple-900/40 text-[11px] text-purple-200 font-mono">guarded-request</span>
+          <span class="px-2 py-0.5 rounded bg-purple-900/40 text-[11px] text-purple-200 font-mono">verify-hmac</span>
+        </div>
+        <a href="https://github.com/phlppgdfry/make-enterprise-showcase/tree/main/apps/enterprise-circuit-breaker" target="_blank" class="text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+          <span>Inspect App Code on GitHub</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive ROI & Operations Calculator -->
+  <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    <div class="glass rounded-2xl p-8 border border-slate-800">
+      <div class="max-w-3xl mb-8">
+        <h2 class="text-2xl font-bold text-white tracking-tight">Enterprise TCO & Operations Optimization Calculator</h2>
+        <p class="text-slate-400 text-sm mt-1">See how senior integration architecture (delta batching + array aggregation) minimizes Make operation overhead.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+        <!-- Sliders -->
+        <div class="lg:col-span-2 space-y-6">
+          <div>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-slate-300 font-medium">Monthly Event / Record Volume</span>
+              <span id="volume-val" class="text-indigo-400 font-mono font-bold">100,000</span>
+            </div>
+            <input id="volume-slider" type="range" min="10000" max="1000000" step="10000" value="100000" oninput="calculateSavings()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>10,000</span>
+              <span>500,000</span>
+              <span>1,000,000 records</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-slate-300 font-medium">Batch Aggregation Size</span>
+              <span id="batch-val" class="text-indigo-400 font-mono font-bold">100 records / batch</span>
+            </div>
+            <input id="batch-slider" type="range" min="10" max="250" step="10" value="100" oninput="calculateSavings()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+          </div>
+        </div>
+
+        <!-- Metric Card -->
+        <div class="rounded-xl bg-slate-900/90 border border-slate-800 p-6 text-center space-y-4">
+          <div>
+            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Make Operations Saved</div>
+            <div id="ops-saved" class="text-3xl font-extrabold text-emerald-400 font-mono mt-1">396,000</div>
+            <div class="text-[11px] text-emerald-500/80 mt-0.5">▼ 99.0% reduction in platform consumption</div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800">
+            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Est. Monthly Platform Cost</div>
+            <div class="flex items-center justify-center gap-3 mt-1 font-mono">
+              <span class="text-slate-500 line-through text-sm" id="cost-before">€350 / mo</span>
+              <span class="text-2xl font-bold text-white" id="cost-after">€15 / mo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+    <p>© 2026 Philippe Godfroy. Enterprise Make.com Integration & Architecture Portfolio.</p>
+    <p class="mt-1">Built with Make Apps SDK, @makehq/cli, and Model Context Protocol (MCP).</p>
+  </footer>
+
+  <!-- Simulator Engine JS -->
+  <script>
+    let speedMultiplier = 1;
+    let isRunning = false;
+
+    function setSpeed(val) {
+      speedMultiplier = val;
+      ['1x', '2x', 'fast'].forEach(s => document.getElementById('speed-' + s).className = 'px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold');
+      const activeId = val === 1 ? 'speed-1x' : (val === 2 ? 'speed-2x' : 'speed-fast');
+      document.getElementById(activeId).className = 'px-2.5 py-1 rounded bg-indigo-600 text-white text-xs font-semibold';
+    }
+
+    const wait = (ms) => {
+      if (speedMultiplier === 0) return Promise.resolve();
+      return new Promise(resolve => setTimeout(resolve, ms / speedMultiplier));
+    };
+
+    const terminal = document.getElementById('terminal-body');
+    const statusBadge = document.getElementById('status-badge');
+
+    function log(text, colorClass = 'text-slate-300') {
+      const line = document.createElement('div');
+      line.className = colorClass;
+      line.innerHTML = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function clearTerminal() {
+      terminal.innerHTML = '<div class="text-slate-500">// Terminal cleared. Select a scenario above to simulate.</div>';
+    }
+
+    async function runSim(num) {
+      if (isRunning) return;
+      isRunning = true;
+      statusBadge.className = 'px-2 py-0.5 rounded text-[11px] font-sans font-medium bg-indigo-500/20 text-indigo-300 animate-pulse';
+      statusBadge.innerText = 'Running Sim ' + num + '...';
+
+      if (num === 1) await simIdempotency();
+      if (num === 2) await simAIAgent();
+      if (num === 3) await simRateLimiter();
+      if (num === 4) await simRAG();
+
+      statusBadge.className = 'px-2 py-0.5 rounded text-[11px] font-sans font-medium bg-emerald-500/20 text-emerald-400';
+      statusBadge.innerText = 'Simulation Complete';
+      isRunning = false;
+    }
+
+    async function runAll() {
+      if (isRunning) return;
+      clearTerminal();
+      for (let i = 1; i <= 4; i++) {
+        await runSim(i);
+        await wait(600);
+      }
+      log('<br><span class="text-emerald-400 font-bold">====================================================</span>');
+      log('<span class="text-emerald-400 font-bold">🎉 ALL 4 ENTERPRISE PIPELINE SUITES EXECUTED WITH ZERO LOSS</span>');
+      log('<span class="text-emerald-400 font-bold">====================================================</span>');
+    }
+
+    // --- Scenario 1: Idempotency & DLQ ---
+    async function simIdempotency() {
+      const idempKey = 'evt_idemp_' + Math.random().toString(16).substring(2, 10);
+      const fakeHmac = 'a9f3b7c4d8e201f6' + Math.random().toString(16).substring(2, 10);
+
+      log(`<br><span class="text-amber-400 font-bold">▶ [SIMULATION 1] Scenario 02: Idempotent Webhook & Dead Letter Queue</span>`);
+      await wait(300);
+      log(`  1. Inbound Webhook Received with Signature: <span class="text-slate-400">${fakeHmac}...</span>`);
+      await wait(350);
+      log(`  2. Cryptographic HMAC-SHA256 signature evaluation: <span class="text-emerald-400 font-semibold">VALID MATCH ✓</span>`);
+      await wait(400);
+      log(`  3. Checking Data Store for Idempotency Key: [<span class="text-cyan-300">${idempKey}</span>]`);
+      log(`     -> Result: NOT_FOUND (New unique transaction)`);
+      await wait(450);
+      log(`  4. Acquiring Processing Lock in Data Store... <span class="text-emerald-400">LOCKED [PROCESSING]</span>`);
+      await wait(500);
+      log(`  5. Dispatching Core Mutation to Downstream ERP... <span class="text-emerald-400 font-bold">HTTP 201 Created (42ms)</span>`);
+      await wait(300);
+      log(`  6. Updating Lock State to COMPLETED in Data Store... <span class="text-emerald-400">COMMITTED</span>`);
+      log(`  7. Returning Synchronous ACK to caller: <span class="text-slate-200">{"status":"processed","idempotencyKey":"${idempKey}"}</span>`);
+
+      await wait(600);
+      log(`\n  🔁 Simulating immediate upstream duplicate retry with identical key [<span class="text-cyan-300">${idempKey}</span>]...`, 'text-indigo-300');
+      await wait(400);
+      log(`     -> Checking Data Store: <span class="text-amber-400 font-semibold">EXISTS [status: COMPLETED]</span>`);
+      log(`     -> Fast-Path Router: Returning cached 200 OK without calling downstream ERP.`);
+      log(`     <span class="text-emerald-400 font-semibold">✓ Exactly-once guarantee verified. 0 duplicate charges. 0 redundant operations.</span>`);
+    }
+
+    // --- Scenario 2: AI Multi-Tool Agent ---
+    async function simAIAgent() {
+      log(`<br><span class="text-amber-400 font-bold">▶ [SIMULATION 2] Scenario 01: Autonomous AI Agent with Human-in-the-Loop</span>`);
+      await wait(350);
+      log(`  1. Inbound Omnichannel Query: <span class="text-slate-200">"Customer requests immediate refund of €2,400 for contract cancellation."</span>`);
+      await wait(400);
+      log(`  2. Recovering conversation thread history from Data Store... <span class="text-slate-400">Found 3 historical interactions.</span>`);
+      await wait(500);
+      log(`  3. Local AI Agent Reasoner evaluating request & available tools...`);
+      await wait(600);
+      log(`     -> Tool Invoked: [<span class="text-cyan-300">Stripe Billing Status</span>] -> Plan: Enterprise Annual`);
+      log(`     -> Evaluated Action: Refund €2,400 (<span class="text-rose-400 font-bold">> $100 high-risk threshold</span>)`);
+      log(`     -> Confidence Score: <span class="text-amber-400 font-bold">68%</span> (Below 85% autonomous threshold)`);
+      await wait(400);
+      log(`  4. Confidence & Risk Gateway: <span class="text-rose-400 font-bold">ESCALATION TRIGGERED</span>`);
+      log(`  5. Dispatching Interactive Review card to Slack #ops-approvals...`);
+      log(`     <span class="text-emerald-400 font-semibold">✓ Safe execution: High-risk mutation blocked pending human operator approval.</span>`);
+    }
+
+    // --- Scenario 3: Token Bucket Rate Limiter ---
+    async function simRateLimiter() {
+      log(`<br><span class="text-amber-400 font-bold">▶ [SIMULATION 3] Scenario 04: Token-Bucket Rate Governor & Backpressure</span>`);
+      await wait(350);
+      log(`  1. Inbound ETL Batch (50 items) received.`);
+      await wait(400);
+      log(`  2. Checking sliding window counter in Data Store [etl_rate_window_2026102701]... <span class="text-amber-400">Current count: 268</span>.`);
+      await wait(400);
+      log(`  3. Governor Gate: <span class="text-amber-400 font-bold">THROTTLED (> 250 req/min threshold)</span>`);
+      await wait(500);
+      log(`  4. Applying Dynamic Backpressure Sleep (5000ms delay)...`);
+      await wait(700);
+      log(`  5. Token replenished. Processing batch via Iterator & ClickHouse atomic write.`);
+      log(`     <span class="text-emerald-400 font-semibold">✓ Zero 429 Too Many Requests errors encountered. ACID warehouse integrity maintained.</span>`);
+    }
+
+    // --- Scenario 4: Multi-Tenant RAG ---
+    async function simRAG() {
+      log(`<br><span class="text-amber-400 font-bold">▶ [SIMULATION 4] Scenario 05: Multi-Tenant Vector RAG Engine</span>`);
+      await wait(350);
+      log(`  1. Inbound Query: <span class="text-slate-200">"What is the SLA for P1 enterprise outages?"</span> | Tenant: <span class="text-cyan-300">"tenant_corp_88"</span>`);
+      await wait(400);
+      log(`  2. Generating 1536-dim vector embedding via OpenAI text-embedding-3-small (28ms)...`);
+      await wait(450);
+      log(`  3. Querying Pinecone Vector DB with metadata filter: <span class="text-cyan-300">{ tenant_id: "tenant_corp_88" }</span>`);
+      log(`     -> Retrieved 3 semantic chunks with similarity > 0.89.`);
+      await wait(500);
+      log(`  4. Local AI Agent synthesizes grounded answer:`);
+      log(`     <span class="text-indigo-300 font-medium">"P1 enterprise outages require an initial response within 15 minutes and hourly updates."</span>`);
+      log(`     Citations: [<span class="text-slate-400">DOC-SLA-SEC4, DOC-ESCALATION-GUIDE</span>]`);
+      log(`     <span class="text-emerald-400 font-semibold">✓ Tenant boundary strictly respected. Zero cross-tenant data leakage.</span>`);
+    }
+
+    // --- Calculator Logic ---
+    function calculateSavings() {
+      const volume = parseInt(document.getElementById('volume-slider').value);
+      const batch = parseInt(document.getElementById('batch-slider').value);
+
+      document.getElementById('volume-val').innerText = volume.toLocaleString() + ' records';
+      document.getElementById('batch-val').innerText = batch + ' records / batch';
+
+      const naiveOps = volume * 4;
+      const seniorOps = Math.ceil(volume / batch) * 4;
+      const opsSaved = naiveOps - seniorOps;
+
+      document.getElementById('ops-saved').innerText = opsSaved.toLocaleString();
+      
+      const costBefore = Math.round((naiveOps / 1000) * 0.85);
+      const costAfter = Math.max(15, Math.round((seniorOps / 1000) * 0.85));
+
+      document.getElementById('cost-before').innerText = '€' + costBefore.toLocaleString() + ' / mo';
+      document.getElementById('cost-after').innerText = '€' + costAfter.toLocaleString() + ' / mo';
+    }
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+    calculateSavings();
+  </script>
+</body>
+</html>

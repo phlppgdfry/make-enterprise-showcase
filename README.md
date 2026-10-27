@@ -1,10 +1,13 @@
 # 🚀 Enterprise Make.com Architecture & AI Automation Portfolio
 
-[![CI Blueprint Validation](https://img.shields.io/badge/CI-15%2F15%20Passing-success?style=for-the-badge&logo=githubactions)](https://github.com)
+[![Live Interactive Showcase](https://img.shields.io/badge/Live%20Showcase-GitHub%20Pages-10B981?style=for-the-badge&logo=github)](https://phlppgdfry.github.io/make-enterprise-showcase/)
+[![CI Blueprint Validation](https://img.shields.io/badge/CI-15%2F15%20Passing-success?style=for-the-badge&logo=githubactions)](https://github.com/phlppgdfry/make-enterprise-showcase/actions)
 [![Make.com CLI](https://img.shields.io/badge/@makehq%2Fcli-v1.4.0-0078D4?style=for-the-badge&logo=node.js)](https://www.npmjs.com/package/@makehq/cli)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Make%20Server-8A2BE2?style=for-the-badge)](https://github.com/integromat/make-mcp-server)
 [![Make Custom App](https://img.shields.io/badge/Make%20App%20SDK-v1.0-orange?style=for-the-badge)](./apps/enterprise-circuit-breaker)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+👉 **Experience the Live Web Simulator:** **[https://phlppgdfry.github.io/make-enterprise-showcase/](https://phlppgdfry.github.io/make-enterprise-showcase/)**
 
 An enterprise-grade portfolio of production Make.com (Integromat) automation blueprints, custom integration apps, and AI agent orchestrations designed for high-scale enterprise environments.
 
