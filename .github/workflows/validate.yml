@@ -20,3 +20,6 @@ jobs:
 
     - name: Run Blueprint Validation Suite
       run: npm test
+
+    - name: Run Architecture & Security Compliance Audit
+      run: npm run audit
