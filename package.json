@@ -6,9 +6,11 @@
   "scripts": {
     "test": "node scripts/validate-blueprints.js",
     "validate": "node scripts/validate-blueprints.js",
+    "audit": "node scripts/audit-architecture.js",
     "simulate": "node scripts/simulate.js",
     "setup-datastores": "node scripts/setup-datastores.js",
     "deploy": "./scripts/make-deploy.sh",
+    "replay": "node scripts/dlq-replay.js",
     "export": "./scripts/make-export.sh"
   },
   "keywords": [
