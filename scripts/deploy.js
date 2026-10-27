@@ -80,8 +80,8 @@ dirs.forEach((dir, idx) => {
 
   if (existing) {
     console.log(`[${idx + 1}/${dirs.length}] 🔄 Scenario already deployed: "${scenarioName}"`);
-    console.log(`     -> Live ID: ${existing.id}`);
-    results.push({ name: scenarioName, id: existing.id, status: 'EXISTS / LIVE' });
+    console.log(`     -> Live ID: ${existing.id} (Hook: ${existing.hookId || 'None'})`);
+    results.push({ name: scenarioName, id: existing.id, hookId: existing.hookId || 'N/A', status: 'EXISTS / LIVE' });
   } else {
     console.log(`[${idx + 1}/${dirs.length}] ⬆️  Deploying new scenario: "${scenarioName}"...`);
     try {
