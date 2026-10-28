@@ -108,6 +108,18 @@ const SCENARIOS = {
 };
 
 function dispatch(item) {
+  const isDryRun = process.argv.includes('--dry-run') || process.argv.includes('--mock');
+  if (isDryRun) {
+    return Promise.resolve({
+      scenario: item.name,
+      scenarioId: item.id,
+      httpStatus: 'HTTP 200 (Mock Sandbox)',
+      latency: '74ms',
+      makeResponse: 'Accepted (Mock Telemetry)',
+      healthy: true
+    });
+  }
+
   return new Promise((resolve) => {
     const start = Date.now();
     const data = JSON.stringify(item.payload, null, 2);

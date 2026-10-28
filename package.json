@@ -5,6 +5,8 @@
   "main": "scripts/validate-blueprints.js",
   "scripts": {
     "test": "node scripts/validate-blueprints.js",
+    "test:lab": "node scripts/test-runner.js",
+    "test:all": "node scripts/test-runner.js",
     "validate": "node scripts/validate-blueprints.js",
     "audit": "node scripts/audit-architecture.js",
     "probe": "node scripts/synthetic-test.js",
