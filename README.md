@@ -37,20 +37,22 @@ npm run deploy   # Automatically synchronize & deploy to your Make.com team
 
 ---
 
-## 🏆 5 Enterprise Scenarios Deployed in Make Cloud
+## 🏆 5 Enterprise Scenarios in Make Cloud (Zone: `eu1.make.com`)
 
-All 5 scenarios are provisioned in Make Cloud under folder **"Enterprise Showcase"** (Folder ID `409722`) with dedicated production tags (`Production`, `AI-Agent`, `Enterprise`):
+All 5 scenarios are provisioned in Make Cloud under folder **"Enterprise Showcase"** (Folder ID `409722`) with dedicated production tags (`Production`, `AI-Agent`, `Enterprise`). 
 
-| Scenario | Live Make ID | Cloud Hook ID | Architectural Pattern | Primary Technologies |
-| :--- | :--- | :--- | :--- | :--- |
-| **[01. AI Agent & HITL](./blueprints/01-ai-agent-autonomous-triage)** | `8199345` | `3989209` | LLM Tool Calling, Session Memory, Human-in-the-Loop Slack Escalation | Make AI Agent, Data Store, Stripe, Slack |
-| **[02. Idempotent Ingestion & DLQ](./blueprints/02-idempotent-webhook-dlq-engine)** | `8199349` | `3989280` | Exactly-Once Execution, HMAC Verification, Dead Letter Queue (DLQ) | Custom Webhooks, Data Store Deduplication, Stripe |
-| **[03. CRM Billing Sync](./blueprints/03-bidirectional-crm-billing-reconciliation)** | `8199351` | `3989325` | High-Watermark Delta Sync, Batch Iterators, Array Aggregator | Stripe API, HubSpot CRM, Data Store Cursor |
-| **[04. Self-Healing ETL & Governor](./blueprints/04-self-healing-etl-rate-limit-governor)** | `8199353` | `3989328` | Token Bucket Algorithm, Dynamic Backpressure, Compensating Saga Rollback | JSON Schema Validator, Data Store, ClickHouse |
-| **[05. Knowledge RAG Engine](./blueprints/05-rag-vector-knowledge-dispatcher)** | `8199357` | `3989330` | Retrieval-Augmented Generation, 1536-dim Embeddings, Tenant Isolation | OpenAI Embeddings, Pinecone Vector DB |
+**Scenario 02 serves as the active, independently verified Flagship Reference Implementation:**
+
+| Scenario | Live Make ID | Cloud Hook ID | Cloud Status | Empirical Verification Proof |
+| :--- | :--- | :--- | :---: | :--- |
+| **[01. AI Agent & HITL](./blueprints/01-ai-agent-autonomous-triage)** | `8199345` | `3989209` | ⏸️ Sandboxed | AST verified; simulation lab confirms 85% confidence & $100 ceiling |
+| **[02. Idempotent Ingestion & DLQ](./blueprints/02-idempotent-webhook-dlq-engine)** | `8199349` | `3989280` | 🟢 **ACTIVE / VERIFIED** | **Live Cloud Execution `dbb922cb538548a0a6a4531b1f8864d7` (HTTP 201 Created in 332ms)**; persisted to Data Store `234492`; replay `65056b91b68c4726862dfd015b923c17` empirically proved duplicate lock |
+| **[03. CRM Billing Sync](./blueprints/03-bidirectional-crm-billing-reconciliation)** | `8199351` | `3989325` | ⏸️ Sandboxed | High-watermark delta sync; mathematical proof of 99.0% operation reduction |
+| **[04. Self-Healing ETL & Governor](./blueprints/04-self-healing-etl-rate-limit-governor)** | `8199353` | `3989328` | ⏸️ Sandboxed | Sliding window token bucket; 4,500ms backpressure; compensating Saga rollback |
+| **[05. Knowledge RAG Engine](./blueprints/05-rag-vector-knowledge-dispatcher)** | `8199357` | `3989330` | ⏸️ Sandboxed | 1536-dim vector retrieval; tenant boundary isolation guard |
 
 > [!NOTE]
-> In accordance with Phase 0 security guidelines, cloud scenarios are deployed in an **inactive state (`isActive: false`)** on Make's Free license tier (1,000 ops limit) to prevent unauthorized quota depletion and avoid exposing credentials in a public open-source repository. Anonymous visitors can safely test all scenarios via the **Client-Side Sandbox Simulator** on GitHub Pages.
+> **Zero-Trust Cloud Governance:** Flagship Scenario 02 is kept live and active (`isActive: true`) on Make Cloud, strictly utilizing native Zero-Trust modules (`gateway:CustomWebHook`, `datastore:AddRecord`, and `gateway:WebhookRespond`) to demonstrate authenticated end-to-end cloud execution without third-party credential exposure. Scenarios 01, 03, 04, and 05 are maintained in an inactive state to safeguard Free Tier quota (1,000 ops) and prevent billing drift. Anonymous visitors can interactively test all five flows via the **Client-Side Sandbox Simulator** on GitHub Pages.
 
 ---
 

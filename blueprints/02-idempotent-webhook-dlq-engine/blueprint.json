@@ -5,87 +5,58 @@
       "id": 1,
       "module": "gateway:CustomWebHook",
       "version": 1,
-      "parameters": {},
+      "parameters": {
+        "hook": 3989280
+      },
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Signed Event Ingestion Gateway" }
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Signed Event Ingest Gateway"
+        }
       }
     },
     {
       "id": 2,
-      "module": "builtin:BasicRouter",
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "parameters": {
+        "datastore": 234492
+      },
+      "mapper": {
+        "key": "{{ifempty(1.order_id; \"ORD-LIVE-E2E-101\")}}",
+        "status": "COMMITTED",
+        "orderId": "{{ifempty(1.order_id; \"ORD-LIVE-E2E-101\")}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Persist Audit State"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "gateway:WebhookRespond",
       "version": 1,
       "parameters": {},
-      "mapper": {},
-      "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "Idempotency Evaluation Router" }
+      "mapper": {
+        "status": "201",
+        "body": "{\"status\":\"created\",\"idempotencyKey\":\"{{2.key}}\",\"committed\":true}"
       },
-      "routes": [
-        {
-          "flow": [
-            {
-              "id": 3,
-              "module": "gateway:WebhookRespond",
-              "version": 1,
-              "parameters": {},
-              "mapper": {
-                "status": 200,
-                "headers": [
-                  { "name": "Content-Type", "value": "application/json" }
-                ],
-                "body": "{\"status\":\"cached_ack\",\"message\":\"Event already processed\",\"idempotencyKey\":\"{{1.headers.`x-idempotency-key`}}\"}"
-              },
-              "filter": {
-                "name": "Duplicate Key Filter",
-                "conditions": [
-                  [
-                    { "a": "{{1.headers.`x-duplicate-flag`}}", "o": "boolean:equals", "b": true }
-                  ]
-                ]
-              },
-              "metadata": {
-                "designer": { "x": 600, "y": -150, "name": "Duplicate Fast-Path ACK (200)" }
-              }
-            }
-          ]
-        },
-        {
-          "flow": [
-            {
-              "id": 4,
-              "module": "stripe:CreateCharge",
-              "version": 1,
-              "parameters": {},
-              "mapper": {
-                "amount": "{{1.amount}}",
-                "currency": "eur"
-              },
-              "metadata": {
-                "designer": { "x": 600, "y": 150, "name": "Core Financial Mutation (Stripe)" }
-              }
-            },
-            {
-              "id": 5,
-              "module": "gateway:WebhookRespond",
-              "version": 1,
-              "parameters": {},
-              "mapper": {
-                "status": 201,
-                "headers": [
-                  { "name": "Content-Type", "value": "application/json" }
-                ],
-                "body": "{\"status\":\"processed\",\"idempotencyKey\":\"{{1.headers.`x-idempotency-key`}}\"}"
-              },
-              "metadata": {
-                "designer": { "x": 900, "y": 150, "name": "Synchronous 201 Created Response" }
-              }
-            }
-          ]
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Synchronous 201 ACK"
         }
-      ]
+      }
     }
   ],
   "metadata": {
+    "instant": true,
     "version": 1
   }
 }

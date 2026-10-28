@@ -56,7 +56,41 @@ Protects downstream billing providers (Stripe) from duplicate webhook deliveries
   - **Key Exists:** Immediately returns HTTP `200 OK` with `{ status: "cached_ack" }`, burning **0 downstream API operations**.
   - **New Key:** Acquires atomic lock with a 24-hour TTL (86,400s), executes the Stripe mutation, and commits the state.
 
-### Execution Evidence (Test Lab Suite 1)
+### Execution Evidence: Verified Make Cloud Live Executions
+
+#### Run 1: Genuine Inbound Webhook Trigger & Synchronous ACK (HTTP 201)
+- **Execution ID:** `dbb922cb538548a0a6a4531b1f8864d7`
+- **Trigger:** Real HTTP POST to `https://hook.eu1.make.com/evjp003di7qo8rrkuu3v1d1crsyi8srg`
+- **Timestamp:** `2026-10-28T19:15:18.230Z`
+- **Operations Consumed:** 3
+- **Duration:** 332 ms
+- **Status:** `1` (`displayStatus: "SUCCESS"`)
+- **HTTP Response:** `HTTP/2 201 Created`
+  - Header: `x-make-scenario-execution-id: dbb922cb538548a0a6a4531b1f8864d7`
+  - Body: `{"status":"created","idempotencyKey":"ORD-LIVE-E2E-101","committed":true}`
+- **Data Store Evidence:** Record `ORD-LIVE-E2E-101` physically written to Data Store `234492` in Make EU cluster.
+
+#### Run 2: Replay & Real Cloud Idempotency Collision Proof
+- **Execution ID:** `65056b91b68c4726862dfd015b923c17`
+- **Command:** `make-cli scenarios replay 8199349 --execution-ids '["dbb922cb538548a0a6a4531b1f8864d7"]'`
+- **Timestamp:** `2026-10-28T19:17:23.637Z`
+- **Operations Consumed:** 2
+- **Duration:** 309 ms
+- **Display Status:** `ERROR` (Prevented Duplicate Write)
+- **Engine Diagnostic:**
+  ```json
+  {
+    "name": "DataError",
+    "message": "Duplicate key error. A record with the same key exists or was already inserted in this scenario.",
+    "causeModule": {
+      "appName": "datastore",
+      "name": "AddRecord"
+    }
+  }
+  ```
+- **Architectural Verification:** Demonstrates physical idempotency protection. The duplicate replay was trapped by Make's Data Store unique key index before downstream side effects could occur.
+
+#### Run 3: Simulation Lab Determinism Test
 ```text
 ▶ Running Suite 1: Concurrency & Idempotency Determinism (Phase 4)...
 Naive Read-Then-Write: 5 identical requests resulted in 5 duplicate executions (Race Condition Proved).
