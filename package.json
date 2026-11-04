@@ -1,12 +1,12 @@
 {
   "name": "make-enterprise-showcase",
-  "version": "1.0.0",
-  "description": "Production-Grade Enterprise Make.com Automation & AI Agent Portfolio Showcase",
+  "version": "2.0.0",
+  "description": "Evidence-based Make automation reference with shared policy tools, authenticated API and an interactive workbench",
   "main": "scripts/validate-blueprints.js",
   "scripts": {
-    "test": "node scripts/validate-blueprints.js",
+    "test": "node scripts/validate-blueprints.js && node --test tests/*.test.js",
     "test:lab": "node scripts/test-runner.js",
-    "test:all": "node scripts/test-runner.js",
+    "test:all": "npm test && npm run test:lab && npm run audit",
     "validate": "node scripts/validate-blueprints.js",
     "audit": "node scripts/audit-architecture.js",
     "probe": "node scripts/synthetic-test.js",
@@ -16,7 +16,8 @@
     "setup-datastores": "node scripts/setup-datastores.js",
     "deploy": "./scripts/make-deploy.sh",
     "replay": "node scripts/dlq-replay.js",
-    "export": "./scripts/make-export.sh"
+    "export": "./scripts/make-export.sh",
+    "start": "node scripts/server.js"
   },
   "keywords": [
     "make",
@@ -30,5 +31,8 @@
     "workflow-automation"
   ],
   "author": "Philippe Godfroy",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  }
 }

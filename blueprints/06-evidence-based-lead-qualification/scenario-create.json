@@ -1,0 +1,82 @@
+{
+  "name": "06 - Evidence-Based Lead Qualification",
+  "scheduling": {
+    "type": "immediately"
+  },
+  "modules": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "label": "Authenticated inbound request",
+      "config": {
+        "parameters": {},
+        "mapper": {}
+      },
+      "root": "main"
+    },
+    {
+      "id": 2,
+      "module": "json:CreateJSON",
+      "version": 1,
+      "label": "Serialize typed input",
+      "config": {
+        "parameters": {
+          "type": "__REQUEST_DATA_STRUCTURE_ID__"
+        },
+        "mapper": {
+          "domain": "{{1.domain}}"
+        }
+      },
+      "follows": 1
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "label": "Call tenant-bound policy gateway",
+      "config": {
+        "parameters": {},
+        "mapper": {
+          "url": "https://gateway.example.invalid/api/leads",
+          "method": "POST",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer __GATEWAY_TOKEN__"
+            }
+          ],
+          "bodyType": "raw",
+          "contentType": "application/json",
+          "body": "{{2.json}}",
+          "parseResponse": true
+        }
+      },
+      "follows": 2
+    },
+    {
+      "id": 4,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "label": "Return structured decision",
+      "config": {
+        "parameters": {},
+        "mapper": {
+          "status": 200,
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{{3.data}}"
+        }
+      },
+      "follows": 3
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Enterprise Deployment Script for Make.com Scenarios
-node "$(dirname "$0")/deploy.js"
+# Offline plan by default; forward explicit selection/apply arguments.
+exec node "$(dirname "$0")/deploy.js" "$@"

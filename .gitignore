@@ -3,3 +3,10 @@ node_modules/
 *.log
 .env
 templates/make.env
+
+.env.*
+!.env.example
+exports/
+.playwright-cli/
+playwright-report/
+test-results/

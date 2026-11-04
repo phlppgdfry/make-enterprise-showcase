@@ -1,25 +1,9 @@
-# Scenario 03: Bi-Directional CRM & Billing Differential Sync Engine
+# CRM/billing integration design
 
-## Architecture Overview
-An enterprise batch synchronization pipeline syncing Stripe customer subscription changes and MRR to HubSpot CRM contacts with high-watermark delta cursor tracking and aggregated audit reporting.
+Status: **partial historical template**, not a verified bidirectional reconciliation implementation.
 
-```mermaid
-flowchart LR
-    CRON["1. Scheduled Cron (15m)"] --> GET_CURSOR["2. Read Timestamp Cursor"]
-    GET_CURSOR --> FETCH_STRIPE["3. Stripe Search (updated > cursor)"]
-    FETCH_STRIPE --> ITERATOR["4. Iterator (Batch Unroll)"]
-    ITERATOR --> UPSERT_CRM["5. HubSpot Contact Upsert"]
-    UPSERT_CRM --> AGGREGATOR["6. Array Aggregator"]
-    AGGREGATOR --> SAVE_CURSOR["7. Commit New Timestamp Cursor"]
-    SAVE_CURSOR --> SLACK_DIGEST["8. Post Ops Audit Digest"]
-```
+The UI blueprint currently iterates `customers`, invokes HubSpot `createContact`, aggregates results, posts a Slack message and returns a count. A create-contact call is not an upsert; duplicate handling, billing reads, conflict resolution and durable cursors are not implemented in this export. The flat manifest is an earlier design sketch and is not equivalent to the UI blueprint.
 
-## Senior Architectural Patterns Implemented
-1. **Delta / High-Watermark Synchronization**: Avoids expensive and redundant full-table scans by querying only records updated after the last checkpoint (`updated > cursor`).
-2. **Iterator + Array Aggregator Pairing**: Processes items iteratively to isolate record-level errors, then collapses downstream operations into a single aggregated rollup.
-3. **Sequential Execution Guard**: Configured with `sequential: true` in Make scenario settings to eliminate race conditions between concurrent sync cycles.
-4. **Drift Detection & Reconciliation Log**: Automatically reports counts and audit metrics to internal channels for continuous monitoring.
+Before reuse, resolve credentials and module schemas in Make, replace account-specific channel IDs, validate incoming records and define idempotent CRM behavior. Add integration tests against a sandbox account before activation. Do not infer cost savings or a synchronization SLA from the local arithmetic experiments.
 
-## Files
-- `blueprint.json`: Native Make.com UI importable blueprint.
-- `scenario-create.json`: API & MCP scenario manifest.
+The 2.0 update focuses on support, knowledge and lead workflows. This historical design remains available for further implementation. See [current verification](../../docs/VERIFICATION.md).

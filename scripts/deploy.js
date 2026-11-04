@@ -1,108 +1,54 @@
 #!/usr/bin/env node
-/**
- * Automated Enterprise Make.com Deployment Engine
- * Deploys and synchronizes blueprints with your remote Make team.
- */
-
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-
-// 1. Resolve Credentials
-let apiKey = process.env.MAKE_API_KEY;
-let zone = process.env.MAKE_ZONE || 'eu1.make.com';
-
-const cliConfigPath = path.resolve(process.env.HOME, '.config/make-cli/config.json');
-if (!apiKey && fs.existsSync(cliConfigPath)) {
-  try {
-    const config = JSON.parse(fs.readFileSync(cliConfigPath, 'utf8'));
-    apiKey = config.apiKey;
-    zone = config.zone || zone;
-  } catch (e) {}
+'use strict';
+// Readiness plan by default. A selected, configured inactive scenario can be updated explicitly.
+const fs = require('node:fs');
+const path = require('node:path');
+const { validateBlueprint } = require('./validate-blueprints');
+const base = path.resolve(__dirname, '../blueprints');
+function unresolved(bp) {
+  return [...new Set(JSON.stringify(bp).match(/__[A-Z_]+__|https:\/\/[^"\s]*\.invalid[^"\s]*/g) || [])];
 }
-
-console.log('======================================================');
-console.log('🚀 Make.com Enterprise Scenario Deployment Engine');
-console.log(`Target Zone: ${zone}`);
-console.log('======================================================\n');
-
-if (!apiKey) {
-  console.error('❌ Error: No API Key found.');
-  console.error('Please run "make-cli login" or set export MAKE_API_KEY="your-token"');
-  process.exit(1);
-}
-
-// 2. Discover Team ID
-let teamId = process.env.MAKE_TEAM_ID;
-if (!teamId) {
-  try {
-    const orgsRaw = execSync('make-cli organizations list --output json', {
-      encoding: 'utf8',
-      env: { ...process.env, MAKE_API_KEY: apiKey, MAKE_ZONE: zone }
-    });
-    const orgs = JSON.parse(orgsRaw);
-    if (orgs.length > 0 && orgs[0].teams && orgs[0].teams.length > 0) {
-      teamId = orgs[0].teams[0].id;
-      console.log(`✓ Automatically resolved Team ID: ${teamId} ("${orgs[0].teams[0].name}")`);
-    }
-  } catch (err) {
-    console.warn('⚠️ Could not auto-discover team ID, falling back to default 3365938.');
-    teamId = 3365938;
-  }
-}
-
-// 3. Fetch Existing Scenarios to Prevent Duplicates
-let existingScenarios = [];
-try {
-  const existingRaw = execSync(`make-cli scenarios list --team-id=${teamId} --output json`, {
-    encoding: 'utf8',
-    env: { ...process.env, MAKE_API_KEY: apiKey, MAKE_ZONE: zone }
+async function main(args = process.argv.slice(2), env = process.env, request = fetch) {
+  const selected = args.find(a => a.startsWith('--scenario='))?.slice(11);
+  const id = args.find(a => a.startsWith('--id='))?.slice(5);
+  const all = fs.readdirSync(base).filter(d => fs.statSync(path.join(base, d)).isDirectory());
+  if (selected && !all.includes(selected)) throw new Error('Unknown scenario directory');
+  const directories = selected ? [selected] : all;
+  const plans = directories.map(directory => {
+    const blueprint = JSON.parse(fs.readFileSync(path.join(base, directory, 'blueprint.json'), 'utf8'));
+    validateBlueprint(blueprint);
+    return { directory, blueprint, unresolved: unresolved(blueprint) };
   });
-  existingScenarios = JSON.parse(existingRaw);
-} catch (err) {
-  console.warn('⚠️ Warning: Could not list existing scenarios: ' + err.message);
-}
-
-// 4. Discover and Deploy Blueprints
-const BLUEPRINTS_DIR = path.resolve(__dirname, '../blueprints');
-const dirs = fs.readdirSync(BLUEPRINTS_DIR).filter(d => fs.statSync(path.join(BLUEPRINTS_DIR, d)).isDirectory());
-
-const results = [];
-
-dirs.forEach((dir, idx) => {
-  const bpPath = path.join(BLUEPRINTS_DIR, dir, 'blueprint.json');
-  if (!fs.existsSync(bpPath)) return;
-
-  const bpData = JSON.parse(fs.readFileSync(bpPath, 'utf8'));
-  const scenarioName = bpData.name;
-
-  const existing = existingScenarios.find(s => s.name === scenarioName);
-
-  if (existing) {
-    console.log(`[${idx + 1}/${dirs.length}] 🔄 Scenario already deployed: "${scenarioName}"`);
-    console.log(`     -> Live ID: ${existing.id} (Hook: ${existing.hookId || 'None'})`);
-    results.push({ name: scenarioName, id: existing.id, hookId: existing.hookId || 'N/A', status: 'EXISTS / LIVE' });
-  } else {
-    console.log(`[${idx + 1}/${dirs.length}] ⬆️  Deploying new scenario: "${scenarioName}"...`);
-    try {
-      const blueprintString = JSON.stringify(bpData);
-      const cmd = `make-cli scenarios create --team-id=${teamId} --scheduling='{"type":"immediately"}' --blueprint='${blueprintString}' --output json`;
-      const createdRaw = execSync(cmd, {
-        encoding: 'utf8',
-        env: { ...process.env, MAKE_API_KEY: apiKey, MAKE_ZONE: zone }
-      });
-      const created = JSON.parse(createdRaw);
-      console.log(`     ✅ Successfully created! Live ID: ${created.id}`);
-      results.push({ name: scenarioName, id: created.id, status: 'CREATED' });
-    } catch (err) {
-      console.error(`     ❌ Deployment failed: ${err.message}`);
-      results.push({ name: scenarioName, id: null, status: 'FAILED' });
-    }
+  if (!args.includes('--apply')) {
+    console.table(plans.map(p => ({ scenario: p.directory, state: p.unresolved.length ? 'CONFIGURATION REQUIRED' : 'REQUIRES MAKE SCHEMA / CONNECTION REVIEW', placeholders: p.unresolved.length })));
+    console.log('Readiness plan only. No cloud requests or mutations. Existing scenario names do not prove synchronization.');
+    return;
   }
-});
-
-console.log('\n======================================================');
-console.log('📊 Deployment Summary:');
-console.table(results);
-console.log(`👉 View in your Make dashboard: https://${zone}/organization/9433554/dashboard`);
-console.log('======================================================');
+  if (!selected || !id || !/^\d+$/.test(id)) throw new Error('Apply requires --scenario=<directory> and --id=<existing-scenario-id>');
+  if (plans[0].unresolved.length) throw new Error('Resolve placeholders privately in a deployment copy before applying');
+  if (!env.MAKE_API_KEY || !/^\d+$/.test(env.MAKE_TEAM_ID || '')) throw new Error('Set explicit MAKE_API_KEY and MAKE_TEAM_ID');
+  const zone = env.MAKE_ZONE || 'eu1.make.com';
+  if (!/^(eu[12]|us[12])\.make\.com$/.test(zone)) throw new Error('Unsupported Make zone');
+  const url = 'https://' + zone + '/api/v2/scenarios/' + id;
+  async function call(endpoint, options = {}) {
+    const response = await request(endpoint, { redirect: 'error', signal: AbortSignal.timeout(15000), ...options,
+      headers: { Authorization: 'Token ' + env.MAKE_API_KEY, 'Content-Type': 'application/json' } });
+    if (!response.ok) throw new Error('Make API returned HTTP ' + response.status);
+    const body = await response.json(); return body.response || body;
+  }
+  const detail = await call(url); const current = detail.scenario || detail;
+  if (String(current.teamId) !== env.MAKE_TEAM_ID) throw new Error('Scenario belongs to a different team');
+  if (current.isActive !== false) throw new Error('Only an explicitly inactive scenario can be updated');
+  if (!Number.isInteger(current.version)) throw new Error('No concurrency version returned. Inspect and configure in Make instead of overwriting.');
+  const previous = await call(url + '/blueprint');
+  if (!previous.blueprint) throw new Error('Could not fetch the current blueprint');
+  const backupDir = path.resolve(__dirname, '../exports'); fs.mkdirSync(backupDir, { recursive: true });
+  const backup = path.join(backupDir, id + '-' + Date.now() + '.json');
+  fs.writeFileSync(backup, JSON.stringify(previous, null, 2), { mode: 0o600 });
+  await call(url, { method: 'PATCH', body: JSON.stringify({ blueprint: JSON.stringify(plans[0].blueprint), baseVersion: current.version }) });
+  const saved = await call(url + '/blueprint');
+  if (!saved.blueprint || saved.blueprint.name !== plans[0].blueprint.name) throw new Error('Saved blueprint could not be verified');
+  console.log('Selected scenario saved inactive. Prior blueprint backed up in ignored exports/. Validate modules and run before activation.');
+}
+if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });
+module.exports = { main, unresolved };

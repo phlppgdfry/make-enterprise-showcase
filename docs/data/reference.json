@@ -1,0 +1,18 @@
+{
+  "notice": "Synthetic fixtures for a local reference implementation. No live CRM, web research, vector database or model is used by the browser demo.",
+  "documents": [
+    { "id": "sla-north-01", "tenantId": "north", "title": "P1 incident response", "text": "For North Logistics, P1 incidents receive an initial response within 15 minutes. The incident owner provides updates every 60 minutes until recovery.", "keywords": ["sla", "incident", "response", "outage", "storing", "reactietijd"], "url": "#source-sla-north-01" },
+    { "id": "billing-north-01", "tenantId": "north", "title": "Refund review policy", "text": "Refunds and subscription cancellations require finance review. Support may prepare a draft and collect the invoice reference, but cannot execute a refund or cancel an account.", "keywords": ["refund", "billing", "invoice", "factuur", "terugbetaling", "annuleren"], "url": "#source-billing-north-01" },
+    { "id": "access-north-01", "tenantId": "north", "title": "Account access", "text": "Customers can request a password reset using the Forgot password link on the sign-in page. Support must never request or disclose a password.", "keywords": ["password", "login", "access", "wachtwoord", "inloggen"], "url": "#source-access-north-01" },
+    { "id": "sla-south-01", "tenantId": "south", "title": "South Manufacturing support", "text": "For South Manufacturing, P1 incidents receive an initial response within 30 minutes. The incident owner provides updates every 120 minutes until recovery.", "keywords": ["sla", "incident", "response", "outage", "storing", "reactietijd"], "url": "#source-sla-south-01" }
+  ],
+  "customers": [
+    { "id": "customer-north", "tenantId": "north", "plan": "Enterprise" },
+    { "id": "customer-south", "tenantId": "south", "plan": "Business" }
+  ],
+  "companies": [
+    { "domain": "north-logistics.example", "tenantId": "north", "name": "North Logistics", "industry": "logistics", "country": "BE", "employees": 240, "source": { "id": "company-north", "title": "Synthetic company profile", "url": "#source-company-north" } },
+    { "domain": "studio-small.example", "tenantId": "north", "name": "Small Studio", "industry": "design", "country": "FR", "employees": 8, "source": { "id": "company-studio", "title": "Synthetic company profile", "url": "#source-company-studio" } },
+    { "domain": "south-manufacturing.example", "tenantId": "south", "name": "South Manufacturing", "industry": "manufacturing", "country": "NL", "employees": 620, "source": { "id": "company-south", "title": "Synthetic company profile", "url": "#source-company-south" } }
+  ]
+}

@@ -1,3 +1,5 @@
+> **Historical design material (superseded 2026-11-04).** Claims below are not current verification. Some describe intended patterns, synthetic examples or incomplete implementations. Use the [current verification](VERIFICATION.md) and scenario README files for actual behavior; local tests do not establish production readiness or compliance.
+
 # Enterprise ROI & Make.com Cost Optimization Framework
 
 Senior automation architects design pipelines not just for functionality, but for **operational efficiency, low total cost of ownership (TCO), and minimal Make operation consumption**.

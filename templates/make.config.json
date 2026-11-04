@@ -7,7 +7,7 @@
     "autoCommit": true,
     "autoCommitTriggerLast": true,
     "sequential": false,
-    "confidential": false,
+    "confidential": true,
     "dataloss": false,
     "dlq": true
   },

@@ -1,5 +1,5 @@
 {
-  "name": "05 - Multi-Tenant Enterprise Knowledge RAG Engine",
+  "name": "05 - Tenant-Scoped Knowledge Retrieval",
   "flow": [
     {
       "id": 1,
@@ -8,50 +8,91 @@
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Inbound Semantic Query Webhook" }
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Authenticated inbound request"
+        }
       }
     },
     {
       "id": 2,
-      "module": "openai-gpt-3:CreateCompletion",
+      "module": "json:CreateJSON",
       "version": 1,
-      "parameters": {},
+      "parameters": {
+        "type": "__REQUEST_DATA_STRUCTURE_ID__"
+      },
       "mapper": {
-        "select": "chat",
-        "model": "gpt-4o-mini",
-        "messages": [
-          {
-            "role": "system",
-            "content": "You are an enterprise knowledge retrieval engine. Formulate a verified response with source citations based on query context. Format: JSON {answer: string, citations: string[], confidenceScore: number}"
-          },
-          {
-            "role": "user",
-            "content": "Tenant: {{1.tenantId}}\nQuery: {{1.query}}"
-          }
-        ]
+        "query": "{{1.query}}"
       },
       "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "Synthesize Grounded Answer with Citations" }
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Serialize typed input"
+        }
       }
     },
     {
       "id": 3,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "url": "https://gateway.example.invalid/api/knowledge",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer __GATEWAY_TOKEN__"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{{2.json}}",
+        "parseResponse": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Call tenant-bound policy gateway"
+        }
+      }
+    },
+    {
+      "id": 4,
       "module": "gateway:WebhookRespond",
       "version": 1,
       "parameters": {},
       "mapper": {
         "status": 200,
         "headers": [
-          { "name": "Content-Type", "value": "application/json" }
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
         ],
-        "body": "{\"query\":\"{{1.query}}\",\"tenantId\":\"{{1.tenantId}}\",\"result\":\"{{2.choices[1].message.content}}\"}"
+        "body": "{{3.data}}"
       },
       "metadata": {
-        "designer": { "x": 600, "y": 0, "name": "Stream Grounded Answer with Citations" }
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Return structured decision"
+        }
       }
     }
   ],
   "metadata": {
-    "version": 1
+    "version": 1,
+    "scenario": {
+      "confidential": true,
+      "sequential": false
+    }
   }
 }

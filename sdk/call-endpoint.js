@@ -1,3 +1,4 @@
+// HISTORICAL, UNVERIFIED API SKETCH. See sdk/README.md before use.
 /**
  * Example: Calling Make Endpoints via @makehq/endpoints-sdk
  * 

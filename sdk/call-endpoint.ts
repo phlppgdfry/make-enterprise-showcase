@@ -1,3 +1,4 @@
+// HISTORICAL, UNVERIFIED API SKETCH. See sdk/README.md before use.
 import { MakeClient, type EndpointCallOptions } from '@makehq/endpoints-sdk';
 
 /**

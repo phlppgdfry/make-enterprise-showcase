@@ -27,7 +27,7 @@ function recordTest(suite, testName, status, durationMs, details) {
 }
 
 console.log('================================================================');
-console.log('🧪 Enterprise Make.com Architecture Test Lab (Full Verification)');
+console.log('🧪 Local Pattern Experiments (not cloud execution verification)');
 console.log('================================================================\n');
 
 // -------------------------------------------------------------
@@ -226,9 +226,10 @@ function printSummary() {
   console.log('================================================================');
   if (allPassed) {
     console.log('🎉 ALL ENTERPRISE TEST SUITES VERIFIED AND PASSING (5/5)');
-    console.log('   Architectural determinism, fault recovery, and security verified.');
+    console.log('   Local examples passed. This does not verify deployed Make behavior.');
   } else {
-    console.log('⚠️ Some tests failed or returned warnings.');
+    console.log('Some local experiments failed or returned warnings.');
+    process.exitCode = 1;
   }
   console.log('================================================================\n');
 }

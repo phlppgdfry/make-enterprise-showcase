@@ -1,3 +1,5 @@
+> **Historical design material (superseded 2026-11-04).** Claims below are not current verification. Some describe intended patterns, synthetic examples or incomplete implementations. Use the [current verification](VERIFICATION.md) and scenario README files for actual behavior; local tests do not establish production readiness or compliance.
+
 # How to Import & View Scenarios in your Make.com Dashboard
 
 This guide walks you through viewing and deploying the 5 showcase scenarios into your live Make.com dashboard:

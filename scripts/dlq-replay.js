@@ -24,13 +24,14 @@ try {
 
   const items = JSON.parse(output);
   if (items.length === 0) {
-    console.log('✅ Clean state: 0 incomplete executions found. All pipelines running healthy!');
+    console.log('No incomplete executions returned. This does not establish scenario health.');
   } else {
     console.log(`⚠️  Found ${items.length} incomplete execution(s) pending triage:`);
     console.table(items);
   }
 } catch (err) {
-  console.log('ℹ️  Note: Requires authenticated session with incomplete-executions:read scope.');
+  process.exitCode = 1;
+  console.log('Query failed. Requires an authenticated session with incomplete-executions:read scope.');
   console.log('   Command: make-cli incomplete-executions list --team-id=' + TEAM_ID);
 }
 

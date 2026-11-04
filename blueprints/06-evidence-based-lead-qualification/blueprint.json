@@ -1,0 +1,98 @@
+{
+  "name": "06 - Evidence-Based Lead Qualification",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Authenticated inbound request"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "json:CreateJSON",
+      "version": 1,
+      "parameters": {
+        "type": "__REQUEST_DATA_STRUCTURE_ID__"
+      },
+      "mapper": {
+        "domain": "{{1.domain}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Serialize typed input"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendRequest",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "url": "https://gateway.example.invalid/api/leads",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer __GATEWAY_TOKEN__"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{{2.json}}",
+        "parseResponse": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Call tenant-bound policy gateway"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{{3.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Return structured decision"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "confidential": true,
+      "sequential": false
+    }
+  }
+}

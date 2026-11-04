@@ -1,5 +1,5 @@
 {
-  "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+  "name": "01 - Evidence-Based Support Triage",
   "flow": [
     {
       "id": 1,
@@ -8,91 +8,94 @@
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": { "x": 0, "y": 0, "name": "Incoming Omnichannel Webhook" }
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Authenticated inbound request"
+        }
       }
     },
     {
       "id": 2,
-      "module": "openai-gpt-3:CreateCompletion",
+      "module": "json:CreateJSON",
       "version": 1,
-      "parameters": {},
+      "parameters": {
+        "type": "__REQUEST_DATA_STRUCTURE_ID__"
+      },
       "mapper": {
-        "select": "chat",
-        "model": "gpt-4o-mini",
-        "messages": [
-          {
-            "role": "system",
-            "content": "You are an Enterprise Autonomous Support Engineer. You resolve customer requests. Return JSON with resolution, confidenceScore, escalated, actionTaken."
-          },
-          {
-            "role": "user",
-            "content": "{{1.query}}"
-          }
-        ]
+        "query": "{{1.query}}",
+        "customerId": "{{1.customerId}}",
+        "action": "{{1.action}}",
+        "amount": "{{1.amount}}"
       },
       "metadata": {
-        "designer": { "x": 300, "y": 0, "name": "OpenAI Reasoning Core" }
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Serialize typed input"
+        }
       }
     },
     {
       "id": 3,
-      "module": "builtin:BasicRouter",
+      "module": "http:ActionSendRequest",
       "version": 1,
       "parameters": {},
-      "mapper": {},
-      "metadata": {
-        "designer": { "x": 600, "y": 0, "name": "Confidence & Risk Gateway" }
+      "mapper": {
+        "url": "https://gateway.example.invalid/api/support",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer __GATEWAY_TOKEN__"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{{2.json}}",
+        "parseResponse": true
       },
-      "routes": [
-        {
-          "flow": [
-            {
-              "id": 4,
-              "module": "slack:CreateMessage",
-              "version": 4,
-              "parameters": {},
-              "mapper": {
-                "channel": "C08ENTERPRISE",
-                "text": "🚨 *Human-in-the-Loop Required*\n*Query:* {{1.query}}\n*Evaluation:* {{2.choices[1].message.content}}"
-              },
-              "filter": {
-                "name": "Low Confidence or Escalated",
-                "conditions": [
-                  [
-                    { "a": "{{2.choices[1].message.content}}", "o": "text:contains", "b": "escalated" }
-                  ]
-                ]
-              },
-              "metadata": {
-                "designer": { "x": 900, "y": -150, "name": "Escalate to Slack Review" }
-              }
-            }
-          ]
-        },
-        {
-          "flow": [
-            {
-              "id": 5,
-              "module": "gateway:WebhookRespond",
-              "version": 1,
-              "parameters": {},
-              "mapper": {
-                "status": 200,
-                "headers": [
-                  { "name": "Content-Type", "value": "application/json" }
-                ],
-                "body": "{\"status\":\"success\",\"resolution\":\"{{2.choices[1].message.content}}\"}"
-              },
-              "metadata": {
-                "designer": { "x": 900, "y": 150, "name": "Automated Webhook Response" }
-              }
-            }
-          ]
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Call tenant-bound policy gateway"
         }
-      ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{{3.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "Return structured decision"
+        }
+      }
     }
   ],
   "metadata": {
-    "version": 1
+    "version": 1,
+    "scenario": {
+      "confidential": true,
+      "sequential": false
+    }
   }
 }
