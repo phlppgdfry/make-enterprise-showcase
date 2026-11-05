@@ -13,7 +13,7 @@ Use **Make AI Agents (New) > Run an agent (New)** in the current Scenario Builde
 1. Create a dedicated, authenticated webhook scenario for draft generation. It must be separate from the `/api/support` integration scenario to avoid recursive calls.
 2. Learn this request shape: `query` (string), `proposedAction` (string), `context` (array of source objects with `id`, `title`, `quote`, `url`), `customer` (object or null). The gateway sends these fields, not raw billing data.
 3. Add the new agent module. Select the provider and a supported model in the builder; do not copy an invented provider ID. Use [support instructions](../agents/support/instructions.md) or [knowledge instructions](../agents/knowledge/instructions.md). Map the whole input with the builder's JSON serializer. Set a short timeout and bounded steps/tokens appropriate to the selected model.
-4. Configure a structured response matching [output.schema.json](../agents/output.schema.json). If only text is available, parse and validate JSON before responding. Return the object directly, without a `response` wrapper or Markdown fences. The gateway checks field types and source quotations again.
+4. Configure a structured response matching [output.schema.json](../agents/output.schema.json). If only text is available, parse and validate JSON before responding. Return the object directly, without a `response` wrapper or Markdown fences. The gateway checks field types, unexpected fields and source quotations again. Return at most three citations, with each document ID used once.
 5. End with Webhooks > Webhook response, Content-Type application/json, serializing the object safely. Protect the incoming webhook with a gateway that checks `Authorization: Bearer <MAKE_AGENT_TOKEN>`. A secret URL alone is not the authentication used by this adapter.
 6. Attach no mutation or send-email tools. The gateway already supplies scoped sources. If you later add retrieval tools, bind their tenant on the server and use independent tool scenarios that cannot call this drafting webhook recursively. New Make agents can choose module/scenario tools and supported MCP tools; this repository does not claim those tools have been provisioned.
 7. Configure the local gateway environment (values are placeholders):
@@ -44,6 +44,16 @@ Content-Type: application/json
 Knowledge input: `{"query":"P1 incident response"}` to `/api/knowledge`.
 Lead input: `{"domain":"north-logistics.example"}` to `/api/leads`.
 The server sets the tenant. A mismatching `tenantId` is rejected with 403.
+
+## Private deployment configuration
+
+Keep account-specific JSON and credentials outside the public repository. Configure a private copy of a blueprint and inspect the plan first:
+
+```bash
+npm run deploy -- --scenario=01-ai-agent-autonomous-triage --blueprint-file=/private/path/support.json
+```
+
+After resolving schemas and connections in Make, explicitly select an inactive scenario with `--apply --id=<existing-id>` and the same private-file arguments. The deployment code requires the expected team and concurrency version, backs up the current blueprint in ignored `exports/`, and compares the saved graph and settings. A conflict or mismatched save is a failure, not a successful deployment. Nothing is activated automatically.
 
 ## Before production
 

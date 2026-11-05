@@ -1,6 +1,6 @@
 {
   "name": "make-enterprise-showcase",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Evidence-based Make automation reference with shared policy tools, authenticated API and an interactive workbench",
   "main": "scripts/validate-blueprints.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "audit": "node scripts/audit-architecture.js",
     "probe": "node scripts/synthetic-test.js",
     "dispatch": "node scripts/dispatch-payload.js",
-    "test:e2e": "node scripts/synthetic-test.js",
+    "test:e2e": "node --test tests/workflows.test.js",
     "simulate": "node scripts/simulate.js",
     "setup-datastores": "node scripts/setup-datastores.js",
     "deploy": "./scripts/make-deploy.sh",

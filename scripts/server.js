@@ -35,14 +35,35 @@ async function agentDraft(input, result, options) {
     body: JSON.stringify({ query: input.query, proposedAction: input.action || 'answer', context: result.citations, customer: result.customer || null })
   });
   if (!response.ok) throw new Error('Agent unavailable');
-  const body = await response.text();
-  if (body.length > 32768) throw new Error('Agent output too large');
+  // Bound bytes while receiving, rather than after buffering an unbounded response.
+  const chunks = [];
+  let size = 0;
+  if (!response.body) throw new Error('Empty agent response');
+  const reader = response.body.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > 32768) {
+        await reader.cancel();
+        throw new Error('Agent output too large');
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = Buffer.concat(chunks).toString('utf8');
   return core.validateCandidate(JSON.parse(body), result);
 }
 function createServer(options = {}) {
   const apiToken = options.apiToken || '';
   const tenantId = options.tenantId || 'north';
-  if (options.agentUrl && (!/^https:\/\//.test(options.agentUrl) || !options.agentToken)) throw new Error('Agent needs HTTPS URL and token');
+  if (options.agentUrl) {
+    const url = new URL(options.agentUrl);
+    if (url.protocol !== 'https:' || url.username || url.password || url.hash || !options.agentToken) throw new Error('Agent needs HTTPS URL and token, without URL credentials or fragments');
+  }
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -56,7 +77,7 @@ function createServer(options = {}) {
         if (req.method !== 'POST') return send(res, 405, { error: 'Use POST' });
         const kind = pathname.slice(5);
         if (!kinds.has(kind)) return send(res, 404, { error: 'Unknown workflow' });
-        if (!(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, { error: 'Use application/json' });
+        if ((req.headers['content-type'] || '').split(';')[0].trim().toLowerCase() !== 'application/json') return send(res, 415, { error: 'Use application/json' });
         const input = await readBody(req);
         if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Invalid input');
         if (input.tenantId !== undefined && input.tenantId !== tenantId) return send(res, 403, { error: 'Tenant mismatch' });

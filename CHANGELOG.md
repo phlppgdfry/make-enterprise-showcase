@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0 — 2026-11-05
+
+- Fixed short SLA queries and withheld final lead scores when company data or evidence is incomplete.
+- Enforced the published agent-output contract, including citation limits, duplicate IDs and unexpected fields.
+- Bounded streamed agent responses by bytes during receipt; tightened media-type and draft-URL validation.
+- Added real local HTTP workflow tests and failure-path coverage for deployment preconditions, concurrency conflicts and mismatched saved configurations.
+- Added private deployment-file selection, preserving public templates; verified saved graph structure and values rather than only the scenario name.
+- Displayed unknown criterion values clearly, cleared stale results after errors and formatted the stylesheet for maintenance.
+- Reverified the reference implementation with 78 regression tests and desktop/mobile browser checks. Live Make provisioning and real business data remain separate configuration work.
+
 ## 2.0.0 — 2026-11-04
 
 - Replaced scripted success logs with executable support, knowledge and lead workflows sharing one policy core.

@@ -27,7 +27,7 @@ The browser demo uses **synthetic fixtures and deterministic tools**, not an LLM
 | --- | --- | --- |
 | Support triage | Tenant-scoped customer lookup and knowledge retrieval; response draft; explicit review reasons | Every refund, cancellation or plan change requires review; no mutation tools |
 | Knowledge search | Filter by tenant before lexical ranking; extract source text with document IDs | No matching evidence → insufficient context; no fabricated vector-search claims |
-| Lead qualification | Published ICP rules, per-criterion points, source-backed synthetic firmographics and outreach draft | Unknown company → research needed and null score; no invented facts or email sending |
+| Lead qualification | Published ICP rules, per-criterion points, source-backed synthetic firmographics and outreach draft | Unknown or incomplete company → research needed and null score; no invented facts or email sending |
 | Make agent adapter | One authenticated draft request; typed output checks; exact source-quote validation; bounded timeout | Every model draft requires review; rejected output fails closed |
 
 A source quotation proves provenance, not that all claims in a model draft follow from it. No self-reported confidence score is used as permission to act.
@@ -84,11 +84,12 @@ To enable model-assisted drafting, configure `MAKE_AGENT_URL` and `MAKE_AGENT_TO
 npm test          # Structural blueprint checks + regression/API tests
 npm run test:all  # Tests, local pattern experiments and static audit
 npm run simulate  # Execute six actual fixture requests and print their trace
+npm run test:e2e  # Real local HTTP journey across all three workflows
 npm run deploy    # Offline readiness plan; no cloud changes by default
 npm run probe     # Dry run; no network requests by default
 ```
 
-`npm run deploy -- --apply --scenario=<directory> --id=<existing-id>` only permits a selected, inactive scenario with explicit credentials/team, resolved placeholders, a backup and a concurrency version. Template module schemas must still be verified in Make. Live probes require one explicit webhook, an explicit payload file and `--live`. No bulk webhook broadcast or simulated healthy response is used.
+`npm run deploy -- --apply --scenario=<directory> --id=<existing-id> --blueprint-file=/private/path/configured.json` only permits a selected, inactive scenario with explicit credentials/team, resolved placeholders, a backup and a concurrency version. The private file lets credentials and tenant-specific configuration stay outside git; the saved module order, routes, filters and mapped values are checked after saving. Template module schemas must still be verified in Make. Live probes require one explicit webhook, an explicit payload file and `--live`. No bulk webhook broadcast or simulated healthy response is used.
 
 ## Scope and historical material
 

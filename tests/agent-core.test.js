@@ -58,3 +58,33 @@ test('malformed model output fails closed', () => {
   const r = run('support'); const c = candidate(r); c.escalated = 'false'; assert.throws(() => core.validateCandidate(c, r));
   for (const bad of [null, [], {}, { draft: 'Hello' }]) assert.throws(() => core.validateCandidate(bad, r));
 });
+
+test('short SLA questions retrieve a tenant-specific source', () => {
+  assert.match(run('knowledge', {query:'SLA'}).answer, /15 minutes/);
+  assert.match(run('knowledge', {query:'Wat is de SLA?',tenantId:'south'}).answer, /30 minutes/);
+});
+for (const [field, value] of [['industry',null],['country',''],['employees',undefined],['employees','240'],['employees',-1],['employees',240.5],['name',null],['source',null]]) {
+  test('incomplete company ' + field + '=' + String(value) + ' withholds final score', () => {
+    const custom = structuredClone(data); custom.companies[0][field] = value;
+    const r = core.run('leads',{tenantId:'north',domain:'north-logistics.example'},custom);
+    assert.equal(r.status,'needs_research'); assert.equal(r.score,null); assert.equal(r.draft,'');
+    assert.ok(r.reasons.includes('INCOMPLETE_COMPANY_DATA')); assert.ok(!JSON.stringify(r.citations).includes('undefined'));
+  });
+}
+test('unknown lead criteria are explicitly unknown instead of zero', () => {
+  const r = run('leads',{domain:'unknown.example'}); assert.ok(r.breakdown.every(row => row.points === null));
+});
+test('candidate schema rejects extra fields at both levels', () => {
+  const r = run('support'); const a = candidate(r); a.approved = true;
+  assert.throws(() => core.validateCandidate(a,r),/Unexpected/);
+  const b = candidate(r); b.citations[0].approved = true;
+  assert.throws(() => core.validateCandidate(b,r),/Invalid citation/);
+});
+test('candidate rejects null, non-object, duplicate and excessive citations', () => {
+  const r = run('support');
+  for (const bad of [null,12,[],{id:1,quote:'long enough source quote'}]) {
+    const c = candidate(r); c.citations = [bad]; assert.throws(() => core.validateCandidate(c,r),/Invalid citation/);
+  }
+  const duplicate = candidate(r); duplicate.citations.push({...duplicate.citations[0]}); assert.throws(() => core.validateCandidate(duplicate,r),/Duplicate/);
+  const excessive = candidate(r); excessive.citations = Array.from({length:4},() => ({...excessive.citations[0]})); assert.throws(() => core.validateCandidate(excessive,r),/Too many/);
+});

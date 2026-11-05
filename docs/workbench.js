@@ -4,7 +4,7 @@ let data;
 let latest;
 const $ = id => document.getElementById(id);
 const labels = { draft_ready: 'Draft ready', needs_review: 'Human review required', grounded: 'Source found', insufficient_context: 'More context needed', qualified: 'Qualified lead', low_fit: 'Low ICP fit', needs_research: 'Research needed' };
-const reasonLabels = { CUSTOMER_NOT_FOUND: 'No customer was found in this workspace.', SENSITIVE_ACTION_REQUIRES_REVIEW: 'Account and financial changes require human approval.', INSUFFICIENT_CONTEXT: 'The available sources do not answer this request.', NO_VERIFIED_COMPANY_DATA: 'No verified company profile is available.' };
+const reasonLabels = { CUSTOMER_NOT_FOUND: 'No customer was found in this workspace.', SENSITIVE_ACTION_REQUIRES_REVIEW: 'Account and financial changes require human approval.', INSUFFICIENT_CONTEXT: 'The available sources do not answer this request.', NO_VERIFIED_COMPANY_DATA: 'No verified company profile is available.', INCOMPLETE_COMPANY_DATA: 'The company profile is incomplete. Verify the missing facts before scoring.' };
 const presets = {
   support: [{ label: 'P1 incident', query: 'What is the response time for a P1 incident?', action: 'answer', amount: 0 }, { label: 'Refund request', query: 'Please refund my invoice for €2400.', action: 'refund', amount: 2400 }, { label: 'Unknown policy', query: 'Can I bring a pet to the office?', action: 'answer', amount: 0 }],
   knowledge: [{ label: 'P1 SLA', query: 'What is the P1 incident response time?' }, { label: 'Password reset', query: 'How do I reset my password?' }, { label: 'Missing answer', query: 'What is our office lunch menu?' }],
@@ -46,7 +46,7 @@ function render(result, duration) {
   if (result.kind === 'leads') {
     fragment.append(node('h3', result.company));
     const score = node('div', result.score === null ? '—' : String(result.score), 'score'); score.append(node('span', ' / 100 ICP fit')); fragment.append(score);
-    for (const row of result.breakdown) { const item = node('div', undefined, 'score-row'); item.append(node('span', row.criterion), node('strong', row.points + ' / ' + row.maximum)); fragment.append(item); }
+    for (const row of result.breakdown) { const item = node('div', undefined, 'score-row'); item.append(node('span', row.criterion), node('strong', row.points === null ? 'Unknown' : row.points + ' / ' + row.maximum)); fragment.append(item); }
   }
   if (result.reasons && result.reasons.length) fragment.append(node('p', result.reasons.map(r => reasonLabels[r] || r).join(' '), 'reasons'));
   if (result.draft || result.answer) { fragment.append(node('p', result.kind === 'leads' ? 'Outreach draft · not sent' : result.kind === 'support' ? 'Response draft · not sent' : 'Extracted answer', 'subheading'), node('p', result.draft || result.answer, 'answer')); }
@@ -59,7 +59,7 @@ function render(result, duration) {
   fragment.append(node('p', 'Execution trace', 'subheading'));
   const trace = node('ol', undefined, 'trace'); for (const step of result.trace) { const li = node('li'); const body = node('div'); body.append(node('strong', step.tool), node('p', step.detail)); li.append(body); trace.append(li); } fragment.append(trace);
   const metrics = node('div', undefined, 'metrics');
-  for (const [label, value] of [['Tool calls', result.metrics.toolCalls], ['Model calls', result.metrics.modelCalls], ['External writes', result.metrics.externalWrites]]) { const item = node('div'); item.append(node('strong', String(value)), node('span', label)); metrics.append(item); } fragment.append(metrics);
+  for (const [label, value] of [['Tool calls', result.metrics.toolCalls], ['Model calls', result.metrics.modelCalls], ['External writes', result.metrics.externalWrites]]) { const item = node('div'); item.append(node('strong', value === null ? 'Unknown' : String(value)), node('span', label)); metrics.append(item); } fragment.append(metrics);
   $('result').replaceChildren(fragment); $('export').disabled = false;
 }
 for (const tab of document.querySelectorAll('[role=tab]')) {
@@ -80,7 +80,7 @@ $('request-form').addEventListener('submit', event => {
     const input = { tenantId, query: $('query').value, customerId: 'customer-' + tenantId, action: $('action').value, amount: Number($('amount').value), domain: $('domain').value };
     const started = performance.now(); latest = AgentCore.run(kind, input, data); const duration = performance.now() - started;
     latest = { ...latest, durationMs: Number(duration.toFixed(2)) }; render(latest, duration);
-  } catch (error) { latest = null; $('export').disabled = true; $('form-error').textContent = error.message; }
+  } catch (error) { clearResult(); $('form-error').textContent = error.message; }
 });
 $('export').addEventListener('click', () => {
   if (!latest) return;

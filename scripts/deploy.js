@@ -8,14 +8,16 @@ const base = path.resolve(__dirname, '../blueprints');
 function unresolved(bp) {
   return [...new Set(JSON.stringify(bp).match(/__[A-Z_]+__|https:\/\/[^"\s]*\.invalid[^"\s]*/g) || [])];
 }
-async function main(args = process.argv.slice(2), env = process.env, request = fetch) {
+async function main(args = process.argv.slice(2), env = process.env, request = fetch, options = {}) {
   const selected = args.find(a => a.startsWith('--scenario='))?.slice(11);
   const id = args.find(a => a.startsWith('--id='))?.slice(5);
+  const blueprintFile = args.find(a => a.startsWith('--blueprint-file='))?.slice(17);
   const all = fs.readdirSync(base).filter(d => fs.statSync(path.join(base, d)).isDirectory());
   if (selected && !all.includes(selected)) throw new Error('Unknown scenario directory');
+  if (blueprintFile !== undefined && (!blueprintFile || !selected)) throw new Error('A private blueprint file requires --scenario and a nonempty path');
   const directories = selected ? [selected] : all;
   const plans = directories.map(directory => {
-    const blueprint = JSON.parse(fs.readFileSync(path.join(base, directory, 'blueprint.json'), 'utf8'));
+    const blueprint = JSON.parse(fs.readFileSync(blueprintFile || path.join(base, directory, 'blueprint.json'), 'utf8'));
     validateBlueprint(blueprint);
     return { directory, blueprint, unresolved: unresolved(blueprint) };
   });
@@ -42,12 +44,22 @@ async function main(args = process.argv.slice(2), env = process.env, request = f
   if (!Number.isInteger(current.version)) throw new Error('No concurrency version returned. Inspect and configure in Make instead of overwriting.');
   const previous = await call(url + '/blueprint');
   if (!previous.blueprint) throw new Error('Could not fetch the current blueprint');
-  const backupDir = path.resolve(__dirname, '../exports'); fs.mkdirSync(backupDir, { recursive: true });
+  const backupDir = options.backupDir || path.resolve(__dirname, '../exports'); fs.mkdirSync(backupDir, { recursive: true });
   const backup = path.join(backupDir, id + '-' + Date.now() + '.json');
   fs.writeFileSync(backup, JSON.stringify(previous, null, 2), { mode: 0o600 });
   await call(url, { method: 'PATCH', body: JSON.stringify({ blueprint: JSON.stringify(plans[0].blueprint), baseVersion: current.version }) });
   const saved = await call(url + '/blueprint');
   if (!saved.blueprint || saved.blueprint.name !== plans[0].blueprint.name) throw new Error('Saved blueprint could not be verified');
+  validateBlueprint(saved.blueprint);
+  // Make may enrich metadata; compare the configured modules/values, not just the name.
+  const { isDeepStrictEqual } = require('node:util');
+  const shape = flow => flow.map(node => ({
+    id: node.id, module: node.module, version: node.version,
+    mapper: node.mapper || {}, parameters: node.parameters || {}, filter: node.filter || {},
+    routes: (node.routes || []).map(route => shape(route.flow || [])),
+    onerror: shape(node.onerror || node.errorHandler || [])
+  }));
+  if (!isDeepStrictEqual(shape(saved.blueprint.flow), shape(plans[0].blueprint.flow))) throw new Error('Saved blueprint configuration differs from the intended update; inspect the backup and cloud scenario');
   console.log('Selected scenario saved inactive. Prior blueprint backed up in ignored exports/. Validate modules and run before activation.');
 }
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });

@@ -30,7 +30,7 @@ test('disabled API does not silently open access', async () => {
 for (const broken of ['throw', 'bad-citation', 'unavailable']) test('agent ' + broken + ' returns a review decision', async () => {
   const api = createServer({ apiToken: 'test-token', agentUrl: 'https://agent.example', agentToken: 'test-agent', fetch: async () => {
     if (broken === 'throw') throw new Error('Timeout');
-    return { ok: broken !== 'unavailable', text: async () => JSON.stringify({ draft: 'Invented!', citations: [{ id: 'fake', quote: 'a fabricated source' }], escalated: false, proposedAction: 'answer' }) };
+    return new Response(JSON.stringify({ draft: 'Invented!', citations: [{ id: 'fake', quote: 'a fabricated source' }], escalated: false, proposedAction: 'answer' }), {status: broken === 'unavailable' ? 503 : 200});
   } });
   await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
   try {
@@ -42,7 +42,7 @@ test('valid agent output is a reviewable draft and uses authenticated bounded ca
   const quote = require('../docs/data/reference.json').documents[0].text;
   const api = createServer({ apiToken: 'test-token', agentUrl: 'https://agent.example', agentToken: 'secret-test', fetch: async (url, opts) => {
     assert.equal(url, 'https://agent.example'); assert.equal(opts.redirect, 'error'); assert.equal(opts.headers.Authorization, 'Bearer secret-test'); assert.equal(JSON.parse(opts.body).context[0].id, 'sla-north-01');
-    return { ok: true, text: async () => JSON.stringify({ draft: 'P1 response is within 15 minutes.', citations: [{ id: 'sla-north-01', quote }], escalated: false, proposedAction: 'answer' }) };
+    return new Response(JSON.stringify({ draft: 'P1 response is within 15 minutes.', citations: [{ id: 'sla-north-01', quote }], escalated: false, proposedAction: 'answer' }));
   } });
   await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
   try {
@@ -51,3 +51,23 @@ test('valid agent output is a reviewable draft and uses authenticated bounded ca
   } finally { await new Promise(resolve => api.close(resolve)); }
 });
 test('agent URLs require HTTPS and a token', () => { assert.throws(() => createServer({ agentUrl: 'http://agent.example', agentToken: 'token' })); assert.throws(() => createServer({ agentUrl: 'https://agent.example' })); });
+
+test('JSON media type is exact and accepts normal charset parameters', async () => {
+  for (const [type,status] of [['application/jsonp',415],['application/json; charset=utf-8',200],['APPLICATION/JSON',200]]) {
+    const response = await fetch(base+'/api/support',{method:'POST',headers:{Authorization:'Bearer test-token','Content-Type':type},body:JSON.stringify(payload)});
+    assert.equal(response.status,status);
+  }
+});
+test('malformed HTTPS draft URLs fail at startup', () => {
+  for(const agentUrl of ['https://','https://user:password@agent.example','https://agent.example/#fragment']) assert.throws(() => createServer({agentUrl,agentToken:'token'}));
+});
+for (const oversized of ['ascii','unicode']) test('oversized '+oversized+' agent stream is cancelled before buffering the whole response', async () => {
+  let cancelled = false;
+  const chunk = new TextEncoder().encode(oversized === 'unicode' ? '😀'.repeat(9000) : 'a'.repeat(33000));
+  const api = createServer({apiToken:'test-token',agentUrl:'https://agent.example',agentToken:'token',fetch:async () => new Response(new ReadableStream({start(controller){controller.enqueue(chunk);},cancel(){cancelled=true;}}))});
+  await new Promise(resolve => api.listen(0,'127.0.0.1',resolve));
+  try {
+    const response = await fetch('http://127.0.0.1:'+api.address().port+'/api/support',{method:'POST',headers:{Authorization:'Bearer test-token','Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const body = await response.json(); assert.equal(body.status,'needs_review'); assert.ok(body.reasons.includes('AGENT_OUTPUT_REJECTED')); assert.equal(cancelled,true); assert.equal(body.draft,'');
+  } finally {await new Promise(resolve => api.close(resolve));}
+});

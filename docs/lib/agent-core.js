@@ -5,7 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const actions = new Set(['answer', 'refund', 'cancel', 'upgrade']);
-  const stop = new Set('what is the a an for of to in our my how do does het de een wat voor van ik mijn hoe kan sla'.split(' '));
+  const stop = new Set('what is the a an for of to in our my how do does het de een wat voor van ik mijn hoe kan'.split(' '));
   function text(value, name, max = 2000) {
     if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('Invalid ' + name);
     return value.trim();
@@ -68,34 +68,49 @@
     const domain = text(input.domain, 'domain', 253).toLowerCase();
     if (!/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(domain)) throw new Error('Invalid domain');
     const company = data.companies.find(c => c.domain === domain && c.tenantId === input.tenantId);
+    const source = company && company.source && typeof company.source.id === 'string' && company.source.id.trim() &&
+      typeof company.source.title === 'string' && company.source.title.trim() &&
+      typeof company.source.url === 'string' && /^(https?:\/\/|#)/.test(company.source.url) ? company.source : null;
+    const knownString = value => typeof value === 'string' && !!value.trim();
     const rules = [
-      { criterion: 'Industry: logistics or manufacturing', points: 40, matches: c => ['logistics', 'manufacturing'].includes(c.industry) },
-      { criterion: 'Region: Belgium or Netherlands', points: 30, matches: c => ['BE', 'NL'].includes(c.country) },
-      { criterion: 'Company size: 50–1000 employees', points: 30, matches: c => c.employees >= 50 && c.employees <= 1000 }
+      { criterion: 'Industry: logistics or manufacturing', points: 40, known: c => knownString(c.industry), matches: c => ['logistics', 'manufacturing'].includes(c.industry) },
+      { criterion: 'Region: Belgium or Netherlands', points: 30, known: c => typeof c.country === 'string' && /^[A-Z]{2}$/.test(c.country), matches: c => ['BE', 'NL'].includes(c.country) },
+      { criterion: 'Company size: 50–1000 employees', points: 30, known: c => Number.isInteger(c.employees) && c.employees >= 0, matches: c => c.employees >= 50 && c.employees <= 1000 }
     ];
-    const breakdown = rules.map(rule => ({ criterion: rule.criterion, points: company && rule.matches(company) ? rule.points : 0, maximum: rule.points, evidenceId: company ? company.source.id : null }));
-    const score = company ? breakdown.reduce((sum, r) => sum + r.points, 0) : null;
+    const breakdown = rules.map(rule => {
+      const known = !!(company && source && rule.known(company));
+      return { criterion: rule.criterion, points: known ? rule.matches(company) ? rule.points : 0 : null, maximum: rule.points, evidenceId: known ? source.id : null };
+    });
+    const complete = !!(company && source && knownString(company.name) && breakdown.every(row => row.points !== null));
+    const score = complete ? breakdown.reduce((sum, r) => sum + r.points, 0) : null;
     return {
-      kind: 'leads', mode: 'reference', status: !company ? 'needs_research' : score >= 70 ? 'qualified' : 'low_fit',
-      company: company ? company.name : domain, score, breakdown,
-      citations: company ? [{ ...company.source, quote: company.name + ': ' + company.industry + ', ' + company.country + ', ' + company.employees + ' employees.' }] : [],
-      draft: score >= 70 ? 'Hello ' + company.name + ',\n\nWe help logistics and manufacturing teams connect operational systems and reduce repetitive work. Would a short conversation about your integration priorities be useful?' : '',
-      reasons: !company ? ['NO_VERIFIED_COMPANY_DATA'] : [],
-      trace: [{ tool: 'company.lookup', detail: company ? 'Loaded a synthetic company research fixture.' : 'Unknown domain. Research required; no facts invented.' },
+      kind: 'leads', mode: 'reference', status: !complete ? 'needs_research' : score >= 70 ? 'qualified' : 'low_fit',
+      company: company && knownString(company.name) ? company.name : domain, score, breakdown,
+      citations: source ? [{ ...source, quote: [company.name, company.industry, company.country, Number.isInteger(company.employees) ? company.employees + ' employees' : null].filter(knownString).join(', ') + '.' }] : [],
+      draft: score !== null && score >= 70 ? 'Hello ' + company.name + ',\n\nWe help logistics and manufacturing teams connect operational systems and reduce repetitive work. Would a short conversation about your integration priorities be useful?' : '',
+      reasons: !company ? ['NO_VERIFIED_COMPANY_DATA'] : !complete ? ['INCOMPLETE_COMPANY_DATA'] : [],
+      trace: [{ tool: 'company.lookup', detail: !company ? 'Unknown domain. Research required; no facts invented.' : complete ? 'Loaded a synthetic company research fixture.' : 'Company profile has missing or unverified fields. Research required.' },
         { tool: 'icp.score', detail: score === null ? 'Score withheld.' : 'Applied three published rules: ' + score + '/100.' },
-        { tool: 'outreach.draft', detail: score >= 70 ? 'Draft created. Sending requires a separate approved workflow.' : 'No outreach draft.' }],
+        { tool: 'outreach.draft', detail: score !== null && score >= 70 ? 'Draft created. Sending requires a separate approved workflow.' : 'No outreach draft.' }],
       metrics: { modelCalls: 0, toolCalls: 2, externalWrites: 0 }
     };
   }
   // Validate model output against the same retrieved evidence. A confidence claim is never authorization.
   function validateCandidate(candidate, result) {
     if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) throw new Error('Invalid agent output');
+    const fields = ['draft', 'citations', 'escalated', 'proposedAction'];
+    if (Object.keys(candidate).some(key => !fields.includes(key))) throw new Error('Unexpected agent field');
     text(candidate.draft, 'draft', 8000);
     if (!Array.isArray(candidate.citations) || !candidate.citations.length) throw new Error('Missing citations');
+    if (candidate.citations.length > 3) throw new Error('Too many citations');
     if (typeof candidate.escalated !== 'boolean') throw new Error('Invalid escalated flag');
     if (!['answer', 'refund', 'cancel', 'upgrade'].includes(candidate.proposedAction)) throw new Error('Invalid proposedAction');
     const allowed = new Map(result.citations.map(c => [c.id, c]));
+    const seen = new Set();
     const citations = candidate.citations.map(c => {
+      if (!c || typeof c !== 'object' || Array.isArray(c) || Object.keys(c).some(key => !['id', 'quote'].includes(key)) || typeof c.id !== 'string') throw new Error('Invalid citation');
+      if (seen.has(c.id)) throw new Error('Duplicate citation');
+      seen.add(c.id);
       const source = allowed.get(c.id);
       if (!source || typeof c.quote !== 'string' || c.quote.trim().length < 12 || !source.quote.includes(c.quote)) throw new Error('Unverified citation');
       return { ...source, quote: c.quote };
