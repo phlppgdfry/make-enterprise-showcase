@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 — 2026-11-07
+
+- Provisioned a real standalone Make repository knowledge agent using the existing Make AI Provider and seven pinned repository documents.
+- Verified seven real cloud acceptance cases with independently checked citations and recorded iteration IDs, token usage and timings.
+- Added credential-safe provisioning/query commands, opt-in live evaluation, a source allowlist and immutable source hashes.
+- Used four scalar Make output fields to avoid nested-schema and JSON-in-text failures; normalized the result into a source-checked response.
+- Added local regression tests for source provenance, source extraction, API authentication, malformed output and contradictory acceptance answers.
+- Kept the static demo, standalone knowledge assistant and optional drafting gateway clearly separated. Existing Make scenarios remain unchanged.
+
 ## 2.1.0 — 2026-11-05
 
 - Fixed short SLA queries and withheld final lead scores when company data or evidence is incomplete.

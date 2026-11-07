@@ -1,6 +1,6 @@
 {
   "name": "make-enterprise-showcase",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Evidence-based Make automation reference with shared policy tools, authenticated API and an interactive workbench",
   "main": "scripts/validate-blueprints.js",
   "scripts": {
@@ -17,7 +17,11 @@
     "deploy": "./scripts/make-deploy.sh",
     "replay": "node scripts/dlq-replay.js",
     "export": "./scripts/make-export.sh",
-    "start": "node scripts/server.js"
+    "start": "node scripts/server.js",
+    "agent:plan": "node scripts/make-knowledge-agent.js",
+    "agent:setup": "node scripts/make-knowledge-agent.js --apply",
+    "agent:ask": "node scripts/make-knowledge-agent.js --ask",
+    "agent:evaluate": "node scripts/evaluate-make-agent.js"
   },
   "keywords": [
     "make",

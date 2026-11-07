@@ -1,5 +1,11 @@
 # Make AI Agents integration
 
+## Standalone knowledge assistant now deployed
+
+A separate **Make Repo Kennisagent** has been provisioned and tested using Make's published AI Agents API, with seven pinned real repository documents and no mutation tools. Seven cloud acceptance cases passed. See the [agent guide](../agents/repository/README.md) and [live evidence](../agents/repository/live-verification.json). It does not require a hosted Node API.
+
+This standalone agent is distinct from the optional native New-module drafting integration described below. That support gateway integration is still a configuration guide, not a newly deployed scenario.
+
 ## What works now
 
 The workbench and Node gateway execute the same tenant-scoped retrieval, customer lookup, lead scoring and policy code. The default data is explicitly synthetic. The browser does not run an LLM or contact Make. GitHub Pages cannot host the Node API.
@@ -59,7 +65,7 @@ After resolving schemas and connections in Make, explicitly select an inactive s
 
 Replace the fixture repository with an authenticated data adapter and enforce document permissions before retrieval. Keep any vector index partitioning server-side. Lexical overlap in this reference is not semantic similarity, model confidence or a guarantee that an answer is correct. The model adapter checks citation provenance; it cannot prove entailment, so drafts require review. The fixture gateway has no persistent conversation memory, queue, retries, audit store, per-user authorization or production rate limiter. It binds to loopback and needs an authenticated HTTPS proxy for remote access. Add those capabilities only with corresponding tests and real execution evidence.
 
-The live Make account was inspected read-only during this update. Existing scenarios were not overwritten or activated. Publishing GitHub Pages does not activate agents in Make.
+Existing Make scenarios were not overwritten or activated. The standalone repository knowledge agent was separately created and tested through the published API; its evidence is linked above. Publishing GitHub Pages does not activate scenarios or deploy the Node gateway.
 
 ## Official sources checked on 2026-11-04
 

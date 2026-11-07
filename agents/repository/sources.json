@@ -1,0 +1,46 @@
+{
+  "repository": "phlppgdfry/make-enterprise-showcase",
+  "name": "Make Repo Kennisagent",
+  "teamId": 3365938,
+  "connectionId": 12392068,
+  "providerId": 13,
+  "model": "medium",
+  "sources": [
+    {
+      "id": "readme",
+      "path": "README.md",
+      "description": "Project scope, working workflows, operations and limits"
+    },
+    {
+      "id": "verification",
+      "path": "docs/VERIFICATION.md",
+      "description": "Current reproducible test evidence and known production gaps"
+    },
+    {
+      "id": "make-agent-guide",
+      "path": "docs/MAKE-AI-AGENTS.md",
+      "description": "Make drafting integration, authentication and deployment configuration"
+    },
+    {
+      "id": "support-template",
+      "path": "blueprints/01-ai-agent-autonomous-triage/README.md",
+      "description": "Support integration template configuration and limits"
+    },
+    {
+      "id": "knowledge-template",
+      "path": "blueprints/05-rag-vector-knowledge-dispatcher/README.md",
+      "description": "Knowledge retrieval template configuration and limits"
+    },
+    {
+      "id": "lead-template",
+      "path": "blueprints/06-evidence-based-lead-qualification/README.md",
+      "description": "Lead qualification template configuration and limits"
+    },
+    {
+      "id": "policy-core",
+      "path": "docs/lib/agent-core.js",
+      "description": "Actual tenant-scoped retrieval and scoring implementation"
+    }
+  ],
+  "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403"
+}

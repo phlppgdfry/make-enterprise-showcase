@@ -1,4 +1,4 @@
-# Current verification — 2026-11-05
+# Current verification — 2026-11-07
 
 This document supersedes the historical audit scores and production-readiness claims elsewhere in the repository.
 
@@ -6,7 +6,7 @@ This document supersedes the historical audit scores and production-readiness cl
 
 | Check | Observed result | What it establishes |
 | --- | --- | --- |
-| `npm test` | 78 regression tests passed; six blueprint directories passed structural checks | Tested core/API/validator/deployment-plan behavior and local JSON graph integrity |
+| `npm test` | 96 regression tests passed; six blueprint directories passed structural checks | Tested core/API/validator/deployment-plan behavior and local JSON graph integrity |
 | `npm run test:all` | Passed, including five legacy local pattern experiments and static audit | Local checks only; pattern experiments do not execute cloud scenarios |
 | `npm run test:e2e` | Passed against the local HTTP server | Actual support, knowledge and lead request/response journeys; not a live Make run |
 | `npm run simulate` | Six fixture workflows executed with actual tool/policy traces | Support draft, sensitive-action review, tenant-specific knowledge, missing evidence, known/unknown lead behavior |
@@ -34,11 +34,21 @@ Playwright was used because the Browser plugin was not available. Local URL: `ht
 
 Screenshots and browser session files are local verification artifacts, excluded from the repository. Browser checks exercise the deterministic fixture demo; they do not verify a live model, Make account writes, remote API hosting or third-party data access.
 
-## Make read-only observation
+## Live standalone Make knowledge agent
+
+The standalone **Make Repo Kennisagent** (`0a8be23e-73f4-4856-9b7b-f2932f82e84a`) was created in team 3365938 with seven actual repository source documents pinned to commit `885c72b`. Make AI Provider Medium was selected from the account's live model list. The agent has knowledge retrieval, no scenario/MCP mutation tools, a 45-second timeout, five-iteration limit and a 2,400-token output setting.
+
+**Seven real cloud acceptance cases passed** after configuration corrections. The [evidence file](../agents/repository/live-verification.json) includes source-checked responses, Make iteration IDs, timings, token usage and retrieval-tool metadata. These were actual Make model calls, separate from the mocked/local Node tests. Successful samples do not guarantee future model correctness. The independent checker normalizes Markdown presentation and verifies quotes against committed source text; it does not establish semantic entailment of every generated sentence.
+
+The source snapshot's own verification still says 78 tests because that was the 2.1.0 source version. The current local suite has 96 tests. No Node gateway, live CRM, customer billing or company research system was deployed or connected.
+
+This agent is a supported public AI Agents API resource, not a newly authored `Run an agent (New)` scenario. The optional drafting gateway and existing scenario templates remain distinct. See the [agent operations guide](../agents/repository/README.md).
+
+## Historical Make read-only observation
 
 The existing team was read on **2026-11-04** using its existing CLI login; this historical account observation was not refreshed on 2026-11-05. Scenario **8199349 (02)** was active; **8199345, 8199351, 8199353 and 8199357** were inactive. The default Make AI Provider connection was present. Those are configuration observations, not successful-run evidence. Existing AI scenarios had historical errors; no new cloud execution or error remediation is claimed.
 
-No Make scenario was modified or activated for this update. The new 01/05/06 files are gateway **configuration templates**, not Make-schema-validated exports. JSON structure validation does not prove that Make accepts a module's fields, version, JSON data structure, authentication or connection settings. The native Make AI Agents draft workflow is documented but has not been provisioned or run in the cloud.
+No existing Make scenario was modified or activated for this update. The new standalone knowledge agent was created and executed separately as described above. The new 01/05/06 files are gateway **configuration templates**, not Make-schema-validated exports. JSON structure validation does not prove that Make accepts a module's fields, version, JSON data structure, authentication or connection settings. The native Make AI Agents draft workflow is documented but has not been provisioned or run in the cloud.
 
 ## Publishing boundary
 

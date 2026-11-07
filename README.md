@@ -21,6 +21,16 @@ Open **http://127.0.0.1:4173**. Run a support request, change workspaces to test
 
 The browser demo uses **synthetic fixtures and deterministic tools**, not an LLM, live web research or your connected accounts. It executes the same code as the API. There are no external writes, sent emails or automatic refunds.
 
+## Live knowledge agent in Make
+
+**Make Repo Kennisagent** is now provisioned and tested inside Make using seven actual, version-pinned repository documents. It uses Make's AI Provider and built-in knowledge retrieval. Seven real cloud acceptance cases passed, including source questions, missing information and refused sensitive actions.
+
+```bash
+npm run agent:ask -- "Welke workflows werken in deze repository?"
+```
+
+This command uses your authorized Make CLI login or explicit Make environment credentials. See the [agent guide](agents/repository) and [live execution evidence](agents/repository/live-verification.json). The standalone knowledge agent requires no separate API hosting. The browser demo below still uses synthetic data; the optional support-drafting gateway has not been deployed by this change.
+
 ## What is implemented
 
 | Workflow | Executable behavior | Deliberate boundary |
@@ -61,7 +71,7 @@ flowchart LR
 | [05 — Knowledge retrieval](blueprints/05-rag-vector-knowledge-dispatcher) | Updated gateway integration template; lexical fixture retrieval, not a Pinecone implementation |
 | [06 — Lead qualification](blueprints/06-evidence-based-lead-qualification) | New gateway integration template with an auditable fixture scorer |
 
-The Make account was inspected **read-only** for this update. Scenario 02 was active; 01/03/04/05 were inactive. The default Make AI Provider connection was present. No cloud agents were provisioned, activated or executed. Publishing this repo does not deploy the Node API or activate Make scenarios.
+The original account observation on 2026-11-04 was read-only: scenario 02 was active and 01/03/04/05 were inactive. On 2026-11-07 the separate **Make Repo Kennisagent** was created, populated and tested using real Make model runs. Existing scenarios were not overwritten or activated. Publishing this repo does not deploy the Node API or activate those scenario templates.
 
 ## Authenticated API
 

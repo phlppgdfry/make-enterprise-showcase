@@ -1,0 +1,25 @@
+{
+  "type": "make-schema",
+  "schema": [
+    {
+      "name": "status",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "answer",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "quote",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
