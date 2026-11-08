@@ -17,7 +17,7 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
 
-Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. The latest local suite has **110 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
+Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. A fresh final-release model smoke test used another 1.76 credits: **11.75 credits total**, below the approved 50. The latest local suite has **111 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
 
 ## Architecture
 
@@ -68,7 +68,7 @@ The owner explicitly approved secure runtime credential storage and at most 50 e
 ## Verification and deployment
 
 ```bash
-npm run test:all          # 110 Node tests, local experiments and static blueprint audit
+npm run test:all          # 111 Node tests, local experiments and static blueprint audit
 npm run format:check     # Production source formatting
 npm run build:production # Bundle Worker and public assets
 npm run smoke:production # Actual public checks; no metered AI calls
@@ -87,4 +87,4 @@ The older blueprint deployment tooling still defaults to a plan and requires exp
 
 ## Limits before real customer operations
 
-CRM integration requires an authorized destination, credentials, sandbox fields and explicit approval for test writes. Research provides self-published website metadata, not a contact discovery service. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention maintenance is manual; continuous customer operations also need scheduled retention, an approved backup/restore process, access governance and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill have not been verified. The showcase is publicly deployed and its working flows are verified; it is not represented as an unrestricted enterprise production system.
+CRM integration requires an authorized destination, credentials, sandbox fields and explicit approval for test writes. Research provides self-published website metadata, not a contact discovery service. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention maintenance remains manual at the owner’s request. Continuous customer operations also need an approved backup/restore process, access governance and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill have not been verified. The showcase is publicly deployed and its working flows are verified; it is not represented as an unrestricted enterprise production system.

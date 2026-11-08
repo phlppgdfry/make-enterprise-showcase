@@ -45,8 +45,9 @@
     </section>
     <section id="architecture" class="architecture"><div class="section-heading"><div><p class="eyebrow">Under the surface</p><h2>A small core, with clear boundaries.</h2></div><a class="text-link" href="https://github.com/phlppgdfry/make-enterprise-showcase/blob/main/docs/MAKE-AI-AGENTS.md">Integration guide ↗</a></div>
       <div class="architecture-flow"><div><span class="flow-number">1</span><h3>Trusted input</h3><p>Authenticate the request and bind the tenant before any tool runs.</p></div><span class="flow-arrow" aria-hidden="true">→</span><div><span class="flow-number">2</span><h3>Scoped tools</h3><p>Retrieve sources and customer facts. Score leads using published rules.</p></div><span class="flow-arrow" aria-hidden="true">→</span><div><span class="flow-number">3</span><h3>Reviewed output</h3><p>Check evidence and route sensitive actions to review. No automatic account changes.</p></div></div>
-      <div class="implementation"><div><h3>One implementation, two surfaces.</h3><p>The browser and authenticated Node API share the same retrieval, scoring and policy functions. An optional Make agent adapter can produce drafts; model output always goes to review.</p><a href="https://github.com/phlppgdfry/make-enterprise-showcase/blob/main/docs/lib/agent-core.js">Read the implementation ↗</a></div><div class="code-block"><span>Run locally · Node.js 22+</span><pre><code>git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
+      <div class="implementation"><div><h3>One implementation, two surfaces.</h3><p>The browser and authenticated Node API share the same retrieval, scoring and policy functions. An optional Make agent adapter can produce drafts; model output always goes to review.</p><a href="https://github.com/phlppgdfry/make-enterprise-showcase/blob/main/docs/lib/agent-core.js">Read the implementation ↗</a></div><div class="code-block"><span>Run locally · Node.js 22.13+</span><pre><code>git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
 cd make-enterprise-showcase
+npm ci
 npm test
 npm start</code></pre></div></div>
     </section>

@@ -26,7 +26,7 @@
     "start:production": "node scripts/production-preview.mjs",
     "test:production": "node --test tests/production.test.js",
     "db:generate": "drizzle-kit generate --config=production/drizzle.config.cjs",
-    "format:check": "prettier --check production/src production/public production/db tests/production.test.js scripts/build-production.mjs scripts/production-preview.mjs",
+    "format:check": "prettier --check production/src production/public production/db tests/production.test.js scripts/build-production.mjs scripts/production-preview.mjs scripts/production-smoke.mjs scripts/production-retention.mjs",
     "smoke:production": "node scripts/production-smoke.mjs"
   },
   "keywords": [
@@ -43,7 +43,7 @@
   "author": "Philippe Godfroy",
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13"
   },
   "dependencies": {
     "parse5": "8.1.1"

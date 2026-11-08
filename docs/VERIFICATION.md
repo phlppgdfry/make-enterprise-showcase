@@ -1,6 +1,6 @@
 # Reference laboratory verification — 2026-11-07
 
-This is the historical reference-laboratory verification. The operational release and its current 110-test suite are documented in [PRODUCTION-ACCEPTANCE.md](PRODUCTION-ACCEPTANCE.md). The results below retain their original date and scope.
+This is the historical reference-laboratory verification. The operational release and its current 111-test suite are documented in [PRODUCTION-ACCEPTANCE.md](PRODUCTION-ACCEPTANCE.md). The results below retain their original date and scope.
 
 ## Reproducible local checks
 

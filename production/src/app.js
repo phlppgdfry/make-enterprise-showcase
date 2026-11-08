@@ -166,7 +166,14 @@ export function createApp({
       readOnly: true,
     };
   }
-  async function audit(db, id, action, outcome, execution = null) {
+  async function audit(
+    db,
+    id,
+    action,
+    outcome,
+    execution = null,
+    actor = "operator",
+  ) {
     await db
       .prepare(
         "INSERT INTO audit_events (id,request_id,actor,action,outcome,execution_id,created_at,expires_at) VALUES (?,?,?,?,?,?,?,?)",
@@ -174,7 +181,7 @@ export function createApp({
       .bind(
         crypto.randomUUID(),
         id,
-        "operator",
+        actor,
         action,
         outcome,
         execution,
@@ -536,11 +543,19 @@ export function createApp({
           const token = req.headers
             .get("authorization")
             ?.match(/^Bearer ([^\s]+)$/)?.[1];
-          if (
-            !env.OPERATOR_API_KEY ||
-            !token ||
-            !(await secureEqual(token, env.OPERATOR_API_KEY))
-          )
+          const operator = !!(
+            env.OPERATOR_API_KEY &&
+            token &&
+            (await secureEqual(token, env.OPERATOR_API_KEY))
+          );
+          const maintenance = !!(
+            req.method === "POST" &&
+            path === "/api/maintenance/retention" &&
+            env.MAINTENANCE_API_KEY &&
+            token &&
+            (await secureEqual(token, env.MAINTENANCE_API_KEY))
+          );
+          if (!operator && !maintenance)
             fail(401, "unauthorized", "An operator access key is required.");
           if (req.method === "GET" && path === "/api/workflows")
             response = json({
@@ -689,7 +704,19 @@ export function createApp({
                   ).bind(now),
                 ]),
             );
-            response = json({ purged: true });
+            await audit(
+              env.DB,
+              requestId,
+              "retention-maintenance",
+              "succeeded",
+              null,
+              operator ? "operator" : "maintenance",
+            );
+            response = json({
+              purged: true,
+              retentionDays: 7,
+              budgetPreserved: true,
+            });
           } else fail(404, "not_found", "API route not found.");
         }
       }
@@ -735,9 +762,14 @@ export function createApp({
       "strict-transport-security",
       "max-age=31536000; includeSubDomains",
     );
+    // Cloudflare copies this fresh nonce onto its own injected bot-detection script.
+    // Never enable unsafe-inline to accommodate platform injection.
+    const nonce = btoa(
+      String.fromCharCode(...crypto.getRandomValues(new Uint8Array(24))),
+    );
     headers.set(
       "content-security-policy",
-      "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+      `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`,
     );
     logger(
       JSON.stringify({

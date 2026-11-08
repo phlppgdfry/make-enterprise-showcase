@@ -1,0 +1,20 @@
+# Optional template only: not an active workflow.
+# Automatic scheduling and secret setup were deferred by the owner.
+name: Production retention maintenance
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Purge only expired showcase records
+        env:
+          SHOWCASE_MAINTENANCE_KEY: ${{ secrets.SHOWCASE_MAINTENANCE_KEY }}
+        run: node scripts/production-retention.mjs

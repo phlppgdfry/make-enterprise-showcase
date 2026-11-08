@@ -122,6 +122,18 @@ test("production health checks storage and provides traceable build", async () =
   assert.equal(r.status, 200);
   assert.equal(r.data.sourceCommit, "test-commit");
   assert.equal(r.headers.get("x-content-type-options"), "nosniff");
+  const next = await s.call("/api/health");
+  assert.match(
+    r.headers.get("content-security-policy"),
+    /nonce-[A-Za-z0-9+/=]+/,
+  );
+  assert.notEqual(
+    r.headers.get("content-security-policy"),
+    next.headers.get("content-security-policy"),
+  );
+  assert.ok(
+    !r.headers.get("content-security-policy").includes("unsafe-inline"),
+  );
 });
 test("production rejects unauthorized reads, metered calls, CRM writes and cross-origin posts", async () => {
   const s = await setup();
@@ -150,7 +162,7 @@ test("production rejects unauthorized reads, metered calls, CRM writes and cross
 test("agent uses actual provider boundary, validates provenance, persists and replays idempotently", async () => {
   const s = await setup();
   const first = await s.call(
-    "/api/agent/ask",
+    "/api/workflows/repository-agent/execute",
     { question: "Does the demo use an LLM?" },
     { key: "same-request-001" },
   );
@@ -430,4 +442,36 @@ test("credit reconciliation is atomic, receipt-based, idempotent and preserves l
     ).status,
     401,
   );
+});
+test("maintenance credential can purge only expired records and cannot read history, spend credits or reconcile budgets", async () => {
+  const s = await setup();
+  s.env.MAINTENANCE_API_KEY = "maintenance-only-key";
+  const headers = { Authorization: "Bearer maintenance-only-key" };
+  for (const [path, b] of [
+    ["/api/executions", undefined],
+    ["/api/workflows", undefined],
+    ["/api/agent/ask", { question: "hi" }],
+    ["/api/budget/reconcile", {}],
+  ])
+    assert.equal((await s.call(path, b, { headers })).status, 401);
+  await s.call("/api/leads/research", { domain: "cloudflare.com" });
+  const before = s.env.DB.raw
+    .prepare("SELECT COUNT(*) n FROM executions")
+    .get().n;
+  const result = await s.call("/api/maintenance/retention", {}, { headers });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.budgetPreserved, true);
+  assert.equal(
+    s.env.DB.raw.prepare("SELECT COUNT(*) n FROM executions").get().n,
+    before,
+  );
+  assert.equal(
+    s.env.DB.raw
+      .prepare(
+        "SELECT actor FROM audit_events WHERE action='retention-maintenance'",
+      )
+      .get().actor,
+    "maintenance",
+  );
+  assert.equal(s.calls(), 0);
 });
