@@ -31,3 +31,6 @@ jobs:
 
     - name: Dependency security audit
       run: npm audit --audit-level=moderate
+
+    - name: Check production formatting
+      run: npm run format:check
