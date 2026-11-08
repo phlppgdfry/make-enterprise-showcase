@@ -78,10 +78,10 @@ export function createApp({assets={},knowledge,commit='development',fetcher=fetc
     const started=Date.now(),requestId=crypto.randomUUID(),url=new URL(req.url);let response;
     try {
       const path=url.pathname;
-      if(req.method==='GET'&&!path.startsWith('/api/')) {
+      if(['GET','HEAD'].includes(req.method)&&!path.startsWith('/api/')) {
         const name=path==='/'?'/index.html':path;
         if(!assets[name])fail(404,'not_found','Page not found.');
-        const type=name.endsWith('.css')?'text/css':name.endsWith('.js')?'text/javascript':'text/html';response=new Response(assets[name],{headers:{'content-type':type+'; charset=utf-8','cache-control':'no-cache'}});
+        const type=name.endsWith('.css')?'text/css':name.endsWith('.js')?'text/javascript':name.endsWith('.svg')?'image/svg+xml':name.endsWith('.xml')?'application/xml':name.endsWith('.txt')?'text/plain':'text/html';response=new Response(req.method==='HEAD'?null:assets[name],{headers:{'content-type':type+'; charset=utf-8','cache-control':'no-cache'}});
       } else {
         if(!['GET','POST'].includes(req.method))fail(405,'method_not_allowed','Method not supported.');
         if(!env.DB)fail(503,'database_unconfigured','Persistent storage is not configured.');
@@ -116,7 +116,7 @@ export function createApp({assets={},knowledge,commit='development',fetcher=fetc
           else fail(404,'not_found','API route not found.');
         }
       }
-    } catch(error){response=json({error:{code:error instanceof PublicError?error.code:'internal_error',message:error instanceof PublicError?error.message:'The service could not complete this request.',requestId}},error instanceof PublicError?error.status:500);}
+    } catch(error){logger(JSON.stringify({requestId,event:'request_error',name:error.name,code:error instanceof PublicError?error.code:'internal_error',frames:typeof error.stack==='string'?error.stack.split('\n').slice(1,4).map(x=>x.replace(/https?:\/\/[^ )]+/g,'[runtime]')):[]}));response=json({error:{code:error instanceof PublicError?error.code:'internal_error',message:error instanceof PublicError?error.message:'The service could not complete this request.',requestId}},error instanceof PublicError?error.status:500);}
     const headers=new Headers(response.headers);headers.set('x-request-id',requestId);headers.set('x-content-type-options','nosniff');headers.set('referrer-policy','no-referrer');headers.set('permissions-policy','camera=(), microphone=(), geolocation=()');headers.set('strict-transport-security','max-age=31536000; includeSubDomains');headers.set('content-security-policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
     logger(JSON.stringify({requestId,method:req.method,path:url.pathname,status:response.status,durationMs:Date.now()-started}));
     return new Response(response.body,{status:response.status,headers});
