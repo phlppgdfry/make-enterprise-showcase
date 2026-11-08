@@ -211,7 +211,12 @@ $("lock").addEventListener("click", () => {
   pending.clear();
   $("access-state").textContent = "Locked";
   $("access-key").value = "";
-  for (const id of ["agent-result", "research-result", "verify-result"])
+  for (const id of [
+    "agent-result",
+    "research-result",
+    "verify-result",
+    "budget-result",
+  ])
     $(id).replaceChildren();
   history();
 });
@@ -248,3 +253,22 @@ $("verify").addEventListener("click", async () => {
   }
 });
 status();
+
+$("reconcile").addEventListener("click", async () => {
+  if (!key) {
+    message($("budget-result"), "Unlock operator access first.", true);
+    return;
+  }
+  $("reconcile").disabled = true;
+  try {
+    const b = await api("/api/budget/reconcile", {});
+    message(
+      $("budget-result"),
+      `${b.allocatedCredits} credits accounted for · ${b.remainingAllocationCredits} credits available within the unchanged ${b.approvedLimitCredits}-credit allowance. Unknown provider charges remain reserved.`,
+    );
+  } catch (e) {
+    message($("budget-result"), e.message, true);
+  } finally {
+    $("reconcile").disabled = false;
+  }
+});

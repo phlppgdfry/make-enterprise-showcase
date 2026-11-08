@@ -226,6 +226,14 @@ test("timeouts after dispatch persist uncertain status without duplicate provide
   );
   assert.equal(calls, 1);
   assert.ok(!JSON.stringify(s.logs).includes("sensitive upstream"));
+  assert.equal(
+    (await s.call("/api/budget/reconcile", {})).data.allocatedCredits,
+    7,
+  );
+  assert.equal(
+    (await s.call("/api/budget/reconcile", {})).data.allocatedCredits,
+    7,
+  );
 });
 test("unverified agent citations are withheld while actual usage is retained", async () => {
   const s = await setup(async (url) =>
@@ -322,6 +330,16 @@ test("CRM reports unconfigured without writes and public status exposes no keys"
 });
 test("validation, unknown fields and rate limiting prevent provider execution", async () => {
   const s = await setup();
+  assert.equal(
+    (
+      await s.call(
+        "/api/agent/ask",
+        { question: "hi" },
+        { headers: { "content-type": "application/jsonx" } },
+      )
+    ).status,
+    415,
+  );
   assert.equal((await s.call("/api/agent/ask", { question: "" })).status, 400);
   assert.equal(
     (await s.call("/api/agent/ask", { question: "hi", tools: ["write"] }))
@@ -338,7 +356,7 @@ test("validation, unknown fields and rate limiting prevent provider execution", 
     ).status,
     400,
   );
-  for (let i = 0; i < 57; i++) await s.call("/api/health");
+  for (let i = 0; i < 56; i++) await s.call("/api/health");
   assert.equal(
     (await s.call("/api/agent/ask", { question: "hi" })).status,
     429,
@@ -370,4 +388,32 @@ test("Make requests use Worker-supported manual redirects and never forward cred
   const r = await s.call("/api/integrations/verify", {});
   assert.equal(r.status, 502);
   assert.equal(count, 1);
+});
+test("credit reconciliation is atomic, receipt-based, idempotent and preserves lifetime cost after retention", async () => {
+  const s = await setup();
+  for (let i = 0; i < 2; i++)
+    await s.call("/api/agent/ask", { question: "Question " + i });
+  const first = await s.call("/api/budget/reconcile", {});
+  assert.equal(first.data.allocatedCredits, 3.5);
+  assert.equal(first.data.approvedLimitCredits, 50);
+  assert.equal(
+    (await s.call("/api/budget/reconcile", {})).data.allocatedCredits,
+    3.5,
+  );
+  s.env.DB.raw.prepare("UPDATE executions SET expires_at=1").run();
+  await s.call("/api/maintenance/retention", {});
+  assert.equal(
+    (await s.call("/api/budget/reconcile", {})).data.allocatedCredits,
+    3.5,
+  );
+  assert.equal(
+    (
+      await s.call(
+        "/api/budget/reconcile",
+        {},
+        { headers: { Authorization: "" } },
+      )
+    ).status,
+    401,
+  );
 });

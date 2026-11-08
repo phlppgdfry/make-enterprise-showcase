@@ -26,7 +26,8 @@
     "start:production": "node scripts/production-preview.mjs",
     "test:production": "node --test tests/production.test.js",
     "db:generate": "drizzle-kit generate --config=production/drizzle.config.cjs",
-    "format:check": "prettier --check production/src production/public production/db tests/production.test.js scripts/build-production.mjs scripts/production-preview.mjs"
+    "format:check": "prettier --check production/src production/public production/db tests/production.test.js scripts/build-production.mjs scripts/production-preview.mjs",
+    "smoke:production": "node scripts/production-smoke.mjs"
   },
   "keywords": [
     "make",

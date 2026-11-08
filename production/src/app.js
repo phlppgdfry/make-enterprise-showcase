@@ -50,7 +50,10 @@ const decode = (row) =>
       }
     : null;
 async function bodyOf(req) {
-  if (!req.headers.get("content-type")?.startsWith("application/json"))
+  if (
+    req.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() !==
+    "application/json"
+  )
     fail(415, "json_required", "Use application/json.");
   let raw = "";
   const reader = req.body?.getReader();
@@ -265,7 +268,7 @@ export function createApp({
             "INSERT INTO budget (id) VALUES (1) ON CONFLICT(id) DO NOTHING",
           )
           .run();
-        // Conservative, non-refundable allocation: at most seven metered calls per approved 50-credit allowance.
+        // Conservative allocation: at most seven unreconciled dispatches per approved 50-credit allowance.
         const allocation = await db
           .prepare(
             "UPDATE budget SET used_centi=used_centi+700 WHERE id=1 AND used_centi+700<=limit_centi",
@@ -510,7 +513,8 @@ export function createApp({
             },
             creditPolicy: {
               maximumAllocatedCredits: 50,
-              maximumCalls: 7,
+              maximumUnreconciledCalls: 7,
+              allocationPerCallCredits: 7,
               automaticRetries: false,
             },
             retentionDays: 7,
@@ -629,7 +633,39 @@ export function createApp({
               "crm_unconfigured",
               "No authorized CRM connection or write approval is configured. No CRM record has been created.",
             );
-          else if (
+          else if (req.method === "POST" && path === "/api/budget/reconcile") {
+            strict(await bodyOf(req), []);
+            // D1 batch is atomic. Unknown charges retain their full allocation; settled receipts never reset lifetime spend.
+            const settled =
+              "workflow='repository-agent' AND charged_centi IS NOT NULL AND status IN ('succeeded','failed')";
+            await env.DB.batch([
+              env.DB.prepare(
+                "INSERT INTO budget (id) VALUES (1) ON CONFLICT(id) DO NOTHING",
+              ),
+              env.DB.prepare(
+                `UPDATE budget SET used_centi=used_centi-COALESCE((SELECT SUM(reserved_centi-charged_centi) FROM executions WHERE ${settled}),0) WHERE id=1`,
+              ),
+              env.DB.prepare(
+                `UPDATE executions SET reserved_centi=charged_centi WHERE ${settled}`,
+              ),
+            ]);
+            const current = await env.DB.prepare(
+              "SELECT used_centi,limit_centi FROM budget WHERE id=1",
+            ).first();
+            await audit(
+              env.DB,
+              requestId,
+              "credit-reconciliation",
+              "succeeded",
+            );
+            response = json({
+              allocatedCredits: current.used_centi / 100,
+              approvedLimitCredits: current.limit_centi / 100,
+              remainingAllocationCredits:
+                Math.max(0, current.limit_centi - current.used_centi) / 100,
+              limitChanged: false,
+            });
+          } else if (
             req.method === "POST" &&
             path === "/api/maintenance/retention"
           ) {
