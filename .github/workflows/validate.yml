@@ -20,5 +20,14 @@ jobs:
       with:
         node-version: 22.x
 
+    - name: Install locked dependencies
+      run: npm ci
+
     - name: Run Blueprint Validation Suite
       run: npm run test:all
+
+    - name: Build production Worker
+      run: npm run build:production
+
+    - name: Dependency security audit
+      run: npm audit --audit-level=moderate

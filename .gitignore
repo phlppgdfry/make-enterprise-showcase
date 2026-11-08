@@ -10,3 +10,6 @@ exports/
 .playwright-cli/
 playwright-report/
 test-results/
+production/dist/
+production/src/*.generated.json
+production/.wrangler/

@@ -5,7 +5,7 @@
  * Inspects poisoned or interrupted executions and replays them safely via make-cli
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const ZONE = process.env.MAKE_ZONE || 'eu1.make.com';
 const TEAM_ID = process.env.MAKE_TEAM_ID || 3365938;
@@ -17,7 +17,8 @@ console.log('================================================================\n'
 
 try {
   console.log('--> 1. Querying Incomplete Executions queue across scenarios...');
-  const output = execSync(`make-cli incomplete-executions list --team-id=${TEAM_ID} --output json`, {
+  if (!/^\d+$/.test(String(TEAM_ID))) throw new Error('Invalid team ID');
+  const output = execFileSync('make-cli', ['incomplete-executions', 'list', '--team-id', String(TEAM_ID), '--output', 'json'], {
     encoding: 'utf8',
     env: process.env
   });

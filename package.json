@@ -21,7 +21,11 @@
     "agent:plan": "node scripts/make-knowledge-agent.js",
     "agent:setup": "node scripts/make-knowledge-agent.js --apply",
     "agent:ask": "node scripts/make-knowledge-agent.js --ask",
-    "agent:evaluate": "node scripts/evaluate-make-agent.js"
+    "agent:evaluate": "node scripts/evaluate-make-agent.js",
+    "build:production": "node scripts/build-production.mjs",
+    "start:production": "node scripts/production-preview.mjs",
+    "test:production": "node --test tests/production.test.js",
+    "db:generate": "drizzle-kit generate --config=production/drizzle.config.cjs"
   },
   "keywords": [
     "make",
@@ -38,5 +42,16 @@
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "parse5": "8.1.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.11",
+    "drizzle-orm": "0.45.4",
+    "esbuild": "0.28.2"
+  },
+  "overrides": {
+    "esbuild": "$esbuild"
   }
 }

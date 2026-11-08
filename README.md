@@ -1,4 +1,4 @@
-# Make Agent Workbench
+# Make Enterprise Workbench
 
 [![Validate workflows](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml/badge.svg)](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml)
 
@@ -6,13 +6,22 @@
 
 [Open the interactive workbench](https://phlppgdfry.github.io/make-enterprise-showcase/) · [Make AI Agents setup](docs/MAKE-AI-AGENTS.md) · [Current verification](docs/VERIFICATION.md)
 
+## Operational application
+
+The new server-backed workbench is being verified at [Make Enterprise Workbench](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site). Its authoritative release status is the [production acceptance report](docs/PRODUCTION-ACCEPTANCE.md). The existing GitHub Pages URL remains a clearly synthetic reference laboratory.
+
+The operational backend provides authenticated calls to the existing Make knowledge agent, strict pinned-source citation validation, real allowlisted company website metadata research, persistent D1 execution records, duplicate prevention, request IDs, API rate limiting and a conservative 50-credit verification allocation. An operator access key is required for metered actions and history. CRM is unconfigured and cannot create contacts. Research does not invent contacts or claim AI lead scoring.
+
+Run `npm run start:production` for the separate local preview. See [architecture](docs/PRODUCTION-ARCHITECTURE.md), [deployment and API setup](docs/PRODUCTION-DEPLOYMENT.md) and [repository audit](docs/REPOSITORY-AUDIT.md).
+
 ## Try it
 
-Requires Node.js 22 or newer. No package installation, model key or Make login is needed for the local reference flows.
+Requires Node.js 22.13 or newer (Node 24 recommended). Run `npm ci` before testing. No model key or Make login is needed for deterministic local reference flows.
 
 ```bash
 git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
 cd make-enterprise-showcase
+npm ci
 npm test
 npm start
 ```
@@ -23,7 +32,7 @@ The browser demo uses **synthetic fixtures and deterministic tools**, not an LLM
 
 ## Live knowledge agent in Make
 
-**Make Repo Kennisagent** is now provisioned and tested inside Make using seven actual, version-pinned repository documents. It uses Make's AI Provider and built-in knowledge retrieval. Seven real cloud acceptance cases passed, including source questions, missing information and refused sensitive actions.
+**Make Repo Kennisagent** is now provisioned and tested inside Make using seven actual, version-pinned repository documents. It uses Make's AI Provider and built-in knowledge retrieval. Seven cloud acceptance cases passed historically; the current production acceptance report distinguishes fresh results from that snapshot.
 
 ```bash
 npm run agent:ask -- "Welke workflows werken in deze repository?"
