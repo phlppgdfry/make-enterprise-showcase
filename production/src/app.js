@@ -14,7 +14,7 @@ export function createApp({assets={},knowledge,commit='development',fetcher=fetc
   async function make(env,path,body) {
     if(!env.MAKE_API_KEY)fail(503,'make_unconfigured','Make credentials are not configured.');
     const zone=env.MAKE_ZONE||'eu1.make.com';if(!/^(eu[12]|us[12])\.make\.com$/.test(zone))fail(503,'invalid_make_configuration','Make region is not configured correctly.');
-    const r=await fetcher(`https://${zone}/api/v2${path}`,{method:body?'POST':'GET',redirect:'error',signal:AbortSignal.timeout(65000),headers:{Authorization:`Token ${env.MAKE_API_KEY}`,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+    const r=await fetcher(`https://${zone}/api/v2${path}`,{method:body?'POST':'GET',redirect:'manual',signal:AbortSignal.timeout(65000),headers:{Authorization:`Token ${env.MAKE_API_KEY}`,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
     const raw=await r.text();if(raw.length>1000000)fail(502,'make_response_too_large','Make returned an oversized response.');
     if(!r.ok)fail(r.status===429?429:502,'make_upstream_error',r.status===429?'Make rate limit reached. Try later.':'Make could not complete this request.');
     try{return JSON.parse(raw);}catch{fail(502,'make_invalid_response','Make returned an invalid response.');}

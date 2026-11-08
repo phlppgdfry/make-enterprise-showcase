@@ -14,7 +14,7 @@ async function bounded(response, max) {
   finally {await reader.cancel().catch(()=>{});}
   const joined=new Uint8Array(size); let at=0; for(const c of chunks){joined.set(c,at);at+=c.length;} return new TextDecoder().decode(joined);
 }
-export async function sourceFetch(url, domain, fetcher, max=1000000) {
+export async function sourceFetch(url, domain, fetcher, max=2000000) {
   for(let redirects=0;redirects<4;redirects++) {
     const r=await fetcher(url,{redirect:'manual',signal:AbortSignal.timeout(12000),headers:{'User-Agent':'MakeEnterpriseShowcaseBot/1.0 (+https://github.com/phlppgdfry/make-enterprise-showcase)','Accept':'text/html,text/plain'}});
     if([301,302,303,307,308].includes(r.status)) {
