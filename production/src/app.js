@@ -488,10 +488,16 @@ export function createApp({
           )
             .bind("make")
             .first();
+          const snapshot = cached ? JSON.parse(cached.value_json) : null;
           response = json({
             make: {
               configured: !!env.MAKE_API_KEY,
-              verification: cached ? JSON.parse(cached.value_json) : null,
+              verification: snapshot
+                ? {
+                    agent: snapshot.agent,
+                    scenarioCount: snapshot.scenarios.length,
+                  }
+                : null,
               observedAt: cached
                 ? new Date(cached.observed_at).toISOString()
                 : null,

@@ -1,6 +1,6 @@
-# Current verification — 2026-11-07
+# Reference laboratory verification — 2026-11-07
 
-This document supersedes the historical audit scores and production-readiness claims elsewhere in the repository.
+This is the historical reference-laboratory verification. The operational release and its current 110-test suite are documented in [PRODUCTION-ACCEPTANCE.md](PRODUCTION-ACCEPTANCE.md). The results below retain their original date and scope.
 
 ## Reproducible local checks
 

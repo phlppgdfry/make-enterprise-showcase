@@ -1,119 +1,90 @@
 # Make Enterprise Workbench
 
-[![Validate workflows](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml/badge.svg)](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml)
+[![Validate workflows](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml/badge.svg)](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/validate.yml) [![Production health](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/production-health.yml/badge.svg)](https://github.com/phlppgdfry/make-enterprise-showcase/actions/workflows/production-health.yml)
 
-**Evidence-based support, knowledge retrieval and lead qualification.** An executable automation reference by Philippe Godfroy, with a shared browser/API policy core and an optional Make AI Agent drafting adapter.
+A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledge agent, research approved company websites and inspect persistent execution records. The operational application and the synthetic reference laboratory are clearly separated.
 
-[Open the interactive workbench](https://phlppgdfry.github.io/make-enterprise-showcase/) · [Make AI Agents setup](docs/MAKE-AI-AGENTS.md) · [Current verification](docs/VERIFICATION.md)
+[**Open the operational application**](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) · [Health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health) · [Acceptance evidence](docs/PRODUCTION-ACCEPTANCE.md) · [Reference lab](https://phlppgdfry.github.io/make-enterprise-showcase/)
 
-## Operational application
+## Actual capabilities
 
-The new server-backed workbench is being verified at [Make Enterprise Workbench](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site). Its authoritative release status is the [production acceptance report](docs/PRODUCTION-ACCEPTANCE.md). The existing GitHub Pages URL remains a clearly synthetic reference laboratory.
-
-The operational backend provides authenticated calls to the existing Make knowledge agent, strict pinned-source citation validation, real allowlisted company website metadata research, persistent D1 execution records, duplicate prevention, request IDs, API rate limiting and a conservative 50-credit verification allocation. An operator access key is required for metered actions and history. CRM is unconfigured and cannot create contacts. Research does not invent contacts or claim AI lead scoring.
-
-Run `npm run start:production` for the separate local preview. See [architecture](docs/PRODUCTION-ARCHITECTURE.md), [deployment and API setup](docs/PRODUCTION-DEPLOYMENT.md) and [repository audit](docs/REPOSITORY-AUDIT.md).
-
-## Try it
-
-Requires Node.js 22.13 or newer (Node 24 recommended). Run `npm ci` before testing. No model key or Make login is needed for deterministic local reference flows.
-
-```bash
-git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
-cd make-enterprise-showcase
-npm ci
-npm test
-npm start
-```
-
-Open **http://127.0.0.1:4173**. Run a support request, change workspaces to test source isolation, or qualify a sample lead. Inspect the evidence, execution trace and decision; export the result as JSON.
-
-The browser demo uses **synthetic fixtures and deterministic tools**, not an LLM, live web research or your connected accounts. It executes the same code as the API. There are no external writes, sent emails or automatic refunds.
-
-## Live knowledge agent in Make
-
-**Make Repo Kennisagent** is now provisioned and tested inside Make using seven actual, version-pinned repository documents. It uses Make's AI Provider and built-in knowledge retrieval. Seven cloud acceptance cases passed historically; the current production acceptance report distinguishes fresh results from that snapshot.
-
-```bash
-npm run agent:ask -- "Welke workflows werken in deze repository?"
-```
-
-This command uses your authorized Make CLI login or explicit Make environment credentials. See the [agent guide](agents/repository) and [live execution evidence](agents/repository/live-verification.json). The standalone knowledge agent requires no separate API hosting. The browser demo below still uses synthetic data; the optional support-drafting gateway has not been deployed by this change.
-
-## What is implemented
-
-| Workflow | Executable behavior | Deliberate boundary |
+| Capability | Operational behavior | Boundary |
 | --- | --- | --- |
-| Support triage | Tenant-scoped customer lookup and knowledge retrieval; response draft; explicit review reasons | Every refund, cancellation or plan change requires review; no mutation tools |
-| Knowledge search | Filter by tenant before lexical ranking; extract source text with document IDs | No matching evidence → insufficient context; no fabricated vector-search claims |
-| Lead qualification | Published ICP rules, per-criterion points, source-backed synthetic firmographics and outreach draft | Unknown or incomplete company → research needed and null score; no invented facts or email sending |
-| Make agent adapter | One authenticated draft request; typed output checks; exact source-quote validation; bounded timeout | Every model draft requires review; rejected output fails closed |
+| Repository knowledge | Browser → authenticated backend → existing Make Repo Kennisagent → validated citations | Seven public documents pinned to `885c72b6a247ef9f9aabe7bc540339888397f403`; answers concern that historical snapshot |
+| Company research | Actual HTTPS homepage metadata, robots checks, source excerpts and observation time | Approved domains only; no invented contacts, emails, fit scores or independently verified firmographics |
+| Execution ledger | D1 persistence, request IDs, audit events, idempotency and uncertain-state handling | Single operator; seven-day retrieval period; physical retention purge is operator-triggered |
+| Credit control | Server-side allocation, provider usage receipts and atomic reconciliation | Existing approved 50-credit allowance; no purchases or automatic model retries |
+| Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
+| CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
 
-A source quotation proves provenance, not that all claims in a model draft follow from it. No self-reported confidence score is used as permission to act.
+Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. The latest local suite has **110 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  Browser[Static workbench] --> Core[Shared retrieval and policy core]
-  Make[Make integration scenario] --> Auth[Authenticated Node gateway]
-  Auth --> Core
-  Core --> Data[Tenant-scoped synthetic fixtures]
-  Auth -. optional context and draft .-> Agent[Separate Make AI Agent webhook]
-  Agent -. draft with citations .-> Review[Validate sources and require review]
+  Browser[Vanilla HTML / CSS / JavaScript] --> API[Same-origin Cloudflare Worker]
+  API --> Auth[Operator authentication / validation / rate limits]
+  Auth --> Ledger[(D1 executions / audit / credit ledger)]
+  Auth --> Make[Existing Make knowledge agent]
+  Auth --> Research[Approved public company websites]
+  Make --> Sources[Pinned quotation validation]
+  Sources --> Ledger
 ```
 
-- [Shared core](docs/lib/agent-core.js): retrieval, support policy, ICP scoring and candidate validation.
-- [Reference data](docs/data/reference.json): explicitly synthetic documents, customers and company profiles.
-- [Gateway](scripts/server.js): token authentication, trusted tenant binding, input limits and optional agent adapter.
-- [Agent instructions and output contract](agents): support/knowledge prompts, research design notes and JSON Schema.
-- [Integration guide](docs/MAKE-AI-AGENTS.md): native Make AI Agents setup, data contracts, error behavior and production gaps.
+The Worker serves both frontend and API through Sites. Secrets remain server-side. Public visitors can inspect health and capability status; model calls, research, history and maintenance require a separate operator key. The browser holds that key only in tab memory. Model output is rendered as text. A verified quotation proves provenance, not the truth of every claim in an answer.
 
-## Make templates and cloud status
+The original GitHub Pages lab remains available with synthetic support, tenant-scoped knowledge retrieval and deterministic lead scoring. It does not use a model, live research or connected business accounts. Its Node gateway (`scripts/server.js`) is a separate local reference, not the operational backend.
 
-| Scenario | Repository status |
-| --- | --- |
-| [01 — Support triage](blueprints/01-ai-agent-autonomous-triage) | Updated gateway integration template; account configuration and Make schema verification required |
-| [02 — Webhook ingestion](blueprints/02-idempotent-webhook-dlq-engine) | Historical three-module cloud reference; active state observed on 2026-11-04, no new execution claimed |
-| [03 — CRM/billing](blueprints/03-bidirectional-crm-billing-reconciliation) | Historical design / partial integration template; not a verified bidirectional sync |
-| [04 — ETL](blueprints/04-self-healing-etl-rate-limit-governor) | Historical design / partial integration template; no implemented distributed rate limiter |
-| [05 — Knowledge retrieval](blueprints/05-rag-vector-knowledge-dispatcher) | Updated gateway integration template; lexical fixture retrieval, not a Pinecone implementation |
-| [06 — Lead qualification](blueprints/06-evidence-based-lead-qualification) | New gateway integration template with an auditable fixture scorer |
+## Local setup
 
-The original account observation on 2026-11-04 was read-only: scenario 02 was active and 01/03/04/05 were inactive. On 2026-11-07 the separate **Make Repo Kennisagent** was created, populated and tested using real Make model runs. Existing scenarios were not overwritten or activated. Publishing this repo does not deploy the Node API or activate those scenario templates.
-
-## Authenticated API
-
-Set `SHOWCASE_API_TOKEN` and optionally `SHOWCASE_TENANT_ID` before `npm start`. The API is disabled without a token; the browser demo remains usable. Each gateway instance binds one tenant. The server uses synthetic data until you implement and test a real data adapter.
-
-| Endpoint | JSON input | Output |
-| --- | --- | --- |
-| `POST /api/support` | `query`, `customerId`, optional `action`, optional numeric `amount` | Draft, citations, review reasons, trace |
-| `POST /api/knowledge` | `query` | Extracted answer or insufficient context |
-| `POST /api/leads` | `domain` | ICP score/breakdown or research needed |
-| `GET /health` | None | Process status, mode and fixture storage label |
-
-Send `Authorization: Bearer <SHOWCASE_API_TOKEN>` and `Content-Type: application/json`. An input tenant that differs from the configured tenant is rejected. Bind the loopback service through an authenticated HTTPS proxy for remote use. GitHub Pages hosts the static workbench only.
-
-To enable model-assisted drafting, configure `MAKE_AGENT_URL` and `MAKE_AGENT_TOKEN` using the [native Make agent guide](docs/MAKE-AI-AGENTS.md). The default remains extractive, deterministic reference behavior.
-
-## Verification and operations
+Node.js **22.13+**, preferably Node 24, npm and a full Git clone are required. The build reads knowledge from the pinned historical commit.
 
 ```bash
-npm test          # Structural blueprint checks + regression/API tests
-npm run test:all  # Tests, local pattern experiments and static audit
-npm run simulate  # Execute six actual fixture requests and print their trace
-npm run test:e2e  # Real local HTTP journey across all three workflows
-npm run deploy    # Offline readiness plan; no cloud changes by default
-npm run probe     # Dry run; no network requests by default
+git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
+cd make-enterprise-showcase
+npm ci
+npm run test:all
+npm run build:production
+npm run start:production
 ```
 
-`npm run deploy -- --apply --scenario=<directory> --id=<existing-id> --blueprint-file=/private/path/configured.json` only permits a selected, inactive scenario with explicit credentials/team, resolved placeholders, a backup and a concurrency version. The private file lets credentials and tenant-specific configuration stay outside git; the saved module order, routes, filters and mapped values are checked after saving. Template module schemas must still be verified in Make. Live probes require one explicit webhook, an explicit payload file and `--live`. No bulk webhook broadcast or simulated healthy response is used.
+Open `http://127.0.0.1:4179`. The local preview has an in-memory SQLite database, the development key `local-preview-only`, and **no Make credentials**. Its data disappears on restart. It can fetch real approved public company websites when network access is available.
 
-## Scope and historical material
+For the original synthetic lab, run `npm start` and open `http://127.0.0.1:4173`. `SHOWCASE_API_TOKEN` enables that reference gateway's authenticated fixture endpoints. It is distinct from the hosted operator key.
 
-Local regression tests establish only the tested behavior. They do not certify SOC 2, ISO 27001, GDPR compliance, exactly-once delivery or an enterprise SLA. This reference has no persistent conversation store, durable task queue, production rate limiter, semantic vector index or live company research adapter.
+## Production configuration
 
-Earlier audits, SDK examples and case-study designs remain as **historical material**, with notices identifying their limits. Read [current verification](docs/VERIFICATION.md) and the individual scenario README before relying on a claim. The earlier 98% architecture score was a heuristic over labels and module presence, not a production readiness assessment; that scoring output has been removed.
+| Setting | Purpose |
+| --- | --- |
+| `MAKE_API_KEY` | Existing authorized Make token; secret runtime storage only |
+| `MAKE_ZONE` | Make API region; this deployment uses `eu1.make.com` |
+| `OPERATOR_API_KEY` | Independent high-entropy operator bearer secret |
+| `RESEARCH_DOMAINS` | Optional approved domains; defaults to `make.com,cloudflare.com,github.com` |
+| `DB` | D1 binding provisioned from `production/.openai/hosting.json` |
 
-MIT License. Built by Philippe Godfroy.
+The owner explicitly approved secure runtime credential storage and at most 50 existing Make credits. No credentials are in source control. The locally generated operator key is in the ignored owner-readable `exports/production-operator-key.txt`; do not publish it. No CRM credential is configured.
+
+## Verification and deployment
+
+```bash
+npm run test:all          # 110 Node tests, local experiments and static blueprint audit
+npm run format:check     # Production source formatting
+npm run build:production # Bundle Worker and public assets
+npm run smoke:production # Actual public checks; no metered AI calls
+npm audit                # Dependency advisories
+```
+
+CI installs locked dependencies, tests, builds, checks formatting and audits dependencies. The public production health workflow runs every six hours and on manual dispatch. Sites publication is performed with authenticated source/archive tooling; a GitHub push alone does not redeploy the Worker. The artifact records its canonical GitHub source commit, which is returned by `/api/health`.
+
+See [deployment, environment setup and rollback](docs/PRODUCTION-DEPLOYMENT.md), [architecture and security boundaries](docs/PRODUCTION-ARCHITECTURE.md), [integration configuration](docs/PRODUCTION-INTEGRATIONS.md), [repository audit](docs/REPOSITORY-AUDIT.md) and [release acceptance](docs/PRODUCTION-ACCEPTANCE.md).
+
+## Existing Make resources
+
+The existing agent is reused; no duplicate agent or scenario was created. Its seven knowledge documents and read-only permissions are preserved. Five existing scenarios were inspected without changing or executing them. The active webhook/datastore example is not a verified DLQ or exactly-once system; inactive support, CRM, ETL and knowledge scenarios remain templates requiring their own configuration.
+
+The older blueprint deployment tooling still defaults to a plan and requires explicit selection and configuration for writes. The incomplete legacy datastore provisioner no longer claims successful schema provisioning. SDK sketches and earlier audit scores remain historical material, not supported production services.
+
+## Limits before real customer operations
+
+CRM integration requires an authorized destination, credentials, sandbox fields and explicit approval for test writes. Research provides self-published website metadata, not a contact discovery service. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention maintenance is manual; continuous customer operations also need scheduled retention, an approved backup/restore process, access governance and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill have not been verified. The showcase is publicly deployed and its working flows are verified; it is not represented as an unrestricted enterprise production system.

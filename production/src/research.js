@@ -210,7 +210,12 @@ export async function research(value, allowed, fetcher = fetch) {
     fetcher,
     100000,
   );
-  if (robots.status !== 404 && (!robots.ok || !robotsAllowed(robots.text)))
+  if (
+    robots.status !== 404 &&
+    (!robots.ok ||
+      !robots.type.includes("text/plain") ||
+      !robotsAllowed(robots.text))
+  )
     throw new PublicError(
       422,
       "robots_restricted",

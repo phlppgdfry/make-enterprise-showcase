@@ -323,7 +323,21 @@ test("CRM reports unconfigured without writes and public status exposes no keys"
   const r = await s.call("/api/crm/contacts", {});
   assert.equal(r.status, 503);
   assert.equal(r.data.error.code, "crm_unconfigured");
+  await s.env.DB.prepare(
+    "INSERT INTO integration_cache (name,value_json,observed_at) VALUES (?,?,?)",
+  )
+    .bind(
+      "make",
+      JSON.stringify({
+        agent: { name: "Make Repo Kennisagent" },
+        scenarios: [{ name: "private-customer-workflow" }],
+      }),
+      Date.now(),
+    )
+    .run();
   const status = await s.call("/api/status");
+  assert.equal(status.data.make.verification.scenarioCount, 1);
+  assert.ok(!JSON.stringify(status.data).includes("private-customer-workflow"));
   assert.equal(status.data.crm.configured, false);
   assert.ok(!JSON.stringify(status.data).includes(s.env.MAKE_API_KEY));
   assert.equal(s.calls(), 0);
