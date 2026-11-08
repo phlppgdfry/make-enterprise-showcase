@@ -31,3 +31,7 @@ Baseline: `605a5de0e1f9b09c8c530b3a7c30013ee2d499c7`, clean `main` synchronized 
 7. Publish evidence, limitations, operations/rollback instructions and the final tested source association. Commit/push without rewriting history.
 
 The user authorized a maximum of 50 existing Make AI credits for verification, with no credit purchase or plan upgrade. Public visitors must not receive anonymous access to metered execution or privileged writes.
+
+## Delivery outcome
+
+The hosted Worker, D1 persistence, real Make agent interface, bounded public company research, operator authorization, budget receipts/reconciliation, security controls, CI build/audit and public monitoring were implemented and verified. See [production acceptance](PRODUCTION-ACCEPTANCE.md) for exact release proof. CRM remains blocked and unfinished: no provider adapter, live connection or destination write has been claimed. Automatic retention activation was deferred by the owner; only an inactive template and optional restricted maintenance role were prepared. Managed cloud backup/restore has not been verified. Historical custom-app/SDK designs and inactive Make scenarios remain outside the operational feature set.

@@ -1,0 +1,346 @@
+{
+  "verifiedAt": "2026-11-08T23:33:59.222Z",
+  "canonicalImplementationCommit": "a99a8d27e25845d582dc4d52db017b5ce6c6fa24",
+  "sitesSourceCommit": "982db97de1de6c53671bcaf0fe13db4ddcb98ba7",
+  "savedVersion": {
+    "id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_1301f6d40f3481918c54d490f1a9d60b",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "version_number": 7,
+    "source": {
+      "commit_sha": "982db97de1de6c53671bcaf0fe13db4ddcb98ba7"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000829881f4aadaddf8b0fadb4c",
+      "content_hash": "sha256:91e70d8ec4c29ece8e34102f126c04eeef5ad39ace6364ae5adbdd343c5162ea",
+      "size_bytes": 286720,
+      "file_count": 5
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6af100721a94819180eef7090ea87857",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "title": "Make Enterprise Workbench",
+    "version_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_1301f6d40f3481918c54d490f1a9d60b",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "failure_message": null,
+    "env_set_revision": 1,
+    "updated_at": "2026-11-08T23:06:38.420853+00:00"
+  },
+  "localTests": {
+    "passed": 111,
+    "failed": 0,
+    "productionApiSecurityPersistenceCases": 15,
+    "coverageMeasured": false
+  },
+  "sevenCaseAcceptance": {
+    "file": "production-agent-acceptance.json",
+    "passed": 7,
+    "actualCredits": 9.99,
+    "canonicalCommit": "20a60e9a33d2cb223da6b46065db35238e1ac4eb"
+  },
+  "freshModelReleaseSmoke": {
+    "sourceCommit": "2d089a5ceef2fa49d42b53a6ba916d9cbbe202f9",
+    "httpStatus": 201,
+    "execution": {
+      "id": "b3cac7af-63b4-4132-b67b-1e64945ff779",
+      "workflow": "repository-agent",
+      "status": "succeeded",
+      "createdAt": "2026-11-08T18:01:08.046Z",
+      "updatedAt": "2026-11-08T18:01:20.685Z",
+      "result": {
+        "status": "answered",
+        "answer": "De drie workflows die in de workbench werken zijn: Support triage workflow, Knowledge search workflow en Lead qualification workflow. De browser demo gebruikt geen echt taalmodel; dit wordt beschreven als synthetische fixtures en deterministische tools, geen LLM, geen live webresearch of verbinding met accounts.",
+        "citations": [
+          {
+            "source": "https://github.com/phlppgdfry/make-enterprise-showcase/blob/885c72b6a247ef9f9aabe7bc540339888397f403/README.md",
+            "quote": "The browser demo uses synthetic fixtures and deterministic tools, not an LLM, live web research or your connected accounts."
+          }
+        ],
+        "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+        "executionTimeMs": 12232,
+        "chargedCenticredits": 176,
+        "iterationId": "e4d80cd5-1be2-4627-a6e9-5252b764c68e",
+        "citationValidation": "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven."
+      },
+      "error": null,
+      "chargedCenticredits": 176,
+      "upstreamId": "e4d80cd5-1be2-4627-a6e9-5252b764c68e"
+    },
+    "budget": "11.75 credits accounted for · 38.25 credits available within the unchanged 50-credit allowance. Unknown provider charges remain reserved."
+  },
+  "totalActualMakeCredits": 13.63,
+  "creditBudget": {
+    "id": 1,
+    "used_centi": 1363,
+    "reserved_centi": 0,
+    "limit_centi": 5000
+  },
+  "finalBrowser": {
+    "sourceCommit": "a99a8d27e25845d582dc4d52db017b5ce6c6fa24",
+    "inspection": "Make Repo Kennisagent: 7 knowledge documents; no scenario or MCP mutation tools. 5 existing scenarios inspected without executing them.",
+    "replayed": true,
+    "executionId": "e5989aad-7625-436f-9eaa-ca5133e1b413",
+    "citationsDisplayed": 1,
+    "research": {
+      "id": "0ecf5027-fcf6-4f5a-805c-e5669238658d",
+      "workflow": "company-research",
+      "status": "succeeded",
+      "createdAt": "2026-11-08T23:07:34.132Z",
+      "updatedAt": "2026-11-08T23:07:34.199Z",
+      "result": {
+        "title": "Cloudflare: Build for the agent era",
+        "description": "Welcome to Cloudflare - Powering the next generation of applications",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "cloudflare.com",
+        "source": "https://www.cloudflare.com/",
+        "observedAt": "2026-11-08T13:18:11.148Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "Cloudflare: Build for the agent era",
+            "url": "https://www.cloudflare.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Welcome to Cloudflare - Powering the next generation of applications",
+            "url": "https://www.cloudflare.com/"
+          }
+        ],
+        "leadId": "d7e2d084-9470-4697-85d8-4e73a860ba66",
+        "reused": true
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": null
+    },
+    "budget": "11.75 credits accounted for · 38.25 credits available within the unchanged 50-credit allowance. Unknown provider charges remain reserved.",
+    "mobileHorizontalOverflow": false,
+    "pageErrors": [],
+    "lockedAtEnd": "Locked"
+  },
+  "logReview": {
+    "since": "2026-11-08T23:06:38.420853+00:00",
+    "eventsReviewed": 25,
+    "httpStatuses": [
+      401,
+      200,
+      200,
+      200,
+      401,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "serverErrors": 0
+  },
+  "research": [
+    {
+      "id": "8094e411-7de5-43c7-b6c1-04288833c517",
+      "domain": "make.com",
+      "source": "https://www.make.com/",
+      "digest": "20a592d885b7dde4c474b1be22b6e7289195f0cb1fb2f1f2ced808c523894056",
+      "observedAt": "2026-11-08T12:46:40.163Z",
+      "data": {
+        "title": "AI Workflow Automation Software & Tools | Make",
+        "description": "Automate your work. Make allows you to visually build, scale and automate AI and agentic workflows. User friendly no-code integration tool. Try it now for free!",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "make.com",
+        "source": "https://www.make.com/",
+        "observedAt": "2026-11-08T12:46:40.625Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "AI Workflow Automation Software & Tools | Make",
+            "url": "https://www.make.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Automate your work. Make allows you to visually build, scale and automate AI and agentic workflows. User friendly no-code integration tool. Try it now for free!",
+            "url": "https://www.make.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d7e2d084-9470-4697-85d8-4e73a860ba66",
+      "domain": "cloudflare.com",
+      "source": "https://www.cloudflare.com/",
+      "digest": "030e092db77b05a187c957e59b0b61d1a12857997c1379cd4ecae8cc355fae23",
+      "observedAt": "2026-11-08T13:18:10.949Z",
+      "data": {
+        "title": "Cloudflare: Build for the agent era",
+        "description": "Welcome to Cloudflare - Powering the next generation of applications",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "cloudflare.com",
+        "source": "https://www.cloudflare.com/",
+        "observedAt": "2026-11-08T13:18:11.148Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "Cloudflare: Build for the agent era",
+            "url": "https://www.cloudflare.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Welcome to Cloudflare - Powering the next generation of applications",
+            "url": "https://www.cloudflare.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e02e3c5a-1b40-42fb-98e2-74a4cc9f4a8b",
+      "domain": "github.com",
+      "source": "https://github.com/",
+      "digest": "743da5b26876120a5ff934814c98a93462b11b1900611b40d06720c43c1d6a52",
+      "observedAt": "2026-11-08T18:05:00.784Z",
+      "data": {
+        "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub",
+        "description": "Join the world's most widely adopted, AI-powered developer platform where millions of developers, businesses, and the largest open source community build software that advances humanity.",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "github.com",
+        "source": "https://github.com/",
+        "observedAt": "2026-11-08T18:05:01.121Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub",
+            "url": "https://github.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Join the world's most widely adopted, AI-powered developer platform where millions of developers, businesses, and the largest open source community build software that advances humanity.",
+            "url": "https://github.com/"
+          }
+        ]
+      }
+    }
+  ],
+  "automaticRetention": {
+    "enabled": false,
+    "reason": "Owner explicitly deferred automatic cleanup; no maintenance secret or active schedule was created."
+  },
+  "crm": {
+    "configured": false,
+    "liveWrites": 0,
+    "reason": "No CRM destination credentials, connection or test-write approval is available; provider adapter remains unfinished."
+  },
+  "recovery": {
+    "cloudRestoreVerified": false,
+    "reason": "Managed D1 backup/restore access and an approved restore drill are unavailable."
+  },
+  "finalNavigation": {
+    "workspaceNavigation": true,
+    "historyNavigation": true,
+    "lockedExecutionErrorDisplayed": true,
+    "finalPageLocked": "Locked"
+  },
+  "finalDeployedModelSmoke": {
+    "sourceCommit": "a99a8d27e25845d582dc4d52db017b5ce6c6fa24",
+    "httpStatus": 201,
+    "execution": {
+      "id": "57247221-bb69-4122-875a-6877b87973f4",
+      "workflow": "repository-agent",
+      "status": "succeeded",
+      "createdAt": "2026-11-08T23:22:55.127Z",
+      "updatedAt": "2026-11-08T23:23:03.920Z",
+      "result": {
+        "status": "answered",
+        "answer": "Drie workflows die in de workbench werken zijn: Support triage workflow, Knowledge search workflow en Lead qualification workflow. De browserdemo gebruikt geen echt taalmodel; het maakt gebruik van synthetische fixtures en deterministische tools, niet van een LLM, live web research of verbonden accounts.",
+        "citations": [
+          {
+            "source": "https://github.com/phlppgdfry/make-enterprise-showcase/blob/885c72b6a247ef9f9aabe7bc540339888397f403/README.md",
+            "quote": "The browser demo uses synthetic fixtures and deterministic tools, not an LLM, live web research or your connected accounts."
+          }
+        ],
+        "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+        "executionTimeMs": 8423,
+        "chargedCenticredits": 188,
+        "iterationId": "73ba8ca5-de8f-4ae9-9322-695ec3ce2a8d",
+        "citationValidation": "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven."
+      },
+      "error": null,
+      "chargedCenticredits": 188,
+      "upstreamId": "73ba8ca5-de8f-4ae9-9322-695ec3ce2a8d"
+    },
+    "research": {
+      "id": "177a7c08-cc80-4442-82e8-b1cf1c420336",
+      "workflow": "company-research",
+      "status": "succeeded",
+      "createdAt": "2026-11-08T23:23:04.427Z",
+      "updatedAt": "2026-11-08T23:23:04.496Z",
+      "result": {
+        "title": "Cloudflare: Build for the agent era",
+        "description": "Welcome to Cloudflare - Powering the next generation of applications",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "cloudflare.com",
+        "source": "https://www.cloudflare.com/",
+        "observedAt": "2026-11-08T13:18:11.148Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "Cloudflare: Build for the agent era",
+            "url": "https://www.cloudflare.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Welcome to Cloudflare - Powering the next generation of applications",
+            "url": "https://www.cloudflare.com/"
+          }
+        ],
+        "leadId": "d7e2d084-9470-4697-85d8-4e73a860ba66",
+        "reused": true
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": null
+    },
+    "budget": "13.63 credits accounted for · 36.37 credits available within the unchanged 50-credit allowance. Unknown provider charges remain reserved.",
+    "citationsDisplayed": 1,
+    "mobileHorizontalOverflow": false,
+    "lockedAtEnd": "Locked"
+  },
+  "providerExecutions": 9
+}

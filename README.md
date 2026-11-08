@@ -17,7 +17,7 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
 
-Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. A fresh final-release model smoke test used another 1.76 credits: **11.75 credits total**, below the approved 50. The latest local suite has **111 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
+Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. Two further fresh release smoke tests used 1.76 and 1.88 credits: **13.63 credits total**, below the approved 50. The latest local suite has **111 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
 
 ## Architecture
 

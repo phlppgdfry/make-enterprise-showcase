@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-11-08T23:32:42.697Z",
+  "sourceCommit": "a99a8d27e25845d582dc4d52db017b5ce6c6fa24",
+  "crm": {
+    "httpStatus": 503,
+    "code": "crm_unconfigured",
+    "requestId": "41e405a0-054b-4697-8cad-5697ddf77bc0"
+  },
+  "workflowAlias": {
+    "httpStatus": 200,
+    "replayed": true,
+    "executionId": "e5989aad-7625-436f-9eaa-ca5133e1b413",
+    "providerIterationId": "5bd624c2-787a-4b0a-af90-1d92014b2b9c"
+  },
+  "leadRetrieval": {
+    "httpStatus": 200,
+    "domain": "cloudflare.com",
+    "id": "d7e2d084-9470-4697-85d8-4e73a860ba66"
+  },
+  "newModelCalls": 0
+}

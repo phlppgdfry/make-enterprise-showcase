@@ -12,7 +12,7 @@ The backend authenticates with `Authorization: Token …` to the [official Make 
 
 Refresh account inspection with authenticated `POST /api/integrations/verify` and `{}`. This does not run scenarios or invoke a model. Detailed scenario names are operator-only; public status exposes an aggregate count and the approved agent summary. Inspection caches are timestamped and do not establish permanent service health.
 
-The seven existing acceptance cases were rerun through the public browser/backend path; [the evidence file](evidence/production-agent-acceptance.json) records actual execution and Make iteration IDs, responses and reported cost. Pinned source facts (including 78 tests at that older snapshot) must not be confused with the current 110-test suite. Changing knowledge versions requires a reviewed knowledge refresh and new acceptance; the current release preserves the existing agent's document set.
+The seven existing acceptance cases were rerun through the public browser/backend path; [the evidence file](evidence/production-agent-acceptance.json) records actual execution and Make iteration IDs, responses and reported cost. Two additional fresh release smokes bring the total to nine provider executions and 13.63 credits; the final exact implementation smoke and reconciled ledger are in [release evidence](evidence/production-release.json). Pinned source facts (including 78 tests at that older snapshot) must not be confused with the current 111-test suite. Changing knowledge versions requires a reviewed knowledge refresh and new acceptance; the current release preserves the existing agent's document set.
 
 ## Credit receipts
 
