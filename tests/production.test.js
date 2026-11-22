@@ -20,6 +20,8 @@ function database() {
       return { results: sql.prepare(q).all(...args) };
     },
     async run() {
+      if (/^\s*SELECT\b/i.test(q))
+        return { results: sql.prepare(q).all(...args), meta: { changes: 0 } };
       const result = sql.prepare(q).run(...args);
       return { meta: { changes: Number(result.changes) } };
     },
@@ -473,5 +475,100 @@ test("maintenance credential can purge only expired records and cannot read hist
       .get().actor,
     "maintenance",
   );
+  assert.equal(s.calls(), 0);
+});
+test("binary icons survive the Worker asset pipeline with correct media types and HEAD behavior", async () => {
+  const { readPublicAssets } = await import("../scripts/public-assets.mjs");
+  const temporary = fs.mkdtempSync(
+    require("node:path").join(require("node:os").tmpdir(), "make-asset-check-"),
+  );
+  try {
+    fs.writeFileSync(temporary + "/.env", "private-fixture");
+    fs.writeFileSync(temporary + "/debug.map", "private-fixture");
+    fs.writeFileSync(temporary + "/index.html", "public");
+    assert.deepEqual(Object.keys(readPublicAssets(temporary)), ["/index.html"]);
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+  const { createApp } = await import("../production/src/app.js");
+  const app = createApp({
+    assets: readPublicAssets("production/public"),
+    knowledge: buildKnowledge(),
+    logger: () => {},
+  });
+  for (const [file, type] of [
+    ["favicon.ico", "image/x-icon"],
+    ["apple-touch-icon.png", "image/png"],
+    ["share-preview.png", "image/png"],
+  ]) {
+    const r = await app(new Request("https://test.example/" + file), {});
+    assert.equal(r.status, 200);
+    assert.equal(r.headers.get("content-type"), type);
+    assert.deepEqual(
+      Buffer.from(await r.arrayBuffer()),
+      fs.readFileSync("production/public/" + file),
+    );
+    const head = await app(
+      new Request("https://test.example/" + file, { method: "HEAD" }),
+      {},
+    );
+    assert.equal(head.status, 200);
+    assert.equal((await head.arrayBuffer()).byteLength, 0);
+  }
+  for (const [name, w, h] of [
+    ["apple-touch-icon.png", 180, 180],
+    ["icon-192.png", 192, 192],
+    ["icon-512.png", 512, 512],
+    ["share-preview.png", 1200, 630],
+  ]) {
+    const bytes = fs.readFileSync("production/public/" + name);
+    assert.equal(bytes.readUInt32BE(16), w);
+    assert.equal(bytes.readUInt32BE(20), h);
+  }
+  const icon = fs.readFileSync("production/public/favicon.ico");
+  assert.equal(icon.readUInt16LE(2), 1);
+  assert.equal(icon.readUInt16LE(4), 3);
+  const manifest = await app(
+    new Request("https://test.example/site.webmanifest"),
+    {},
+  );
+  assert.match(
+    manifest.headers.get("content-type"),
+    /application\/manifest\+json/,
+  );
+  assert.equal((await manifest.json()).icons.length, 2);
+});
+test("operator backup round-trips through an isolated restore and preserves known lifetime credit usage", async () => {
+  const s = await setup();
+  await s.call("/api/agent/ask", { question: "Question" });
+  await s.call("/api/budget/reconcile", {});
+  await s.call("/api/leads/research", { domain: "cloudflare.com" });
+  const r = await s.call("/api/backup");
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get("content-disposition"), /attachment/);
+  assert.equal(r.data.tables.executions.length, 2);
+  assert.equal(r.data.tables.rate_limits, undefined);
+  assert.ok(!JSON.stringify(r.data).includes(s.env.MAKE_API_KEY));
+  assert.ok(!JSON.stringify(r.data).includes(s.env.OPERATOR_API_KEY));
+  const { verifyRestore } =
+    await import("../scripts/verify-production-backup.mjs");
+  const restored = await verifyRestore(r.data);
+  assert.equal(restored.verified, true);
+  assert.equal(restored.rows.executions, 2);
+  assert.equal(restored.budget.used_centi, 175);
+  assert.equal(restored.budget.limit_centi, 5000);
+  const changed = structuredClone(r.data);
+  changed.tables.budget[0].used_centi = 0;
+  await assert.rejects(verifyRestore(changed), /checksum/);
+});
+test("backup access requires the operator role, including when a maintenance credential exists", async () => {
+  const s = await setup();
+  s.env.MAINTENANCE_API_KEY = "maintenance-only-key";
+  for (const Authorization of ["", "Bearer maintenance-only-key"])
+    assert.equal(
+      (await s.call("/api/backup", undefined, { headers: { Authorization } }))
+        .status,
+      401,
+    );
   assert.equal(s.calls(), 0);
 });

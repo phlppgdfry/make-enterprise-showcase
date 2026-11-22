@@ -1,3 +1,4 @@
+import { exportBackup } from "./backup.js";
 import { PublicError, research, companyURL } from "./research.js";
 import validation from "./answer-validation.cjs";
 const AGENT = "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
@@ -446,12 +447,29 @@ export function createApp({
               ? "image/svg+xml"
               : name.endsWith(".xml")
                 ? "application/xml"
-                : name.endsWith(".txt")
-                  ? "text/plain"
-                  : "text/html";
-        response = new Response(req.method === "HEAD" ? null : assets[name], {
+                : name.endsWith(".png")
+                  ? "image/png"
+                  : name.endsWith(".ico")
+                    ? "image/x-icon"
+                    : name.endsWith(".webmanifest")
+                      ? "application/manifest+json"
+                      : name.endsWith(".txt")
+                        ? "text/plain"
+                        : "text/html";
+        const asset = assets[name];
+        const body =
+          typeof asset === "string"
+            ? asset
+            : asset.encoding === "base64"
+              ? Uint8Array.from(atob(asset.body), (c) => c.charCodeAt(0))
+              : asset.body;
+        response = new Response(req.method === "HEAD" ? null : body, {
           headers: {
-            "content-type": type + "; charset=utf-8",
+            "content-type":
+              type +
+              (type.startsWith("image/") && !type.endsWith("svg+xml")
+                ? ""
+                : "; charset=utf-8"),
             "cache-control": "no-cache",
           },
         });
@@ -617,7 +635,15 @@ export function createApp({
               await bodyOf(req),
               requestId,
             );
-          else if (req.method === "GET" && path === "/api/executions") {
+          else if (req.method === "GET" && path === "/api/backup") {
+            const backup = await exportBackup(env.DB, commit);
+            await audit(env.DB, requestId, "backup-export", "succeeded");
+            response = json(backup);
+            response.headers.set(
+              "content-disposition",
+              `attachment; filename="make-enterprise-backup-${backup.createdAt.slice(0, 10)}.json"`,
+            );
+          } else if (req.method === "GET" && path === "/api/executions") {
             const rows = await env.DB.prepare(
               "SELECT * FROM executions WHERE owner=? AND expires_at>? ORDER BY created_at DESC LIMIT 30",
             )

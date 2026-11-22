@@ -1,3 +1,4 @@
+import { readPublicAssets } from "./public-assets.mjs";
 import http from "node:http";
 import fs from "node:fs";
 import { DatabaseSync } from "node:sqlite";
@@ -20,6 +21,11 @@ const prepare = (sql, args = []) => ({
     return { results: sqlite.prepare(sql).all(...args) };
   },
   async run() {
+    if (/^\s*SELECT\b/i.test(sql))
+      return {
+        results: sqlite.prepare(sql).all(...args),
+        meta: { changes: 0 },
+      };
     return {
       meta: { changes: Number(sqlite.prepare(sql).run(...args).changes) },
     };
@@ -40,14 +46,7 @@ const DB = {
     }
   },
 };
-const assets = Object.fromEntries(
-  fs
-    .readdirSync("production/public")
-    .map((name) => [
-      "/" + name,
-      fs.readFileSync("production/public/" + name, "utf8"),
-    ]),
-);
+const assets = readPublicAssets("production/public");
 const env = {
   DB,
   OPERATOR_API_KEY: process.env.OPERATOR_API_KEY || "local-preview-only",

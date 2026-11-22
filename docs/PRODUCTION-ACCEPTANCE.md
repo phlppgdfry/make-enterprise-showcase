@@ -1,3 +1,5 @@
+> Latest update: [version 2.3 interface and recovery verification](RELEASE-2.3.0.md). The dated implementation evidence below remains historical; the new release adds binary favicon assets, an interactive flow explorer, safer session handling, private backup export and isolated local recovery verification. CRM and managed cloud restore remain unconfigured/unverified. Automatic cleanup remains off.
+
 # Production acceptance — 2026-11-08/09
 
 ## Final status and scope

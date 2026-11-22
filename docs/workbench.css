@@ -1,11 +1,11 @@
 :root {
-  --ink:#253048;
-  --muted:#626b7e;
-  --accent:#5e3bc7;
-  --lavender:#f0eafa;
-  --line:#dfe2e9;
+  --ink:#182327;
+  --muted:#536268;
+  --accent:#173a31;
+  --lavender:#e8efdf;
+  --line:#d6dedb;
   --paper:#fff;
-  --canvas:#f7f8fc;
+  --canvas:#f5f6f0;
   --green:#216650;
   --amber:#865414;
   font-family:'Avenir Next','Segoe UI',sans-serif;
@@ -432,7 +432,7 @@ select {
   margin:24px 0 11px;
 }
 .source {
-  background:#f7f8fc;
+  background:#f5f6f0;
   border-left:3px solid #c3b4e4;
   padding:11px 13px;
   margin:9px 0;

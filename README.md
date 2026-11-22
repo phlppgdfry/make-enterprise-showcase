@@ -6,6 +6,12 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 
 [**Open the operational application**](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) · [Health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health) · [Acceptance evidence](docs/PRODUCTION-ACCEPTANCE.md) · [Reference lab](https://phlppgdfry.github.io/make-enterprise-showcase/)
 
+## Version 2.3
+
+The interface now includes an interactive architecture explorer, a consistent workflow icon set, SVG/ICO/touch icons, a social preview, sample questions and readable execution receipts with JSON downloads. Exploring a diagram never runs a model. Locking or failing a new login clears private results and prevents late responses from repopulating them.
+
+Operators can download a private, consistent database snapshot and validate it with `npm run backup:verify -- /private/path/backup.json`. The verifier restores into isolated in-memory SQLite, checks the checksum, row counts and credit ledger, and never writes to the hosted database. Managed cloud restore remains unverified. See [version 2.3 verification](docs/RELEASE-2.3.0.md).
+
 ## Actual capabilities
 
 | Capability | Operational behavior | Boundary |
@@ -17,7 +23,7 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
 
-Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. Two further fresh release smoke tests used 1.76 and 1.88 credits: **13.63 credits total**, below the approved 50. The latest local suite has **111 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
+Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. Two further fresh release smoke tests used 1.76 and 1.88 credits: **13.63 credits total**, below the approved 50. The latest local suite has **114 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
 
 ## Architecture
 
@@ -68,7 +74,7 @@ The owner explicitly approved secure runtime credential storage and at most 50 e
 ## Verification and deployment
 
 ```bash
-npm run test:all          # 111 Node tests, local experiments and static blueprint audit
+npm run test:all          # 114 Node tests, local experiments and static blueprint audit
 npm run format:check     # Production source formatting
 npm run build:production # Bundle Worker and public assets
 npm run smoke:production # Actual public checks; no metered AI calls

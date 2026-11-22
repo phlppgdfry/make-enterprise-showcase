@@ -1,3 +1,5 @@
+import { readPublicAssets } from "./public-assets.mjs";
+import { buildBrandAssets } from "./build-brand-assets.mjs";
 import { build } from "esbuild";
 import fs from "node:fs";
 import path from "node:path";
@@ -20,12 +22,8 @@ fs.writeFileSync(
     sources: knowledge.sources.map(({ url, text }) => ({ url, text })),
   }),
 );
-const assets = {};
-for (const name of fs.readdirSync(root + "/production/public"))
-  assets["/" + name] = fs.readFileSync(
-    root + "/production/public/" + name,
-    "utf8",
-  );
+buildBrandAssets();
+const assets = readPublicAssets(root + "/production/public");
 fs.writeFileSync(
   root + "/production/src/assets.generated.json",
   JSON.stringify(assets),

@@ -7,17 +7,85 @@
       name="description"
       content="A verifiable automation workbench: a live Make knowledge agent, evidence from company websites, and persistent execution records."
     />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico?v=2.3.0" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon.svg?v=2.3.0" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#173a31" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Make Enterprise — automation you can follow to the source"
+    />
+    <meta
+      property="og:description"
+      content="A real Make knowledge agent, company website research and a persistent execution ledger. Explore the workbench and inspect the evidence."
+    />
+    <meta
+      property="og:url"
+      content="https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/"
+    />
+    <meta
+      property="og:image"
+      content="https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/share-preview.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>Make Enterprise · Operations workbench</title>
     <link rel="stylesheet" href="/style.css" />
     <script src="/app.js" defer></script>
   </head>
   <body>
+    <svg
+      class="icon-definitions"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <symbol id="icon-question" viewBox="0 0 24 24">
+          <path
+            d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z"
+          />
+          <path d="M9 8a3 3 0 0 1 6 0c0 2-3 2-3 4m0 2v.1" />
+        </symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24">
+          <path d="m12 3 9 4v6c0 5-9 8-9 8S3 18 3 13V7l9-4Z" />
+          <path d="m8 12 3 3 5-6" />
+        </symbol>
+        <symbol id="icon-knowledge" viewBox="0 0 24 24">
+          <path
+            d="M12 5C8 2 3 4 3 4v15s5-2 9 1c4-3 9-1 9-1V4s-5-2-9 1Zm0 0v15M6 8l3 1M6 12l3 1m6-4 3-1m-3 5 3-1"
+          />
+        </symbol>
+        <symbol id="icon-ledger" viewBox="0 0 24 24">
+          <rect x="4" y="3" width="16" height="18" rx="2" />
+          <path d="M8 8h8M8 12h8M8 16h4" />
+        </symbol>
+        <symbol id="icon-link" viewBox="0 0 24 24">
+          <path
+            d="m10 13 4-4M8 15l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m0 8a4 4 0 0 0 6 0l5-5a4 4 0 0 0-6-6l-1 1"
+            transform="translate(1 2) scale(.9)"
+          />
+        </symbol>
+        <symbol id="icon-globe" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" />
+          <path d="M3 12h18M5 6h14M5 18h14" />
+        </symbol>
+      </defs>
+    </svg>
     <a class="skip" href="#workspace">Skip to workspace</a>
     <header>
       <a class="brand" href="/" aria-label="Make Enterprise home"
-        ><span class="mark">m/</span> MAKE ENTERPRISE
-        <span class="tag">WORKBENCH</span></a
+        ><img
+          class="brand-icon"
+          src="/brand-mark.svg"
+          width="42"
+          height="42"
+          alt=""
+        />
+        MAKE ENTERPRISE <span class="tag">WORKBENCH</span></a
       >
       <nav aria-label="Main navigation">
         <a href="#workspace">Workspace</a><a href="#history">Executions</a
@@ -43,43 +111,124 @@
             ><a href="#integrations">View integration status ↓</a>
           </div>
         </div>
-        <aside class="architecture" aria-label="System architecture">
-          <span class="tiny">EXECUTION PATH</span>
-          <div>Browser <small>Public interface</small></div>
-          <span>↓ authenticated request</span>
-          <div>
-            Secure API + D1
-            <small>Validation · idempotency · audit trail</small>
+        <figure
+          class="flow-board"
+          data-flow="agent"
+          aria-labelledby="flow-title"
+        >
+          <figcaption id="flow-title">Follow the workflow</figcaption>
+          <div
+            class="flow-choices"
+            role="group"
+            aria-label="Explore workflow architecture"
+          >
+            <button type="button" data-flow="agent" aria-pressed="true">
+              Knowledge agent
+            </button>
+            <button type="button" data-flow="research" aria-pressed="false">
+              Company research
+            </button>
+            <button type="button" data-flow="ledger" aria-pressed="false">
+              Execution ledger
+            </button>
           </div>
-          <span>↓ authorized execution</span>
-          <div>
-            Make AI / public sources
-            <small>Verified output · persistent result</small>
+          <div class="flow-canvas" aria-hidden="true">
+            <svg
+              class="flow-wires"
+              viewBox="0 0 600 300"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M95 76H505M300 76C300 150 505 150 505 226H95M505 76C505 150 300 150 300 226"
+              />
+              <path
+                class="flow-signal"
+                d="M95 76H505C505 150 300 150 300 226H95"
+              />
+            </svg>
+            <div class="flow-node flow-input">
+              <svg><use href="#icon-question" /></svg><strong>Your input</strong
+              ><span>Question or domain</span>
+            </div>
+            <div class="flow-node flow-guard">
+              <svg><use href="#icon-shield" /></svg><strong>Access check</strong
+              ><span>Validated request</span>
+            </div>
+            <div class="flow-node flow-agent">
+              <svg><use href="#icon-knowledge" /></svg
+              ><strong>Make agent</strong><span>Pinned knowledge</span>
+            </div>
+            <div class="flow-node flow-evidence">
+              <svg><use href="#icon-link" /></svg><strong>Evidence</strong
+              ><span>Sources to review</span>
+            </div>
+            <div class="flow-node flow-ledger">
+              <svg><use href="#icon-ledger" /></svg
+              ><strong>Saved receipt</strong><span>Persistent history</span>
+            </div>
+            <div class="flow-node flow-research">
+              <svg><use href="#icon-globe" /></svg><strong>Company site</strong
+              ><span>Public information</span>
+            </div>
           </div>
-        </aside>
+          <p id="flow-detail" aria-live="polite">
+            Ask a repository question. The Make agent returns an answer whose
+            quotations are checked against the pinned source documents.
+          </p>
+          <p class="flow-note">
+            Architecture explorer · execution starts in the workspace below.
+          </p>
+        </figure>
       </section>
+      <div class="service-strip">
+        <span id="service-summary" role="status"
+          >Checking the live workbench…</span
+        ><button id="status-refresh" class="text-button" type="button">
+          Refresh status
+        </button>
+      </div>
       <section
         id="integrations"
         class="status-grid"
         aria-label="Integration status"
       >
         <article>
-          <p class="eyebrow">01 / BACKEND</p>
+          <p class="eyebrow">
+            <svg class="small-icon" aria-hidden="true">
+              <use href="#icon-ledger" />
+            </svg>
+            Backend
+          </p>
           <h2 id="health">Checking…</h2>
           <p id="health-detail">Verifying persistent storage.</p>
         </article>
         <article>
-          <p class="eyebrow">02 / MAKE AI</p>
+          <p class="eyebrow">
+            <svg class="small-icon" aria-hidden="true">
+              <use href="#icon-knowledge" />
+            </svg>
+            Make AI
+          </p>
           <h2 id="make-status">Checking…</h2>
           <p id="make-detail">Read-only knowledge agent.</p>
         </article>
         <article>
-          <p class="eyebrow">03 / RESEARCH</p>
+          <p class="eyebrow">
+            <svg class="small-icon" aria-hidden="true">
+              <use href="#icon-globe" />
+            </svg>
+            Research
+          </p>
           <h2>Public website evidence</h2>
           <p id="research-detail">Checking approved domains…</p>
         </article>
         <article>
-          <p class="eyebrow">04 / CRM</p>
+          <p class="eyebrow">
+            <svg class="small-icon" aria-hidden="true">
+              <use href="#icon-link" />
+            </svg>
+            CRM
+          </p>
           <h2>Unconfigured</h2>
           <p>No CRM connection or write approval. No contacts are created.</p>
         </article>
@@ -122,7 +271,8 @@
         <div class="workspace-grid">
           <article class="panel">
             <div class="panel-top">
-              <span class="number">01</span
+              <svg class="workflow-icon" aria-hidden="true">
+                <use href="#icon-knowledge" /></svg
               ><span class="pill">MAKE AI AGENTS</span>
             </div>
             <h3>Ask the repository</h3>
@@ -131,6 +281,23 @@
               Kennisagent. Its seven knowledge documents are pinned to a
               specific repository snapshot.
             </p>
+            <div
+              class="question-examples"
+              aria-label="Example repository questions"
+            >
+              <span>Start with a question</span
+              ><button
+                type="button"
+                data-question="Does the reference browser demo use an LLM?"
+              >
+                Does the demo use AI?</button
+              ><button
+                type="button"
+                data-question="Where is tenant identity bound, and may the agent choose it?"
+              >
+                How is access scoped?
+              </button>
+            </div>
             <form id="agent-form">
               <label for="question">Repository question</label
               ><textarea
@@ -158,7 +325,8 @@
           </article>
           <article class="panel">
             <div class="panel-top">
-              <span class="number">02</span
+              <svg class="workflow-icon" aria-hidden="true">
+                <use href="#icon-globe" /></svg
               ><span class="pill">SOURCE RESEARCH</span>
             </div>
             <h3>Inspect a company website</h3>
@@ -202,9 +370,9 @@
           </button>
         </div>
         <p class="hint">
-          Operator only. Records expire from retrieval after seven days.
-          Retention maintenance removes expired records. Uncertain executions
-          require review before a new request.
+          Operator only. History shows the last seven days. Physical cleanup
+          remains manual; a private backup includes all retained records. Review
+          uncertain executions before starting a new request.
         </p>
         <div id="history-result" role="status">
           Unlock operator access to view execution history.
@@ -212,11 +380,12 @@
       </section>
       <section class="panel boundaries">
         <div>
-          <p class="eyebrow">INTEGRATION INSPECTION</p>
-          <h2>Verify the connected account.</h2>
+          <p class="eyebrow">OPERATOR TOOLS</p>
+          <h2>Connections and recovery.</h2>
           <p>
-            Read the actual Make agent configuration and scenario inventory.
-            This inspection does not execute scenarios or use AI model credits.
+            Inspect the Make connection, reconcile reported credit usage or
+            download a private backup. These tools do not invoke a model or
+            execute scenarios.
           </p>
           <button id="verify" class="secondary" type="button">
             Inspect Make connection
@@ -226,6 +395,10 @@
             Reconcile reported credit usage
           </button>
           <div id="budget-result" class="result" role="status"></div>
+          <button id="backup" class="secondary" type="button">
+            Download private backup
+          </button>
+          <div id="backup-result" class="result" role="status"></div>
         </div>
         <div>
           <p class="eyebrow">OPERATING BOUNDARIES</p>
