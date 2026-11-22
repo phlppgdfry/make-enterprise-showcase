@@ -1,0 +1,26 @@
+{
+  "source": "deployed public website",
+  "explorer": true,
+  "examplesDoNotExecute": true,
+  "responsive": [
+    {
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "pageErrors": [],
+  "failedResponses": [],
+  "title": "Make Enterprise · Operations workbench"
+}

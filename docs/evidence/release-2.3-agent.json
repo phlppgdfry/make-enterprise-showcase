@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-11-22T20:26:09.838Z",
+  "source": "real deployed UI and Make provider; no mocks",
+  "httpStatus": 201,
+  "execution": {
+    "id": "92199b13-de52-4441-bc27-d1e1177bab3c",
+    "workflow": "repository-agent",
+    "status": "succeeded",
+    "createdAt": "2026-11-22T20:26:03.861Z",
+    "updatedAt": "2026-11-22T20:26:09.742Z",
+    "result": {
+      "status": "answered",
+      "answer": "De browserdemonstratie gebruikt synthetische fixtures en deterministische tools, geen LLM. Het voert geen live webonderzoek uit of maakt verbinding met accounts.",
+      "citations": [
+        {
+          "source": "https://github.com/phlppgdfry/make-enterprise-showcase/blob/885c72b6a247ef9f9aabe7bc540339888397f403/README.md",
+          "quote": "The browser demo uses synthetic fixtures and deterministic tools, not an LLM, live web research or your connected accounts."
+        }
+      ],
+      "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+      "executionTimeMs": 5427,
+      "chargedCenticredits": 156,
+      "iterationId": "91b17ba8-5482-4680-8526-3c0e058e16c6",
+      "citationValidation": "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven."
+    },
+    "error": null,
+    "chargedCenticredits": 156,
+    "upstreamId": "91b17ba8-5482-4680-8526-3c0e058e16c6"
+  },
+  "citationsDisplayed": 1
+}

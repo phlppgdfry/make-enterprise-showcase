@@ -1,0 +1,163 @@
+{
+  "checkedAt": "2026-11-22T20:28:22.944Z",
+  "base": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site",
+  "assets": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "type": "application/json; charset=utf-8",
+      "bytes": 154
+    },
+    {
+      "path": "/api/status",
+      "status": 200,
+      "type": "application/json; charset=utf-8",
+      "bytes": 787
+    },
+    {
+      "path": "/favicon.svg",
+      "status": 200,
+      "type": "image/svg+xml; charset=utf-8",
+      "bytes": 398
+    },
+    {
+      "path": "/favicon.ico",
+      "status": 200,
+      "type": "image/x-icon",
+      "bytes": 1257
+    },
+    {
+      "path": "/apple-touch-icon.png",
+      "status": 200,
+      "type": "image/png",
+      "bytes": 2080
+    },
+    {
+      "path": "/site.webmanifest",
+      "status": 200,
+      "type": "application/manifest+json; charset=utf-8",
+      "bytes": 468
+    },
+    {
+      "path": "/share-preview.png",
+      "status": 200,
+      "type": "image/png",
+      "bytes": 50400
+    }
+  ],
+  "health": {
+    "status": "healthy",
+    "storage": "D1",
+    "sourceCommit": "6721997de9e33a74c1fa98b15390a279b9d82740",
+    "knowledgeCommit": "885c72b6a247ef9f9aabe7bc540339888397f403"
+  },
+  "integration": {
+    "agent": {
+      "id": "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
+      "name": "Make Repo Kennisagent",
+      "model": "medium",
+      "knowledgeDocuments": 7,
+      "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+      "readOnly": true
+    },
+    "scenarios": [
+      {
+        "id": 8199349,
+        "name": "02 - High-Throughput Idempotent Webhook Engine & Dead Letter Queue (DLQ)",
+        "active": true,
+        "linked": true
+      },
+      {
+        "id": 8199345,
+        "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+        "active": false,
+        "linked": false
+      },
+      {
+        "id": 8199351,
+        "name": "03 - Bi-Directional CRM & Billing Differential Sync Engine",
+        "active": false,
+        "linked": false
+      },
+      {
+        "id": 8199353,
+        "name": "04 - Self-Healing ETL Pipeline with Rate-Limit Governor & Transaction Rollback",
+        "active": false,
+        "linked": false
+      },
+      {
+        "id": 8199357,
+        "name": "05 - Multi-Tenant Enterprise Knowledge RAG Engine",
+        "active": false,
+        "linked": false
+      }
+    ]
+  },
+  "creditLedger": {
+    "allocatedCredits": 15.19,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 34.81,
+    "limitChanged": false
+  },
+  "research": {
+    "httpStatus": 200,
+    "execution": {
+      "id": "e1e35b51-05e9-4a3d-b140-534705ece61c",
+      "workflow": "company-research",
+      "status": "succeeded",
+      "createdAt": "2026-11-22T20:27:57.261Z",
+      "updatedAt": "2026-11-22T20:27:57.468Z",
+      "result": {
+        "title": "Cloudflare: Build for the agent era",
+        "description": "Welcome to Cloudflare - Powering the next generation of applications",
+        "contacts": [],
+        "employeeCount": null,
+        "fitScore": null,
+        "limitations": [
+          "Website metadata only; claims have not been independently corroborated.",
+          "No person data, contact addresses or AI fit scores are inferred."
+        ],
+        "domain": "cloudflare.com",
+        "source": "https://www.cloudflare.com/",
+        "observedAt": "2026-11-22T20:27:57.414Z",
+        "evidence": [
+          {
+            "field": "title",
+            "quote": "Cloudflare: Build for the agent era",
+            "url": "https://www.cloudflare.com/"
+          },
+          {
+            "field": "description",
+            "quote": "Welcome to Cloudflare - Powering the next generation of applications",
+            "url": "https://www.cloudflare.com/"
+          }
+        ],
+        "leadId": "d7e2d084-9470-4697-85d8-4e73a860ba66",
+        "reused": false
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": null
+    },
+    "replayed": true
+  },
+  "backup": {
+    "verified": true,
+    "mode": "isolated in-memory SQLite restore; no hosted writes",
+    "sourceCommit": "6721997de9e33a74c1fa98b15390a279b9d82740",
+    "backupCreatedAt": "2026-11-22T20:28:24.509Z",
+    "checksum": "02669a91c93affe8688d557314637f5c4f72295a7864dd5c865945cce9103cb5",
+    "rows": {
+      "budget": 1,
+      "executions": 17,
+      "audit_events": 31,
+      "leads": 3,
+      "integration_cache": 1
+    },
+    "budget": {
+      "used_centi": 1519,
+      "limit_centi": 5000
+    }
+  },
+  "unauthorizedBackup": 401
+}
