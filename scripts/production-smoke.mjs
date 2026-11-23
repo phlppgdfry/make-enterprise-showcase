@@ -27,6 +27,29 @@ assert.equal(status.status, 200);
 const integrations = await status.json();
 assert.equal(integrations.crm.configured, false);
 assert.equal(integrations.make.configured, true);
+for (const [path, mediaType, signature] of [
+  ["/favicon.svg", "image/svg+xml", "<svg"],
+  ["/favicon.ico", "image/x-icon", null],
+  ["/apple-touch-icon.png", "image/png", null],
+  ["/share-preview.png", "image/png", null],
+]) {
+  const asset = await read(path);
+  assert.equal(asset.status, 200, path);
+  assert.ok(asset.headers.get("content-type")?.startsWith(mediaType), path);
+  const bytes = new Uint8Array(await asset.arrayBuffer());
+  if (signature) assert.ok(new TextDecoder().decode(bytes).includes(signature));
+  else if (mediaType === "image/png")
+    assert.deepEqual([...bytes.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  else assert.deepEqual([...bytes.slice(0, 4)], [0, 0, 1, 0]);
+}
+const manifest = await read("/site.webmanifest");
+assert.equal(manifest.status, 200);
+assert.ok((await manifest.json()).icons.length >= 2);
+for (const path of ["/api/backup", "/api/executions", "/api/workflows"]) {
+  const privateRead = await read(path);
+  assert.equal(privateRead.status, 401, path);
+  assert.equal((await privateRead.json()).error.code, "unauthorized");
+}
 const unauthorized = await read("/api/agent/ask", {
   method: "POST",
   headers: { "content-type": "application/json" },
@@ -42,6 +65,8 @@ console.log(
       "public HTTPS health and D1",
       "homepage and CSP",
       "accurate integration boundaries",
+      "favicon, touch icon, share image and manifest",
+      "private backup, history and workflow catalog denied anonymously",
       "unauthorized metered execution denied",
     ],
     meteredCalls: 0,

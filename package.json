@@ -1,6 +1,6 @@
 {
   "name": "make-enterprise-showcase",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Evidence-based Make automation reference with shared policy tools, authenticated API and an interactive workbench",
   "main": "scripts/validate-blueprints.js",
   "scripts": {

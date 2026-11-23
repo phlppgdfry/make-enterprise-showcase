@@ -195,6 +195,92 @@ test("agent uses actual provider boundary, validates provenance, persists and re
     "succeeded",
   );
 });
+test("expired idempotency keys withhold retained private data and never dispatch again", async () => {
+  const s = await setup();
+  const question = { question: "A private expired question" };
+  const key = "expired-request-001";
+  const first = await s.call("/api/agent/ask", question, { key });
+  s.env.DB.raw
+    .prepare("UPDATE executions SET expires_at=? WHERE id=?")
+    .run(Date.now() - 1, first.data.execution.id);
+  assert.equal(
+    (await s.call("/api/executions/" + first.data.execution.id)).status,
+    404,
+  );
+  assert.deepEqual((await s.call("/api/executions")).data.executions, []);
+  for (const body of [question, { question: "Changed input" }]) {
+    const replay = await s.call("/api/agent/ask", body, { key });
+    assert.equal(replay.status, 410);
+    assert.equal(replay.data.error.code, "idempotency_expired");
+    assert.equal(replay.data.execution, undefined);
+    assert.ok(
+      !JSON.stringify(replay.data).includes("private expired question"),
+    );
+  }
+  assert.equal(s.calls(), 1);
+  assert.equal(
+    s.env.DB.raw.prepare("SELECT COUNT(*) n FROM executions").get().n,
+    1,
+  );
+  assert.equal(
+    s.env.DB.raw.prepare("SELECT used_centi FROM budget").get().used_centi,
+    700,
+  );
+});
+test("Make success responses are byte-bounded and oversized streams are canceled before full consumption", async () => {
+  let pulls = 0,
+    canceled = false;
+  const s = await setup(
+    async () =>
+      new Response(
+        new ReadableStream(
+          {
+            pull(controller) {
+              pulls++;
+              if (pulls > 2) throw Error("Read beyond safe response limit");
+              controller.enqueue(new Uint8Array(600000).fill(97));
+            },
+            cancel() {
+              canceled = true;
+            },
+          },
+          { highWaterMark: 0 },
+        ),
+      ),
+  );
+  const r = await s.call("/api/integrations/verify", {});
+  assert.equal(r.status, 502);
+  assert.equal(r.data.error.code, "make_response_too_large");
+  assert.equal(pulls, 2);
+  assert.equal(canceled, true);
+});
+test("Make error bodies are canceled unread and upstream rate limits remain actionable", async () => {
+  let pulls = 0,
+    canceled = false;
+  const s = await setup(
+    async () =>
+      new Response(
+        new ReadableStream(
+          {
+            pull() {
+              pulls++;
+              throw Error("Provider error body must not be read");
+            },
+            cancel() {
+              canceled = true;
+            },
+          },
+          { highWaterMark: 0 },
+        ),
+        { status: 429 },
+      ),
+  );
+  const r = await s.call("/api/integrations/verify", {});
+  assert.equal(r.status, 429);
+  assert.equal(r.data.error.code, "make_upstream_error");
+  assert.equal(pulls, 0);
+  assert.equal(canceled, true);
+});
 test("conservative credit allowance admits at most seven metered calls and never retries", async () => {
   const s = await setup();
   for (let i = 0; i < 8; i++) {

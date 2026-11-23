@@ -114,14 +114,8 @@ export function createApp({
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
-    const raw = await r.text();
-    if (raw.length > 1000000)
-      fail(
-        502,
-        "make_response_too_large",
-        "Make returned an oversized response.",
-      );
-    if (!r.ok)
+    if (!r.ok) {
+      await r.body?.cancel().catch(() => {});
       fail(
         r.status === 429 ? 429 : 502,
         "make_upstream_error",
@@ -129,6 +123,31 @@ export function createApp({
           ? "Make rate limit reached. Try later."
           : "Make could not complete this request.",
       );
+    }
+    let raw = "";
+    const reader = r.body?.getReader();
+    if (reader) {
+      const decoder = new TextDecoder();
+      let bytes = 0;
+      try {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          bytes += value.byteLength;
+          if (bytes > 1000000)
+            fail(
+              502,
+              "make_response_too_large",
+              "Make returned an oversized response.",
+            );
+          raw += decoder.decode(value, { stream: true });
+        }
+        raw += decoder.decode();
+      } finally {
+        await reader.cancel().catch(() => {});
+        reader.releaseLock();
+      }
+    }
     try {
       return JSON.parse(raw);
     } catch {
@@ -244,6 +263,12 @@ export function createApp({
       )
       .bind("operator", workflow, key)
       .first();
+    if (existing.expires_at <= now)
+      fail(
+        410,
+        "idempotency_expired",
+        "This request key has expired and its result is unavailable. Review the prior execution before submitting a new request.",
+      );
     if (existing.request_hash !== hash)
       fail(
         409,
@@ -253,7 +278,7 @@ export function createApp({
     if (existing.id !== id)
       return json(
         { execution: decode(existing), replayed: true },
-        existing.status === "running" ? 202 : 200,
+        ["queued", "running"].includes(existing.status) ? 202 : 200,
       );
     const claim = await db
       .prepare(

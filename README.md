@@ -4,9 +4,11 @@
 
 A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledge agent, research approved company websites and inspect persistent execution records. The operational application and the synthetic reference laboratory are clearly separated.
 
-[**Open the operational application**](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) · [Health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health) · [Acceptance evidence](docs/PRODUCTION-ACCEPTANCE.md) · [Reference lab](https://phlppgdfry.github.io/make-enterprise-showcase/)
+[**Open the operational application**](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) · [Health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health) · [Current status and remaining work](docs/PRODUCTION-READINESS.md) · [Reference lab](https://phlppgdfry.github.io/make-enterprise-showcase/)
 
 ## Version 2.3
+
+Patch 2.3.1 closes expired-idempotency result disclosure, bounds Make response consumption while streaming, and extends free public monitoring to icons, the manifest and protected read endpoints. [Current readiness and prioritized completion criteria](docs/PRODUCTION-READINESS.md) distinguish the finished public showcase from integrations still requiring external configuration.
 
 The interface now includes an interactive architecture explorer, a consistent workflow icon set, SVG/ICO/touch icons, a social preview, sample questions and readable execution receipts with JSON downloads. Exploring a diagram never runs a model. Locking or failing a new login clears private results and prevents late responses from repopulating them.
 
@@ -23,7 +25,7 @@ Operators can download a private, consistent database snapshot and validate it w
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
 
-Seven fresh browser-to-Make acceptance cases passed, with **9.99 actual Make credits reported**. Two further fresh release smoke tests used 1.76 and 1.88 credits: **13.63 credits total**, below the approved 50. The latest local suite has **114 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. The [acceptance report](docs/PRODUCTION-ACCEPTANCE.md) records exact commits, deployment evidence and remaining prerequisites.
+Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The 24 November hardening audit invokes no model. The latest local suite has **117 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links the dated acceptance receipts and remaining prerequisites.
 
 ## Architecture
 
@@ -74,7 +76,7 @@ The owner explicitly approved secure runtime credential storage and at most 50 e
 ## Verification and deployment
 
 ```bash
-npm run test:all          # 114 Node tests, local experiments and static blueprint audit
+npm run test:all          # 117 Node tests, local experiments and static blueprint audit
 npm run format:check     # Production source formatting
 npm run build:production # Bundle Worker and public assets
 npm run smoke:production # Actual public checks; no metered AI calls
