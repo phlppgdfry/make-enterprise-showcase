@@ -13,7 +13,7 @@ Audited 24 November 2026. This is the current completion checklist; older accept
 - Corrected stale test/credit totals and linked this checklist from the application and README. The retained 22 November live receipts establish ten provider executions and 15.19 reported credits. This audit requires zero new model calls.
 - Re-inspected Make: five scenarios, one active/four inactive; CRM scenario 8199351 remains inactive and reports an empty connection list. No scenario was run, activated, modified or deleted. No CRM data or messages were written.
 
-Publication and free live-verification receipts for this patch are linked in the final delivery section below after they are collected. Historical live agent, website-research and recovery evidence is in [version 2.3](RELEASE-2.3.0.md).
+Publication and free live-verification receipts for this patch are linked in the final delivery section below. Historical live agent, website-research and recovery evidence is in [version 2.3](RELEASE-2.3.0.md).
 
 ## Required to finish the original enterprise mission
 
@@ -60,4 +60,14 @@ Automatic cleanup remains **off**. No maintenance key, cleanup schedule, new ext
 
 ## Final delivery evidence
 
-See the patch receipt added after publication. Runtime source, deployment identity, free live smoke, Make configuration check, test count and CI are recorded separately from historical metered agent runs. Full enterprise verdict remains **PARTIALLY COMPLETE — FURTHER WORK REQUIRED** until the three P0 items pass.
+- [Live application](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) and [health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health): runtime commit `c62e196153aa01484b8e2f0e0e7be0199d43f826`, healthy D1.
+- Sites version **9**, source artifact `3a108b76038866f9fcce77cc87b5ac442a8e49ba`, deployment `appgdep_6b04cbc2132881919a3ef04a4d8c5645` returned **succeeded**, environment revision 1 and existing public audience preserved. This documentation-only delivery follow-up leaves tested runtime code unchanged.
+- Free live smoke passed: HTTPS/D1, homepage/CSP, actual capability boundaries, icons/social preview/manifest, protected read denial and unauthorized metered-request denial. No model was invoked.
+- Authenticated inspection reverified the actual read-only Make agent and seven documents through the new streaming reader. A real retained expired research receipt returned **410 idempotency_expired**, without exposing its private result.
+- A real production export restored in isolated SQLite with the lifetime credit ledger unchanged at **1519/5000 centicredits**. No hosted restore or cleanup was performed. The initial verification script sent an internal normalized `url` field and was correctly rejected by input validation; the corrected public-schema request passed. This was a verification-script correction, not a bypass or hidden application failure.
+- Public browser checks at 1440 and 390 pixels passed: correct page, meaningful content, no framework overlay, no page/console errors or horizontal overflow; explorer, status refresh and the new checklist link behaved correctly. The checklist's published documentation URL returned HTTP 200. Browser plugin was unavailable; connected Playwright was used. No metered UI action was submitted in this audit.
+- Runtime [CI validation/build/security/formatting](https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45287778689) and [Pages publication](https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45287778535) succeeded. Local Node suite: **117 passed, zero failures**; dependency audit: **zero reported vulnerabilities**.
+
+Machine-readable evidence: [release/deployment/browser receipt](evidence/release-2.3.1.json), [live API/expired replay/recovery receipt](evidence/release-2.3.1-live.json). Raw private database records and credentials are excluded. Screenshots were inspected locally; they are not copies of mocked agent results.
+
+Full enterprise verdict remains **PARTIALLY COMPLETE — FURTHER WORK REQUIRED** until the three P0 items pass. For real customer use, the P1 identity, privacy, recovery custody and operating responsibilities must also be resolved for the chosen scope.

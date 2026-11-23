@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-11-23T23:28:32.224Z",
+  "localAuditDate": "2026-11-24",
+  "health": {
+    "status": "healthy",
+    "storage": "D1",
+    "sourceCommit": "c62e196153aa01484b8e2f0e0e7be0199d43f826",
+    "knowledgeCommit": "885c72b6a247ef9f9aabe7bc540339888397f403"
+  },
+  "agent": {
+    "id": "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
+    "name": "Make Repo Kennisagent",
+    "model": "medium",
+    "knowledgeDocuments": 7,
+    "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+    "readOnly": true
+  },
+  "scenarios": [
+    {
+      "id": 8199349,
+      "name": "02 - High-Throughput Idempotent Webhook Engine & Dead Letter Queue (DLQ)",
+      "active": true,
+      "linked": true
+    },
+    {
+      "id": 8199345,
+      "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199351,
+      "name": "03 - Bi-Directional CRM & Billing Differential Sync Engine",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199353,
+      "name": "04 - Self-Healing ETL Pipeline with Rate-Limit Governor & Transaction Rollback",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199357,
+      "name": "05 - Multi-Tenant Enterprise Knowledge RAG Engine",
+      "active": false,
+      "linked": false
+    }
+  ],
+  "backupRecovery": {
+    "verified": true,
+    "mode": "isolated in-memory SQLite restore; no hosted writes",
+    "sourceCommit": "c62e196153aa01484b8e2f0e0e7be0199d43f826",
+    "backupCreatedAt": "2026-11-23T23:28:31.965Z",
+    "checksum": "e281358a8e124a899f970221bb70a42945e9bbaa38e0e1708e7c859ba965568d",
+    "rows": {
+      "budget": 1,
+      "executions": 17,
+      "audit_events": 35,
+      "leads": 3,
+      "integration_cache": 1
+    },
+    "budget": {
+      "used_centi": 1519,
+      "limit_centi": 5000
+    }
+  },
+  "expiredReplay": {
+    "tested": true,
+    "status": 410,
+    "code": "idempotency_expired",
+    "privateResultReturned": false
+  },
+  "meteredModelCalls": 0,
+  "crmWrites": 0,
+  "automaticCleanupActivated": false
+}

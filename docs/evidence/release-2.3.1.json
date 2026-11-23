@@ -1,0 +1,77 @@
+{
+  "localAuditDate": "2026-11-24",
+  "runtimeCommit": "c62e196153aa01484b8e2f0e0e7be0199d43f826",
+  "source": {
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "commit_sha": "3a108b76038866f9fcce77cc87b5ac442a8e49ba"
+  },
+  "savedVersion": {
+    "id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_001da1046b3481919d378661b54e8d1f",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "version_number": 9,
+    "source": {
+      "commit_sha": "3a108b76038866f9fcce77cc87b5ac442a8e49ba"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000000b5881f4a0f50a8f099cef28",
+      "content_hash": "sha256:2c4b592e4c54f2b6f6efdcf80ef7bcf89f9779a77f4814c035afa90b3099c74b",
+      "size_bytes": 389120,
+      "file_count": 5
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6b04cbc2132881919a3ef04a4d8c5645",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "title": "Make Enterprise Workbench",
+    "version_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_001da1046b3481919d378661b54e8d1f",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "failure_message": null,
+    "env_set_revision": 1,
+    "updated_at": "2026-11-23T23:27:10.073063+00:00"
+  },
+  "browser": {
+    "title": "Make Enterprise · Operations workbench",
+    "url": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/",
+    "checklistLink": "https://github.com/phlppgdfry/make-enterprise-showcase/blob/main/docs/PRODUCTION-READINESS.md",
+    "notBlank": true,
+    "noFrameworkOverlay": true,
+    "explorer": true,
+    "statusRefresh": true,
+    "viewports": [
+      {
+        "width": 1440,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "pageErrors": [],
+    "consoleErrors": [],
+    "meteredModelCalls": 0,
+    "browserPath": "Browser plugin not available; connected Playwright used"
+  },
+  "tests": {
+    "nodeTests": 117,
+    "productionBoundaryTests": 21,
+    "failures": 0,
+    "formatting": "passed",
+    "build": "passed",
+    "dependencyVulnerabilities": 0
+  },
+  "ci": {
+    "validation": "https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45287778689",
+    "pages": "https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45287778535"
+  },
+  "meteredModelCalls": 0,
+  "automaticCleanupActivated": false
+}
