@@ -109,7 +109,7 @@ async function provision(api, knowledge, options = {}) {
   if (existing.length) {
     const payload = await api('GET', base + team), current = payload.agent || payload;
     const expected = state.contexts.map(c => c.result?.id);
-    if (current.id !== state.agentId || current.scenarios?.length || current.mcpConfigs?.length || current.defaultModel !== definition.model || current.llmConfig?.maxTokens !== 2400 ||
+    if (current.id !== state.agentId || !Array.isArray(current.scenarios) || current.scenarios.length || !Array.isArray(current.mcpConfigs) || current.mcpConfigs.length || current.defaultModel !== definition.model || current.llmConfig?.maxTokens !== 2400 ||
       current.contexts?.length !== uploadedSources.length || expected.length !== uploadedSources.length || expected.some(id => typeof id !== 'string') || current.contexts.some(c => !expected.includes(c.id)))
       throw new Error('Existing agent scope or archive documents changed; no update performed');
   }

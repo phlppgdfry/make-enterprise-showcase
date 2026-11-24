@@ -169,10 +169,15 @@ export function createApp({
     if (
       a.id !== AGENT ||
       a.name !== "Make Repo Kennisagent" ||
-      a.contexts?.length !== (knowledge.contextDocumentCount || 7) ||
+      !Array.isArray(a.contexts) ||
+      a.contexts.length !== (knowledge.contextDocumentCount || 7) ||
       (knowledge.archiveContextIds?.length &&
-        a.contexts.some((c) => !knowledge.archiveContextIds.includes(c.id))) ||
+        knowledge.archiveContextIds.some(
+          (id) => !a.contexts.some((c) => c.id === id),
+        )) ||
+      !Array.isArray(a.scenarios) ||
       a.scenarios?.length ||
+      !Array.isArray(a.mcpConfigs) ||
       a.mcpConfigs?.length ||
       a.defaultModel !== "medium" ||
       !a.systemPrompt?.includes(knowledge.ref) ||

@@ -47,7 +47,7 @@
     "id": "current-release",
     "path": "docs/CURRENT-CAPABILITIES.md",
     "description": "Current operational website, HubSpot verification and remaining boundaries",
-    "sourceCommit": "7acbd29a89ed9039eb16147cd68b6dc693a54445"
+    "sourceCommit": "21dad08c5aaed036a2057e6f993911d3b051d776"
   },
   "archiveContextIds": [
     "a883eccb-844b-48af-8307-50e7b59a15ad",

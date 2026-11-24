@@ -10,6 +10,8 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 
 Version 2.4 adds a server-side HubSpot adapter and a confirmation-gated test-contact workspace. It validates destination readback, handles duplicates without overwriting, retains ambiguous writes for review and rejects customer/unowned records. See [HubSpot setup and verification](docs/HUBSPOT-INTEGRATION.md). Desktop/mobile browser acceptance is now a separate GitHub Actions gate; provider fixtures are distinguished from live integration proof.
 
+Patch 2.4.1 preserves the seven uploaded archive documents and supplies a separate current-release source directly in the agent instructions. Both source versions use immutable GitHub URLs and independent quote validation. Controlled updates refuse unexpected archive IDs/tools and modify only the existing agent's instructions, not its tools or documents. Release model acceptance uses the backend's unchanged credit ledger; it does not bypass the allowance through direct unbudgeted API calls.
+
 Patch 2.3.1 closes expired-idempotency result disclosure, bounds Make response consumption while streaming, and extends free public monitoring to icons, the manifest and protected read endpoints. [Current readiness and prioritized completion criteria](docs/PRODUCTION-READINESS.md) distinguish the finished public showcase from integrations still requiring external configuration.
 
 The interface now includes an interactive architecture explorer, a consistent workflow icon set, SVG/ICO/touch icons, a social preview, sample questions and readable execution receipts with JSON downloads. Exploring a diagram never runs a model. Locking or failing a new login clears private results and prevents late responses from repopulating them.
@@ -27,7 +29,7 @@ Operators can download a private, consistent database snapshot and validate it w
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | HubSpot create/find/read/update adapter with confirmed writes and destination readback | Operator-only, application-marked test contacts; no customer writes, messages, enrollment or deletions |
 
-Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The latest local suite has **127 passing Node tests and ten desktop/mobile browser checks**, plus the legacy local pattern experiments. Browser provider fixtures do not establish live HubSpot operation, a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links dated acceptance receipts and remaining prerequisites.
+Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The latest local suite has **132 passing Node tests and ten desktop/mobile browser checks**, plus the legacy local pattern experiments. Browser provider fixtures do not establish live HubSpot operation, a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links dated acceptance receipts and remaining prerequisites.
 
 ## Architecture
 
@@ -81,7 +83,7 @@ The owner approved secure runtime storage, the contact-only HubSpot key and at m
 ## Verification and deployment
 
 ```bash
-npm run test:all          # 127 Node tests, local experiments and static blueprint audit
+npm run test:all          # 132 Node tests, local experiments and static blueprint audit
 npm run test:browser      # 10 desktop/mobile UI checks with local provider fixtures
 npm run format:check     # Production source formatting
 npm run build:production # Bundle Worker and public assets
