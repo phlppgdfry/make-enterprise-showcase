@@ -226,7 +226,11 @@ function renderExecution(target, execution, replayed = false) {
     }
     const note = document.createElement("p");
     note.className = "hint";
-    note.textContent = `Knowledge snapshot ${result.sourceCommit.slice(0, 12)}. ${result.chargedCenticredits === null ? "Reported usage unavailable." : "Reported usage for this execution: " + result.chargedCenticredits / 100 + " Make credits."} Source and quote verified; review the answer for correctness.`;
+    const version =
+      result.archiveCommit && result.archiveCommit !== result.sourceCommit
+        ? `Current release ${result.sourceCommit.slice(0, 12)} · uploaded archive ${result.archiveCommit.slice(0, 12)}.`
+        : `Knowledge snapshot ${result.sourceCommit.slice(0, 12)}.`;
+    note.textContent = `${version} ${result.chargedCenticredits === null ? "Reported usage unavailable." : "Reported usage for this execution: " + result.chargedCenticredits / 100 + " Make credits."} Source and quote verified; review the answer for correctness.`;
     target.append(note);
   } else if (execution.workflow.startsWith("crm-contact-")) {
     renderContact(target, result);

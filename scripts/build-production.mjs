@@ -16,6 +16,9 @@ fs.writeFileSync(
   root + "/production/src/knowledge.generated.json",
   JSON.stringify({
     ref: knowledge.ref,
+    currentRef: knowledge.currentRef,
+    contextDocumentCount: knowledge.contextDocumentCount,
+    archiveContextIds: knowledge.archiveContextIds,
     promptSha256: createHash("sha256")
       .update(knowledge.systemPrompt)
       .digest("hex"),

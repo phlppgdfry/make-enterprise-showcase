@@ -42,5 +42,20 @@
       "description": "Actual tenant-scoped retrieval and scoring implementation"
     }
   ],
-  "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403"
+  "sourceCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+  "currentRelease": {
+    "id": "current-release",
+    "path": "docs/CURRENT-CAPABILITIES.md",
+    "description": "Current operational website, HubSpot verification and remaining boundaries",
+    "sourceCommit": "7acbd29a89ed9039eb16147cd68b6dc693a54445"
+  },
+  "archiveContextIds": [
+    "a883eccb-844b-48af-8307-50e7b59a15ad",
+    "40e92574-82f5-4a3e-823e-9c973b58a262",
+    "fa34ae40-955f-47a8-b8d8-cb59ea99962b",
+    "b2fba6d5-e7f3-4a23-9fb8-876e26a26e0d",
+    "ff4449a3-7d6b-490e-abcd-d071f5f0d33e",
+    "8ae50b04-1515-4c08-b37f-cd488e4b477c",
+    "57f4d157-bd88-440b-b2ad-0eec6321e28b"
+  ]
 }

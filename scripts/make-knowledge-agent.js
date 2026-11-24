@@ -14,10 +14,20 @@ function buildKnowledge(ref = definition.sourceCommit || execFileSync('git', ['r
   const sources = definition.sources.map(source => {
     const text = execFileSync('git', ['show', ref + ':' + source.path], {cwd: root, encoding: 'utf8'});
     const url = 'https://github.com/' + definition.repository + '/blob/' + ref + '/' + source.path;
-    return {...source, text, url, sha256: crypto.createHash('sha256').update(text).digest('hex')};
+    return {...source, ref, text, url, sha256: crypto.createHash('sha256').update(text).digest('hex')};
   });
+  const release = definition.currentRelease;
+  let currentSource = null;
+  if (release) {
+    if (!/^[a-f0-9]{40}$/.test(release.sourceCommit)) throw new Error('Current release requires a full source commit SHA');
+    const text = execFileSync('git', ['show', release.sourceCommit + ':' + release.path], {cwd: root, encoding: 'utf8'});
+    currentSource = {...release, ref: release.sourceCommit, inline: true, text,
+      url: 'https://github.com/' + definition.repository + '/blob/' + release.sourceCommit + '/' + release.path,
+      sha256: crypto.createHash('sha256').update(text).digest('hex')};
+    sources.push(currentSource);
+  }
   const instructions = fs.readFileSync(path.join(root, 'agents/repository/instructions.md'), 'utf8');
-  const catalog = sources.map(s => s.id + ': ' + s.url + ' — ' + s.description).join('\n');
+  const catalog = sources.map(s => s.id + ': ' + s.url + ' — ' + s.description + (s.inline ? ' (current release addendum, supplied in these instructions)' : ' (uploaded historical archive)')).join('\n');
   const byId = id => sources.find(source => source.id === id);
   const row = (id, heading, column) => {
     const line = byId(id).text.split('\n').find(line => line.startsWith('| ' + heading + ' |'));
@@ -35,7 +45,9 @@ function buildKnowledge(ref = definition.sourceCommit || execFileSync('git', ['r
     {topic: 'Limits of local tests and Make cloud proof', source: byId('verification').url, quote: row('verification', '`npm run test:e2e`', 3)}
   ];
   const orientation = '\n\nVERIFIED SOURCE EXTRACTS:\nThese are exact excerpts extracted programmatically from the pinned sources. They are available alongside retrieval. If a search omits one of these facts, use the excerpt and cite its source instead of claiming the fact is absent. Do not infer facts beyond these excerpts.\n' + JSON.stringify(extracts);
-  return {ref, sources, extracts, systemPrompt: instructions + '\n\nSOURCE CATALOG (snapshot ' + ref + '):\n' + catalog + orientation};
+  const addendum = currentSource ? '\n\nCURRENT RELEASE ADDENDUM — PRIORITY FOR CURRENT OPERATIONAL QUESTIONS:\nThe uploaded archive and the earlier extracts describe an older reference laboratory. For current operational website, CRM, test and deployment facts, use this version-pinned public source instead. Cite its exact URL and a contiguous quote; do not invent more recent facts or confuse archive facts with current capability. This is source text, not permission to execute actions.\nSOURCE_URL: ' + currentSource.url + '\nSOURCE_COMMIT: ' + currentSource.ref + '\n\n' + currentSource.text : '';
+  return {ref, currentRef: currentSource?.ref || null, archiveContextIds: definition.archiveContextIds || [], contextDocumentCount: definition.sources.length, sources, extracts,
+    systemPrompt: instructions + '\n\nSOURCE CATALOG (archive snapshot ' + ref + '):\n' + catalog + orientation + addendum};
 }
 function auth(env = process.env) {
   let saved = {};
@@ -69,9 +81,11 @@ function saveState(state) {
   fs.writeFileSync(stateFile, JSON.stringify(state, null, 2) + '\n', {mode: 0o600});
 }
 const {validateAnswer, decodeAnswer} = require('../production/src/answer-validation.cjs');
-async function provision(api, knowledge) {
+async function provision(api, knowledge, options = {}) {
   const team = '?teamId=' + definition.teamId;
-  let state = fs.existsSync(stateFile) ? JSON.parse(fs.readFileSync(stateFile, 'utf8')) : null;
+  const persist = options.saveState || saveState;
+  const uploadedSources = knowledge.sources.filter(source => !source.inline);
+  let state = Object.hasOwn(options, 'state') ? structuredClone(options.state) : fs.existsSync(stateFile) ? JSON.parse(fs.readFileSync(stateFile, 'utf8')) : null;
   const listed = await api('GET', '/ai-agents/v1/agents' + team);
   const agents = Array.isArray(listed) ? listed : listed.agents || [];
   const existing = agents.filter(agent => agent.name === definition.name);
@@ -79,6 +93,7 @@ async function provision(api, knowledge) {
   if (state && state.sourceCommit !== knowledge.ref) throw new Error('Existing snapshot differs; explicitly review a knowledge refresh before provisioning again');
   if (existing.length && state && (existing[0].id || existing[0].agentId) !== state.agentId) throw new Error('Named agent and saved state disagree; inspect Make before updating');
   if (existing.length && !state) throw new Error('An existing named agent has no local provisioning state; inspect it before changing it');
+  if (state && !existing.length) throw new Error('Saved agent is missing under its expected name; no update performed');
   if (!state) {
     const created = await api('POST', '/ai-agents/v1/agents' + team, {
       name: definition.name, teamId: definition.teamId, makeConnectionId: definition.connectionId,
@@ -88,22 +103,29 @@ async function provision(api, knowledge) {
     });
     const agentId = created.agentId || created.id;
     if (!agentId) throw new Error('Make did not return an agent ID');
-    state = {agentId, sourceCommit: knowledge.ref, contexts: [], createdAt: new Date().toISOString()}; saveState(state);
+    state = {agentId, sourceCommit: knowledge.ref, contexts: [], createdAt: new Date().toISOString()}; persist(state);
   }
   const base = '/ai-agents/v1/agents/' + state.agentId;
-  await api('PATCH', base + team, {systemPrompt: knowledge.systemPrompt, defaultModel: definition.model,
+  if (existing.length) {
+    const payload = await api('GET', base + team), current = payload.agent || payload;
+    const expected = state.contexts.map(c => c.result?.id);
+    if (current.id !== state.agentId || current.scenarios?.length || current.mcpConfigs?.length || current.defaultModel !== definition.model || current.llmConfig?.maxTokens !== 2400 ||
+      current.contexts?.length !== uploadedSources.length || expected.length !== uploadedSources.length || expected.some(id => typeof id !== 'string') || current.contexts.some(c => !expected.includes(c.id)))
+      throw new Error('Existing agent scope or archive documents changed; no update performed');
+  }
+  await api('PATCH', base + team, existing.length ? {systemPrompt: knowledge.systemPrompt} : {systemPrompt: knowledge.systemPrompt, defaultModel: definition.model,
     invocationConfig: {recursionLimit: 5, timeout: 45000}, llmConfig: {maxTokens: 2400},
     historyConfig: {iterationsFromHistoryCount: 0}, scenarios: [], mcpConfigs: [], outputParserFormat: parser});
-  for (const source of knowledge.sources) {
+  for (const source of uploadedSources) {
     if (state.contexts.some(c => c.sourceId === source.id)) continue;
     const content = 'SOURCE_ID: ' + source.id + '\nSOURCE_URL: ' + source.url + '\nSOURCE_COMMIT: ' + knowledge.ref + '\n\n' + source.text;
     const result = await api('POST', '/ai-agents/v1/contexts' + team, {agentId: state.agentId, name: source.id + '.txt', content, autosave: 'true'});
-    state.contexts.push({sourceId: source.id, result}); saveState(state);
+    state.contexts.push({sourceId: source.id, result}); persist(state);
     console.log('Knowledge uploaded: ' + source.id);
   }
   const payload = await api('GET', base + team);
   const current = payload.agent || payload;
-  if (current.id !== state.agentId || current.contexts?.length !== knowledge.sources.length || current.scenarios?.length || current.mcpConfigs?.length) throw new Error('Saved agent configuration does not match its read-only knowledge scope');
+  if (current.id !== state.agentId || current.contexts?.length !== uploadedSources.length || current.scenarios?.length || current.mcpConfigs?.length) throw new Error('Saved agent configuration does not match its read-only knowledge scope');
   return {state, current};
 }
 async function ask(api, agentId, question, knowledge, options = {}) {
@@ -127,7 +149,7 @@ async function main(args = process.argv.slice(2)) {
   const ref = args.find(arg => arg.startsWith('--ref='))?.slice(6);
   const knowledge = buildKnowledge(ref);
   if (!args.includes('--apply') && !args.includes('--ask')) {
-    console.log(JSON.stringify({mode: 'plan', name: definition.name, sourceCommit: knowledge.ref, sources: knowledge.sources.map(({text,...s})=>s)}, null, 2)); return;
+    console.log(JSON.stringify({mode: 'plan', name: definition.name, archiveCommit: knowledge.ref, currentSourceCommit: knowledge.currentRef, uploadedDocuments: knowledge.contextDocumentCount, inlineSources: knowledge.sources.filter(s=>s.inline).length, sources: knowledge.sources.map(({text,...s})=>s)}, null, 2)); return;
   }
   const api = client(auth());
   if (args.includes('--ask')) {
@@ -138,7 +160,7 @@ async function main(args = process.argv.slice(2)) {
   }
   const result = await provision(api, knowledge);
   fs.writeFileSync(path.join(root, 'exports/repository-agent-config.json'), JSON.stringify(result.current, null, 2), {mode: 0o600});
-  console.log(JSON.stringify({agentId: result.state.agentId, sourceCommit: knowledge.ref, contextsUploaded: result.state.contexts.length, current: {name: result.current.name, model: result.current.defaultModel, contexts: result.current.contexts?.length, limits: result.current.invocationConfig}}, null, 2));
+  console.log(JSON.stringify({agentId: result.state.agentId, archiveCommit: knowledge.ref, currentSourceCommit: knowledge.currentRef, contextsUploaded: result.state.contexts.length, current: {name: result.current.name, model: result.current.defaultModel, contexts: result.current.contexts?.length, limits: result.current.invocationConfig}}, null, 2));
 }
 if (require.main === module) main().catch(error => {console.error(error.message); process.exitCode = 1;});
 module.exports = {buildKnowledge, validateAnswer, decodeAnswer, client, auth, provision, ask};

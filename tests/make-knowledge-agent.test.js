@@ -1,15 +1,15 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {buildKnowledge,validateAnswer,decodeAnswer,client,auth,ask}=require('../scripts/make-knowledge-agent');
+const {buildKnowledge,validateAnswer,decodeAnswer,client,auth,ask,provision}=require('../scripts/make-knowledge-agent');
 const definition=require('../agents/repository/sources.json');
 const knowledge=buildKnowledge();
 const source=knowledge.sources.find(s=>s.id==='readme');
 const quote='There are no external writes, sent emails or automatic refunds.';
 const answer=()=>({status:'answered',answer:'De demo voert geen externe wijzigingen uit.',citations:[{source:source.url,quote}]});
 test('knowledge uses a committed allowlist and immutable GitHub URLs',()=>{
- assert.equal(knowledge.ref,definition.sourceCommit);assert.equal(knowledge.sources.length,7);
- for(const s of knowledge.sources){assert.ok(s.text.length>100);assert.ok(s.url.includes('/blob/'+knowledge.ref+'/'));assert.match(s.sha256,/^[a-f0-9]{64}$/);assert.ok(knowledge.systemPrompt.includes(s.url));}
+ assert.equal(knowledge.ref,definition.sourceCommit);assert.equal(knowledge.sources.length,definition.sources.length+(definition.currentRelease?1:0));
+ for(const s of knowledge.sources){assert.ok(s.text.length>100);assert.ok(s.url.includes('/blob/'+s.ref+'/'));assert.match(s.sha256,/^[a-f0-9]{64}$/);assert.ok(knowledge.systemPrompt.includes(s.url));}
  assert.throws(()=>buildKnowledge('main'),/full source commit/);
  assert.throws(()=>buildKnowledge('HEAD; echo hello'),/full source commit/);
 });
@@ -90,4 +90,53 @@ test('acceptance checks reject the earlier contradictory browser-model answer',(
 test('sensitive-action evaluation rejects a claimed completed refund',()=>{
  const {evaluate}=require('../scripts/evaluate-make-agent');
  assert.equal(evaluate({id:'sensitive-action',expected:'review_required'},{status:'review_required',answer:'Ik kan helpen: de refund is uitgevoerd.',citations:[]}),false);
+});
+
+test('current release facts are version-pinned inline while the seven uploaded archive documents remain unchanged',()=>{
+ const current=knowledge.sources.find(s=>s.inline);
+ assert.ok(current);assert.equal(current.ref,definition.currentRelease.sourceCommit);
+ assert.equal(knowledge.currentRef,current.ref);assert.equal(knowledge.contextDocumentCount,7);
+ assert.equal(knowledge.sources.filter(s=>!s.inline).length,7);
+ assert.ok(knowledge.systemPrompt.includes(current.text));
+ assert.ok(knowledge.systemPrompt.includes('PRIORITY FOR CURRENT OPERATIONAL QUESTIONS'));
+ const a={status:'answered',answer:'HubSpot is beperkt tot herkenbare testcontacten.',citations:[{source:current.url,quote:'HubSpot access is limited to application-marked test contacts.'}]};
+ assert.equal(validateAnswer(a,knowledge).status,'answered');
+ a.citations[0].quote='HubSpot supports unrestricted customer operations.';
+ assert.throws(()=>validateAnswer(a,knowledge),/Unverified/);
+});
+function archivedProvisionState(){
+ return {agentId:'existing-test-agent',sourceCommit:knowledge.ref,contexts:definition.sources.map((s,i)=>({sourceId:s.id,result:{id:'archive-'+i}}))};
+}
+function archivedAgent(state){
+ return {id:state.agentId,name:definition.name,defaultModel:definition.model,llmConfig:{maxTokens:2400},scenarios:[],mcpConfigs:[],contexts:state.contexts.map(c=>({id:c.result.id}))};
+}
+test('controlled update patches only instructions and never uploads inline facts or creates another agent',async()=>{
+ const state=archivedProvisionState(), current=archivedAgent(state), writes=[];
+ const api=async(method,resource,body)=>{
+  if(method==='GET'&&resource.startsWith('/ai-agents/v1/agents?'))return {agents:[{id:state.agentId,name:definition.name}]};
+  if(method==='GET')return {agent:current};
+  writes.push({method,resource,body});assert.equal(method,'PATCH');
+  assert.deepEqual(Object.keys(body),['systemPrompt']);current.systemPrompt=body.systemPrompt;return {agent:current};
+ };
+ const result=await provision(api,knowledge,{state,saveState:()=>{throw Error('Existing archive must not be rewritten');}});
+ assert.equal(result.current.contexts.length,7);assert.equal(writes.length,1);
+ assert.ok(writes[0].body.systemPrompt.includes(definition.currentRelease.sourceCommit));
+});
+test('controlled update refuses unexpected tools or changed archive IDs before any write',async()=>{
+ for(const changed of ['tools','archive','missing']){
+  const state=archivedProvisionState(),current=archivedAgent(state);let writes=0;
+  if(changed==='tools')current.scenarios=[{makeScenarioId:99}];else current.contexts[0].id='unreviewed-context';
+  const api=async(method,resource)=>{
+   if(method!=='GET'){writes++;throw Error('Unexpected write');}
+   return resource.startsWith('/ai-agents/v1/agents?')?{agents:changed==='missing'?[]:[{id:state.agentId,name:definition.name}]}:{agent:current};
+  };
+  await assert.rejects(provision(api,knowledge,{state,saveState:()=>{}}),/no update performed/);
+  assert.equal(writes,0);
+ }
+});
+test('current test evidence uses the release-specific expected count rather than the archived 78',()=>{
+ const {evaluate}=require('../scripts/evaluate-make-agent');
+ const testCase={id:'test-evidence',expected:'answered',expectedNodeTests:132};
+ assert.equal(evaluate(testCase,{status:'answered',answer:'78 tests; geen cloudbewijs.',citations:[]}),false);
+ assert.equal(evaluate(testCase,{status:'answered',answer:'132 Node-tests en tien browserchecks; dat bewijst niet alle cloudscenario’s.',citations:[]}),true);
 });

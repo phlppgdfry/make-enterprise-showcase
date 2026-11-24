@@ -169,7 +169,9 @@ export function createApp({
     if (
       a.id !== AGENT ||
       a.name !== "Make Repo Kennisagent" ||
-      a.contexts?.length !== 7 ||
+      a.contexts?.length !== (knowledge.contextDocumentCount || 7) ||
+      (knowledge.archiveContextIds?.length &&
+        a.contexts.some((c) => !knowledge.archiveContextIds.includes(c.id))) ||
       a.scenarios?.length ||
       a.mcpConfigs?.length ||
       a.defaultModel !== "medium" ||
@@ -188,7 +190,9 @@ export function createApp({
       name: a.name,
       model: a.defaultModel,
       knowledgeDocuments: a.contexts.length,
-      sourceCommit: knowledge.ref,
+      sourceCommit: knowledge.currentRef || knowledge.ref,
+      archiveCommit: knowledge.ref,
+      inlineAddendum: !!knowledge.currentRef,
       readOnly: true,
     };
   }
@@ -381,12 +385,45 @@ export function createApp({
         }
         result = {
           ...answer,
-          sourceCommit: knowledge.ref,
+          sourceCommit: knowledge.currentRef || knowledge.ref,
+          archiveCommit: knowledge.ref,
           executionTimeMs: r.executionTimeMs || null,
           chargedCenticredits: charged,
           iterationId: upstream,
           citationValidation:
             "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven.",
+          retrievalSteps: (Array.isArray(r.executionSteps)
+            ? r.executionSteps
+            : []
+          )
+            .filter(
+              (step) =>
+                step?.role === "tool" ||
+                (Array.isArray(step?.toolCalls) && step.toolCalls.length),
+            )
+            .map((step) => ({
+              role: step.role === "tool" ? "tool" : "assistant",
+              toolCallCount: Array.isArray(step.toolCalls)
+                ? step.toolCalls.length
+                : 0,
+              ...(step.toolResponse
+                ? {
+                    toolResponse: {
+                      name:
+                        step.toolResponse.name === "essential_context_retriever"
+                          ? "essential_context_retriever"
+                          : "unrecognized",
+                      status: ["ok", "error"].includes(step.toolResponse.status)
+                        ? step.toolResponse.status
+                        : "unknown",
+                      toolType:
+                        step.toolResponse.toolType === "rag"
+                          ? "rag"
+                          : "unknown",
+                    },
+                  }
+                : {}),
+            })),
         };
       } else if (workflow.startsWith("crm-contact-")) {
         const client = hubspotClient(env, fetcher);
@@ -572,7 +609,7 @@ export function createApp({
             status: "healthy",
             storage: "D1",
             sourceCommit: commit,
-            knowledgeCommit: knowledge.ref,
+            knowledgeCommit: knowledge.currentRef || knowledge.ref,
           });
         } else if (req.method === "GET" && path === "/api/status") {
           const cached = await env.DB.prepare(

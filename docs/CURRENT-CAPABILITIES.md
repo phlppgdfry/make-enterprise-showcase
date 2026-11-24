@@ -1,6 +1,6 @@
 # Versioned current capabilities
 
-Verified release: 2.4, 24 November 2026. Runtime source: `46a4eb85d70156258c93020f17e0a7d47c342795`. This document describes the operational website, separately from the older reference laboratory and archived agent documents.
+Verified business-capability release: 2.4, 24 November 2026, runtime source `46a4eb85d70156258c93020f17e0a7d47c342795`. This is a versioned capability record, not a live health response. The exact current runtime commit is returned by `/api/health` and may be newer after knowledge-only updates. This document describes the operational website separately from the reference laboratory and archived agent documents.
 
 The operational website calls the real Make Repo Kennisagent through an authenticated server-side API. The separate GitHub Pages reference laboratory uses deterministic synthetic fixtures and does not call a language model. Support triage, knowledge search and lead qualification in that laboratory remain reference examples, not proof that every Make scenario is operational.
 
@@ -10,7 +10,7 @@ The real test contact is `936971617524`, with reserved address `make-showcase-te
 
 Company research reads public website title/description and evidence from approved domains: make.com, cloudflare.com and github.com. It does not independently verify firmographics or discover contacts, employee counts or fit scores. Missing facts remain unknown.
 
-The verified 2.4 suite contains 127 passing Node tests and ten desktop/mobile browser checks. Browser CI uses explicit local provider fixtures; actual HubSpot proof is recorded separately. Node validation, build, dependency audit, browser CI and GitHub Pages publication passed for the runtime source above. Passing checks are not a security certification or an enterprise SLA.
+The current local code verification has 132 passing Node tests and ten desktop/mobile browser checks. The earlier verified 2.4 business release had 127 Node tests. Browser CI uses explicit local provider fixtures; actual HubSpot proof is recorded separately. Local regression tests do not prove that every Make cloud scenario works. Node validation, build, dependency audit, browser CI and GitHub Pages publication passed for the business-capability runtime source above. Passing checks are not a security certification or an enterprise SLA.
 
 Persistent D1 receipts, input validation, operator authorization, rate limits, request IDs and idempotency are implemented. Ambiguous provider writes remain uncertain and are not automatically retried. Expired local receipts cannot be retrieved or replayed for their old data. Seven-day local visibility does not mean automatic physical deletion or deletion of external HubSpot contacts. Automatic cleanup remains off at the owner's request.
 

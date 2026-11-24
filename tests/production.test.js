@@ -61,6 +61,17 @@ async function setup(fetcher) {
           },
           centicreditsConsumption: { totalCenticreditsConsumption: 175 },
           lastAgentIterationId: "iteration-test",
+          executionSteps: [
+            {
+              role: "tool",
+              toolResponse: {
+                name: "essential_context_retriever",
+                status: "ok",
+                toolType: "rag",
+                result: "private provider trace body must not be retained",
+              },
+            },
+          ],
         });
       }
       if (url.includes("/ai-agents/"))
@@ -68,7 +79,7 @@ async function setup(fetcher) {
           agent: {
             id: "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
             name: "Make Repo Kennisagent",
-            contexts: Array(7).fill({}),
+            contexts: buildKnowledge().archiveContextIds.map((id) => ({ id })),
             scenarios: [],
             mcpConfigs: [],
             defaultModel: "medium",
@@ -414,6 +425,13 @@ test("agent uses actual provider boundary, validates provenance, persists and re
   assert.equal(first.data.execution.status, "succeeded");
   assert.equal(first.data.execution.chargedCenticredits, 175);
   assert.equal(first.data.execution.result.citations.length, 1);
+  assert.equal(
+    first.data.execution.result.retrievalSteps[0].toolResponse.toolType,
+    "rag",
+  );
+  assert.ok(
+    !JSON.stringify(first.data).includes("private provider trace body"),
+  );
   const replay = await s.call(
     "/api/agent/ask",
     { question: "Does the demo use an LLM?" },
@@ -524,6 +542,36 @@ test("Make error bodies are canceled unread and upstream rate limits remain acti
   assert.equal(pulls, 0);
   assert.equal(canceled, true);
 });
+test("agent scope rejects a replaced archive document even when seven documents remain", async () => {
+  const knowledge = buildKnowledge();
+  let modelCalls = 0;
+  const s = await setup(async (url) => {
+    if (url.includes("/run?")) {
+      modelCalls++;
+      throw Error("Unexpected model call");
+    }
+    return Response.json({
+      agent: {
+        id: "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
+        name: "Make Repo Kennisagent",
+        contexts: knowledge.archiveContextIds.map((id, i) => ({
+          id: i === 0 ? crypto.randomUUID() : id,
+        })),
+        scenarios: [],
+        mcpConfigs: [],
+        defaultModel: "medium",
+        systemPrompt: knowledge.systemPrompt,
+        llmConfig: { maxTokens: 2400 },
+      },
+    });
+  });
+  const r = await s.call("/api/agent/ask", {
+    question: "Current capabilities?",
+  });
+  assert.equal(r.data.execution.status, "failed");
+  assert.equal(r.data.execution.error.code, "agent_scope_changed");
+  assert.equal(modelCalls, 0);
+});
 test("conservative credit allowance admits at most seven metered calls and never retries", async () => {
   const s = await setup();
   for (let i = 0; i < 8; i++) {
@@ -547,7 +595,7 @@ test("timeouts after dispatch persist uncertain status without duplicate provide
       agent: {
         id: "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
         name: "Make Repo Kennisagent",
-        contexts: Array(7).fill({}),
+        contexts: buildKnowledge().archiveContextIds.map((id) => ({ id })),
         scenarios: [],
         mcpConfigs: [],
         defaultModel: "medium",
@@ -594,7 +642,7 @@ test("unverified agent citations are withheld while actual usage is retained", a
           agent: {
             id: "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
             name: "Make Repo Kennisagent",
-            contexts: Array(7).fill({}),
+            contexts: buildKnowledge().archiveContextIds.map((id) => ({ id })),
             scenarios: [],
             mcpConfigs: [],
             defaultModel: "medium",

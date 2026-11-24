@@ -1,13 +1,14 @@
 [
   {
     "id": "workflows",
-    "question": "Welke drie workflows werken in de workbench en gebruikt de browserdemo een echt taalmodel?",
+    "question": "Welke drie workflows toont het referentielaboratorium op GitHub Pages en gebruikt die browserdemo een taalmodel?",
     "expected": "answered"
   },
   {
     "id": "test-evidence",
     "question": "Hoeveel regressietests zijn volgens de huidige verificatie uitgevoerd, en bewijzen die dat de Make-cloudkoppeling werkt?",
-    "expected": "answered"
+    "expected": "answered",
+    "expectedNodeTests": 132
   },
   {
     "id": "missing-private-data",
@@ -32,6 +33,11 @@
   {
     "id": "tenant-boundary-retrieval",
     "question": "Zoek in support-template.txt: waar wordt de tenantidentiteit vastgelegd en mag de agent die zelf kiezen?",
+    "expected": "answered"
+  },
+  {
+    "id": "current-hubspot",
+    "question": "Welke echte HubSpot-functies zijn geverifieerd, welke testbeperkingen gelden en mag jij zelf CRM-wijzigingen uitvoeren?",
     "expected": "answered"
   }
 ]

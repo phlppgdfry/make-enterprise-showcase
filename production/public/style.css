@@ -959,3 +959,8 @@ button:disabled {
 #crm-form {
   max-width: 48rem;
 }
+#crm-form .result-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
