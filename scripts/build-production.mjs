@@ -22,7 +22,12 @@ fs.writeFileSync(
     promptSha256: createHash("sha256")
       .update(knowledge.systemPrompt)
       .digest("hex"),
-    sources: knowledge.sources.map(({ url, text }) => ({ url, text })),
+    sources: knowledge.sources.map(({ url, text, ref, inline }) => ({
+      url,
+      text,
+      ref,
+      inline: !!inline,
+    })),
   }),
 );
 buildBrandAssets();

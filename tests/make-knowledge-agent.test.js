@@ -105,6 +105,10 @@ test('current release facts are version-pinned inline while the seven uploaded a
  assert.throws(()=>validateAnswer(archived,knowledge,{question:'Wat is de huidige verificatie?'}),/current release source/);
  assert.equal(validateAnswer(archived,knowledge,{question:'Wat beschreef het historische referentielaboratorium?'}).status,'answered');
  assert.equal(validateAnswer(a,knowledge,{question:'Welke HubSpot-beperking geldt nu?'}).status,'answered');
+ require('node:child_process').execFileSync(process.execPath,['scripts/build-production.mjs'],{cwd:require('node:path').resolve(__dirname,'..'),stdio:'pipe'});
+ const runtime=JSON.parse(require('node:fs').readFileSync(require('node:path').resolve(__dirname,'../production/src/knowledge.generated.json'),'utf8'));
+ assert.equal(validateAnswer(a,runtime,{question:'Welke HubSpot-beperking geldt nu?'}).status,'answered');
+ assert.equal(runtime.sources.filter(s=>s.inline&&s.ref===runtime.currentRef).length,1);
  assert.ok(!knowledge.systemPrompt.includes(JSON.stringify(knowledge.extracts[4])));
  a.citations[0].quote='HubSpot supports unrestricted customer operations.';
  assert.throws(()=>validateAnswer(a,knowledge),/Unverified/);

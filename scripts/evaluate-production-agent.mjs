@@ -83,7 +83,7 @@ if (!process.argv.includes("--live")) {
     report.startingLedger = await call("/api/budget/reconcile", {});
     const signature = crypto
       .createHash("sha256")
-      .update(knowledge.systemPrompt)
+      .update(knowledge.systemPrompt + "\0" + health.sourceCommit)
       .digest("hex")
       .slice(0, 12);
     for (const test of selectedCases) {
@@ -106,7 +106,11 @@ if (!process.argv.includes("--live")) {
           status: e.status,
           error: e.error,
         });
-        if (!response.replayed && (e.upstreamId || e.chargedCenticredits != null)) report.meteredRequestsStarted++;
+        if (
+          !response.replayed &&
+          (e.upstreamId || e.chargedCenticredits != null)
+        )
+          report.meteredRequestsStarted++;
         report.finalLedger = await call("/api/budget/reconcile", {});
         save();
         throw Error(
