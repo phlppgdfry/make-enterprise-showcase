@@ -380,6 +380,7 @@ export function createApp({
           answer = validation.validateAnswer(
             validation.decodeAnswer(raw),
             knowledge,
+            { question: input.question },
           );
         } catch {
           fail(

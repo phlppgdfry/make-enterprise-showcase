@@ -1,5 +1,5 @@
 "use strict";
-function validateAnswer(answer, knowledge) {
+function validateAnswer(answer, knowledge, { question = "" } = {}) {
   if (!answer || typeof answer !== "object" || Array.isArray(answer))
     throw new Error("Invalid answer object");
   if (
@@ -49,6 +49,26 @@ function validateAnswer(answer, knowledge) {
     const key = citation.source + "\0" + normalize(citation.quote);
     if (seen.has(key)) throw new Error("Duplicate citation");
     seen.add(key);
+  }
+  // A verified archive quote must not be presented as evidence for an explicitly current operational question.
+  // This bounds source/version selection; it is not a proof of every sentence's semantic truth.
+  if (
+    knowledge.currentRef &&
+    answer.status === "answered" &&
+    /\b(huidig(?:e)?|actueel|actuele|momenteel|tegenwoordig|vandaag|nu|current|latest|now|hubspot|crm|production|productie|operational|operationeel|operationele)\b/i.test(
+      question,
+    )
+  ) {
+    const currentURLs = new Set(
+      knowledge.sources
+        .filter((s) => s.inline && s.ref === knowledge.currentRef)
+        .map((s) => s.url),
+    );
+    if (
+      !answer.citations.length ||
+      answer.citations.some((c) => !currentURLs.has(c.source))
+    )
+      throw new Error("Current question requires the current release source");
   }
   return answer;
 }

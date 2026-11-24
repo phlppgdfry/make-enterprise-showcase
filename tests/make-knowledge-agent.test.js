@@ -101,6 +101,11 @@ test('current release facts are version-pinned inline while the seven uploaded a
  assert.ok(knowledge.systemPrompt.includes('PRIORITY FOR CURRENT OPERATIONAL QUESTIONS'));
  const a={status:'answered',answer:'HubSpot is beperkt tot herkenbare testcontacten.',citations:[{source:current.url,quote:'HubSpot access is limited to application-marked test contacts.'}]};
  assert.equal(validateAnswer(a,knowledge).status,'answered');
+ const archived=answer();
+ assert.throws(()=>validateAnswer(archived,knowledge,{question:'Wat is de huidige verificatie?'}),/current release source/);
+ assert.equal(validateAnswer(archived,knowledge,{question:'Wat beschreef het historische referentielaboratorium?'}).status,'answered');
+ assert.equal(validateAnswer(a,knowledge,{question:'Welke HubSpot-beperking geldt nu?'}).status,'answered');
+ assert.ok(!knowledge.systemPrompt.includes(JSON.stringify(knowledge.extracts[4])));
  a.citations[0].quote='HubSpot supports unrestricted customer operations.';
  assert.throws(()=>validateAnswer(a,knowledge),/Unverified/);
 });

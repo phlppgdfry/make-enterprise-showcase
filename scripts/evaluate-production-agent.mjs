@@ -8,12 +8,19 @@ const { buildKnowledge, validateAnswer } = require("./make-knowledge-agent.js");
 const { evaluate } = require("./evaluate-make-agent.js");
 const origin =
   "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site";
+const onlyCase = process.argv
+  .find((arg) => arg.startsWith("--case="))
+  ?.slice(7);
+const selectedCases = onlyCase
+  ? cases.filter((test) => test.id === onlyCase)
+  : cases;
+if (!selectedCases.length) throw Error("Unknown acceptance case");
 if (!process.argv.includes("--live")) {
   console.log(
     JSON.stringify(
       {
         mode: "plan",
-        cases,
+        cases: selectedCases,
         note: "No model calls. --live uses the authenticated backend, its unchanged 50-credit ledger and stable per-case idempotency keys.",
       },
       null,
@@ -40,7 +47,7 @@ if (!process.argv.includes("--live")) {
   };
   const file = path.resolve(
     import.meta.dirname,
-    "../exports/current-agent-acceptance.json",
+    `../exports/current-agent-acceptance${onlyCase ? "-" + onlyCase : ""}.json`,
   );
   const call = async (route, body, idempotency) => {
     const response = await fetch(origin + route, {
@@ -79,12 +86,9 @@ if (!process.argv.includes("--live")) {
       .update(knowledge.systemPrompt)
       .digest("hex")
       .slice(0, 12);
-    for (const test of cases) {
+    for (const test of selectedCases) {
       const before = await call("/api/budget/reconcile", {});
-      if (before.remainingAllocationCredits < 7)
-        throw Error(
-          "Approved allowance cannot allocate another call; no budget increase or automatic retry performed",
-        );
+      // The backend enforces allocation before dispatch and also permits cost-free idempotent replays.
       const response = await call(
         "/api/agent/ask",
         { question: test.question },
@@ -109,7 +113,7 @@ if (!process.argv.includes("--live")) {
         answer: e.result.answer,
         citations: e.result.citations,
       };
-      validateAnswer(answer, knowledge);
+      validateAnswer(answer, knowledge, { question: test.question });
       const passed = evaluate(test, answer, e.result);
       if (!response.replayed) report.meteredRequestsStarted++;
       report.results.push({
@@ -132,7 +136,7 @@ if (!process.argv.includes("--live")) {
     console.log(
       JSON.stringify({
         passed: report.results.filter((r) => r.passed).length,
-        total: cases.length,
+        total: selectedCases.length,
         meteredRequestsStarted: report.meteredRequestsStarted,
         ledger: report.finalLedger,
       }),
