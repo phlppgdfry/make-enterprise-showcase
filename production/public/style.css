@@ -945,3 +945,17 @@ button:disabled {
     align-items: center;
   }
 }
+.crm-confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.crm-confirmation input[type="checkbox"] {
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+  min-height: 1.25rem;
+  margin-top: 0.2rem;
+}
+#crm-form {
+  max-width: 48rem;
+}

@@ -1,4 +1,10 @@
 import { exportBackup } from "./backup.js";
+import {
+  crmConfiguration,
+  requireCRM,
+  validateContact,
+  hubspotClient,
+} from "./crm.js";
 import { PublicError, research, companyURL } from "./research.js";
 import validation from "./answer-validation.cjs";
 const AGENT = "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
@@ -211,7 +217,14 @@ export function createApp({
       .run();
   }
   async function execute(req, env, workflow, b, requestId) {
-    if (!["repository-agent", "company-research"].includes(workflow))
+    if (
+      ![
+        "repository-agent",
+        "company-research",
+        "crm-contact-create",
+        "crm-contact-update",
+      ].includes(workflow)
+    )
       fail(404, "workflow_not_found", "Workflow is not available.");
     let input;
     if (workflow === "repository-agent") {
@@ -225,6 +238,9 @@ export function createApp({
       input = { question: b.question.trim() };
       if (!env.MAKE_API_KEY)
         fail(503, "make_unconfigured", "Make credentials are not configured.");
+    } else if (workflow.startsWith("crm-contact-")) {
+      requireCRM(env);
+      input = validateContact(b, workflow === "crm-contact-update");
     } else {
       strict(b, ["domain"]);
       input = companyURL(b.domain, allowed(env));
@@ -372,6 +388,32 @@ export function createApp({
           citationValidation:
             "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven.",
         };
+      } else if (workflow.startsWith("crm-contact-")) {
+        const client = hubspotClient(env, fetcher);
+        const callbacks = {
+          onWrite: () => {
+            dispatched = true;
+          },
+          onReceipt: (id) => {
+            upstream = id;
+          },
+        };
+        if (workflow === "crm-contact-update") {
+          const owned = await db
+            .prepare(
+              "SELECT id FROM executions WHERE owner=? AND workflow IN ('crm-contact-create','crm-contact-update') AND upstream_id=? AND status='succeeded' AND expires_at>? LIMIT 1",
+            )
+            .bind("operator", input.id, now)
+            .first();
+          if (!owned)
+            fail(
+              404,
+              "crm_contact_not_owned",
+              "Only an unexpired contact receipt created by this application can be updated.",
+            );
+          result = await client.update(input, callbacks);
+        } else result = await client.create(input, callbacks);
+        upstream = result.contact.id;
       } else {
         const prior = await db
           .prepare("SELECT * FROM leads WHERE domain=? AND expires_at>?")
@@ -539,6 +581,14 @@ export function createApp({
             .bind("make")
             .first();
           const snapshot = cached ? JSON.parse(cached.value_json) : null;
+          const crmCached = await env.DB.prepare(
+            "SELECT * FROM integration_cache WHERE name=?",
+          )
+            .bind("hubspot")
+            .first();
+          const crmSnapshot = crmCached
+            ? JSON.parse(crmCached.value_json)
+            : null;
           response = json({
             make: {
               configured: !!env.MAKE_API_KEY,
@@ -558,10 +608,15 @@ export function createApp({
               allowedDomains: allowed(env),
             },
             crm: {
-              configured: false,
-              status: "unconfigured",
-              reason:
-                "No authorized CRM connection or write approval is configured.",
+              ...crmConfiguration(env),
+              status: crmConfiguration(env).configured
+                ? "configured"
+                : "unconfigured",
+              readVerified:
+                crmConfiguration(env).configured && !!crmSnapshot?.readVerified,
+              observedAt: crmCached
+                ? new Date(crmCached.observed_at).toISOString()
+                : null,
             },
             authentication: {
               requiredForExecution: true,
@@ -615,9 +670,75 @@ export function createApp({
                   provider: "Public company website",
                   configured: true,
                 },
+                {
+                  id: "crm-contact-create",
+                  name: "HubSpot test contact create",
+                  provider: "HubSpot",
+                  configured: crmConfiguration(env).configured,
+                },
+                {
+                  id: "crm-contact-update",
+                  name: "HubSpot test contact update",
+                  provider: "HubSpot",
+                  configured: crmConfiguration(env).configured,
+                },
               ],
             });
-          else if (
+          else if (req.method === "POST" && path === "/api/crm/verify") {
+            strict(await bodyOf(req), []);
+            const result = await hubspotClient(env, fetcher).inspect();
+            await env.DB.prepare(
+              "INSERT INTO integration_cache (name,value_json,observed_at) VALUES (?,?,?) ON CONFLICT(name) DO UPDATE SET value_json=excluded.value_json,observed_at=excluded.observed_at",
+            )
+              .bind("hubspot", JSON.stringify(result), Date.now())
+              .run();
+            await audit(env.DB, requestId, "crm-inspection", "succeeded");
+            response = json(result);
+          } else if (
+            req.method === "POST" &&
+            (path === "/api/crm/contacts" ||
+              /^\/api\/crm\/contacts\/[0-9]{1,30}\/update$/.test(path))
+          ) {
+            const body = await bodyOf(req);
+            const updating = path.endsWith("/update");
+            if (Object.hasOwn(body, "id"))
+              fail(
+                400,
+                "unknown_field",
+                "Contact ID must come from the route.",
+              );
+            response = await execute(
+              req,
+              env,
+              updating ? "crm-contact-update" : "crm-contact-create",
+              updating ? { ...body, id: path.split("/")[4] } : body,
+              requestId,
+            );
+          } else if (
+            req.method === "GET" &&
+            /^\/api\/crm\/contacts\/[0-9]{1,30}$/.test(path)
+          ) {
+            requireCRM(env);
+            const id = path.split("/")[4];
+            const owned = await env.DB.prepare(
+              "SELECT id FROM executions WHERE owner=? AND workflow IN ('crm-contact-create','crm-contact-update') AND upstream_id=? AND status IN ('succeeded','uncertain') AND expires_at>? LIMIT 1",
+            )
+              .bind("operator", id, now)
+              .first();
+            if (!owned)
+              fail(
+                404,
+                "crm_contact_not_owned",
+                "Only contacts with an unexpired application receipt can be retrieved.",
+              );
+            const contact = await hubspotClient(env, fetcher).get(id);
+            await audit(env.DB, requestId, "crm-contact-read", "succeeded");
+            response = json({
+              contact,
+              mode: "test-only",
+              readBackVerified: true,
+            });
+          } else if (
             req.method === "POST" &&
             path === "/api/integrations/verify"
           ) {
@@ -699,13 +820,13 @@ export function createApp({
             response = json({
               lead: { ...JSON.parse(row.data_json), id: row.id },
             });
-          } else if (path.startsWith("/api/crm/"))
-            fail(
-              503,
-              "crm_unconfigured",
-              "No authorized CRM connection or write approval is configured. No CRM record has been created.",
-            );
-          else if (req.method === "POST" && path === "/api/budget/reconcile") {
+          } else if (path.startsWith("/api/crm/")) {
+            requireCRM(env);
+            fail(404, "not_found", "CRM route not found.");
+          } else if (
+            req.method === "POST" &&
+            path === "/api/budget/reconcile"
+          ) {
             strict(await bodyOf(req), []);
             // D1 batch is atomic. Unknown charges retain their full allocation; settled receipts never reset lifetime spend.
             const settled =

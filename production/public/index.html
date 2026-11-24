@@ -229,8 +229,8 @@
             </svg>
             CRM
           </p>
-          <h2>Unconfigured</h2>
-          <p>No CRM connection or write approval. No contacts are created.</p>
+          <h2 id="crm-status">Checking…</h2>
+          <p id="crm-detail">Verifying the CRM configuration.</p>
         </article>
       </section>
       <section class="access-panel" aria-labelledby="access-heading">
@@ -359,6 +359,78 @@
           </article>
         </div>
       </section>
+      <section class="panel" aria-labelledby="crm-heading">
+        <p class="eyebrow">HUBSPOT / CONTROLLED TEST RECORDS</p>
+        <h2 id="crm-heading">Verify a real CRM round trip.</h2>
+        <p>
+          Create, read back or update a clearly marked test contact in the
+          connected HubSpot account. This is a real CRM write, not a simulation.
+          Customer records and messages are outside this flow.
+        </p>
+        <form id="crm-form">
+          <label for="crm-email">Reserved test address</label>
+          <input
+            id="crm-email"
+            type="email"
+            maxlength="100"
+            required
+            value="make-showcase-test-verification@example.com"
+          />
+          <p class="hint">
+            Only make-showcase-test-…@example.com addresses are accepted. They
+            identify synthetic test records, not discovered contacts.
+          </p>
+          <label for="crm-firstname">First name</label
+          ><input
+            id="crm-firstname"
+            maxlength="80"
+            required
+            value="Make Showcase"
+          />
+          <label for="crm-lastname">Last name, starting with TEST</label
+          ><input
+            id="crm-lastname"
+            maxlength="80"
+            required
+            value="TEST Verification"
+          />
+          <label for="crm-id">HubSpot contact ID from this application</label
+          ><input
+            id="crm-id"
+            readonly
+            placeholder="Available after a successful create or duplicate lookup"
+          />
+          <p class="hint">
+            Company is fixed to “Make Enterprise Showcase - TEST”. The contact
+            remains in HubSpot until the owner removes it; local receipt expiry
+            does not remove CRM records.
+          </p>
+          <label class="crm-confirmation"
+            ><input id="crm-confirm" type="checkbox" required /> I approve
+            writing the exact test contact shown above to HubSpot.</label
+          >
+          <div class="result-actions">
+            <button id="crm-create" type="submit">
+              Create or find test contact
+            </button>
+            <button id="crm-update" type="button" class="secondary">
+              Update this test contact
+            </button>
+            <button id="crm-read" type="button" class="secondary">
+              Read back contact
+            </button>
+            <button id="crm-verify" type="button" class="secondary">
+              Check HubSpot connection
+            </button>
+          </div>
+        </form>
+        <div
+          id="crm-result"
+          class="result"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </section>
       <section id="history" class="panel history">
         <div class="section-heading">
           <div>
@@ -409,7 +481,10 @@
               AI output can still be incomplete or mistaken; review the
               evidence.
             </li>
-            <li>CRM writes and outbound communications are unavailable.</li>
+            <li>
+              HubSpot writes require operator approval and are restricted to
+              application-marked test contacts. No communications are sent.
+            </li>
             <li>
               Each AI call allocates 7 credits within the approved 50-credit
               verification allowance.

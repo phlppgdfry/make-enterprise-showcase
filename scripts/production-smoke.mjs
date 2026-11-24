@@ -25,7 +25,11 @@ assert.ok(
 const status = await read("/api/status");
 assert.equal(status.status, 200);
 const integrations = await status.json();
-assert.equal(integrations.crm.configured, false);
+assert.equal(typeof integrations.crm.configured, "boolean");
+assert.equal(
+  integrations.crm.mode,
+  integrations.crm.configured ? "test-only" : "unconfigured",
+);
 assert.equal(integrations.make.configured, true);
 for (const [path, mediaType, signature] of [
   ["/favicon.svg", "image/svg+xml", "<svg"],

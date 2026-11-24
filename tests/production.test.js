@@ -118,6 +118,249 @@ async function setup(fetcher) {
   };
   return { call, env, logs, calls: () => calls, app };
 }
+
+const approvedCRM = {
+  email: "make-showcase-test-verification@example.com",
+  firstname: "Make Showcase",
+  lastname: "TEST Verification",
+  confirmed: true,
+};
+async function crmSetup() {
+  const contacts = new Map(),
+    requests = [],
+    mode = {};
+  let serial = 1000;
+  const s = await setup(async (url, options) => {
+    assert.ok(url.startsWith("https://api.hubapi.com/crm/v3/objects/contacts"));
+    assert.equal(options.redirect, "manual");
+    assert.equal(
+      options.headers.Authorization,
+      "Bearer fixture-hubspot-secret",
+    );
+    const u = new URL(url),
+      id = decodeURIComponent(u.pathname.split("/").at(-1));
+    const properties = options.body
+      ? JSON.parse(options.body).properties
+      : null;
+    requests.push({ method: options.method, id, properties });
+    if (mode.permissionDenied)
+      return Response.json(
+        { message: "secret provider detail" },
+        { status: 403 },
+      );
+    if (mode.rateLimited) return Response.json({}, { status: 429 });
+    if (options.method === "GET") {
+      const contact =
+        u.searchParams.get("idProperty") === "email"
+          ? [...contacts.values()].find((c) => c.properties.email === id)
+          : contacts.get(id);
+      if (!contact) return Response.json({}, { status: 404 });
+      const copy = JSON.parse(JSON.stringify(contact));
+      if (mode.readbackMismatch && !u.searchParams.has("idProperty"))
+        copy.properties.firstname = "Unexpected value";
+      return Response.json(copy);
+    }
+    if (options.method === "POST") {
+      assert.deepEqual(Object.keys(properties).sort(), [
+        "company",
+        "email",
+        "firstname",
+        "lastname",
+      ]);
+      const created = { id: String(++serial), properties, archived: false };
+      contacts.set(created.id, created);
+      if (mode.timeoutAfterWrite)
+        throw Error("fixture-hubspot-secret upstream private error");
+      if (mode.conflictAfterWrite) return Response.json({}, { status: 409 });
+      return Response.json(created, { status: 201 });
+    }
+    if (options.method === "PATCH") {
+      assert.deepEqual(Object.keys(properties).sort(), [
+        "firstname",
+        "lastname",
+      ]);
+      const contact = contacts.get(id);
+      contact.properties = { ...contact.properties, ...properties };
+      return Response.json(contact);
+    }
+    throw Error("Unexpected provider operation");
+  });
+  Object.assign(s.env, {
+    HUBSPOT_ACCESS_TOKEN: "fixture-hubspot-secret",
+    HUBSPOT_PORTAL_ID: "149828901",
+    CRM_MODE: "test-only",
+  });
+  return { ...s, contacts, requests, mode };
+}
+test("CRM requires exact write confirmation, test addresses and explicit test markers before calling HubSpot", async () => {
+  const s = await crmSetup();
+  for (const body of [
+    { ...approvedCRM, confirmed: false },
+    { ...approvedCRM, email: "customer@business.example" },
+    { ...approvedCRM, lastname: "Real customer" },
+    { ...approvedCRM, company: "extra field" },
+    { ...approvedCRM, firstname: "<img src=x>" },
+  ])
+    assert.equal((await s.call("/api/crm/contacts", body)).status, 400);
+  assert.equal(s.requests.length, 0);
+  assert.equal(
+    s.env.DB.raw.prepare("SELECT COUNT(*) n FROM executions").get().n,
+    0,
+  );
+});
+test("CRM create and retrieval verify actual provider readback; transport replay and email dedup never overwrite", async () => {
+  const s = await crmSetup();
+  const created = await s.call("/api/crm/contacts", approvedCRM, {
+    key: "crm-create-001",
+  });
+  assert.equal(created.data.execution.status, "succeeded");
+  assert.equal(created.data.execution.result.operation, "created");
+  assert.equal(created.data.execution.result.readBackVerified, true);
+  const id = created.data.execution.result.contact.id;
+  assert.equal(created.data.execution.upstreamId, id);
+  assert.equal(
+    (await s.call("/api/crm/contacts/" + id)).data.contact.email,
+    approvedCRM.email,
+  );
+  const replay = await s.call("/api/crm/contacts", approvedCRM, {
+    key: "crm-create-001",
+  });
+  assert.equal(replay.data.replayed, true);
+  const duplicate = await s.call("/api/crm/contacts", {
+    ...approvedCRM,
+    firstname: "Different",
+  });
+  assert.equal(duplicate.data.execution.result.operation, "existing");
+  assert.equal(
+    duplicate.data.execution.result.contact.firstname,
+    approvedCRM.firstname,
+  );
+  assert.equal(s.contacts.size, 1);
+  assert.equal(s.requests.filter((r) => r.method === "POST").length, 1);
+  assert.equal(s.requests.filter((r) => r.method === "PATCH").length, 0);
+  assert.equal(
+    s.env.DB.raw.prepare("SELECT COUNT(*) n FROM budget").get().n,
+    0,
+  );
+});
+test("CRM updates only a tracked, unexpired, application-owned test contact and verifies the destination", async () => {
+  const s = await crmSetup();
+  const created = await s.call("/api/crm/contacts", approvedCRM);
+  const id = created.data.execution.result.contact.id;
+  const result = await s.call(
+    `/api/crm/contacts/${id}/update`,
+    { ...approvedCRM, lastname: "TEST Updated" },
+    { key: "crm-update-001" },
+  );
+  assert.equal(result.data.execution.status, "succeeded");
+  assert.equal(result.data.execution.result.operation, "updated");
+  assert.equal(result.data.execution.result.contact.lastname, "TEST Updated");
+  const replay = await s.call(
+    `/api/crm/contacts/${id}/update`,
+    { ...approvedCRM, lastname: "TEST Updated" },
+    { key: "crm-update-001" },
+  );
+  assert.equal(replay.data.replayed, true);
+  assert.equal(s.requests.filter((r) => r.method === "PATCH").length, 1);
+  const before = s.requests.length;
+  assert.equal((await s.call("/api/crm/contacts/999999")).status, 404);
+  const unowned = await s.call("/api/crm/contacts/999999/update", approvedCRM);
+  assert.equal(unowned.data.execution.status, "failed");
+  assert.equal(s.requests.length, before);
+});
+test("CRM rejects existing unmarked contacts and does not turn a duplicate lookup into an update", async () => {
+  const s = await crmSetup();
+  s.contacts.set("9", {
+    id: "9",
+    properties: {
+      email: approvedCRM.email,
+      firstname: "Existing",
+      lastname: "TEST Existing",
+      company: "Customer company",
+    },
+  });
+  const r = await s.call("/api/crm/contacts", approvedCRM);
+  assert.equal(r.data.execution.status, "failed");
+  assert.equal(r.data.execution.error.code, "crm_contact_not_owned");
+  assert.equal(
+    s.requests.some((r) => r.method !== "GET"),
+    false,
+  );
+});
+test("CRM ambiguous writes are uncertain, retain safe errors and never automatically retry", async () => {
+  const s = await crmSetup();
+  s.mode.timeoutAfterWrite = true;
+  const first = await s.call("/api/crm/contacts", approvedCRM, {
+    key: "crm-timeout-001",
+  });
+  assert.equal(first.data.execution.status, "uncertain");
+  assert.ok(!JSON.stringify(first.data).includes("fixture-hubspot-secret"));
+  assert.ok(!s.logs.join().includes("fixture-hubspot-secret"));
+  const replay = await s.call("/api/crm/contacts", approvedCRM, {
+    key: "crm-timeout-001",
+  });
+  assert.equal(replay.data.replayed, true);
+  assert.equal(s.requests.filter((r) => r.method === "POST").length, 1);
+});
+test("CRM readback mismatch withholds success and retains the known upstream identifier for review", async () => {
+  const s = await crmSetup();
+  s.mode.readbackMismatch = true;
+  const r = await s.call("/api/crm/contacts", approvedCRM);
+  assert.equal(r.data.execution.status, "uncertain");
+  assert.equal(r.data.execution.error.code, "crm_readback_mismatch");
+  assert.equal(r.data.execution.upstreamId, "1001");
+  assert.equal(r.data.execution.result, null);
+});
+test("CRM conflict recovery reads the destination instead of retrying a create", async () => {
+  const s = await crmSetup();
+  s.mode.conflictAfterWrite = true;
+  const r = await s.call("/api/crm/contacts", approvedCRM);
+  assert.equal(r.data.execution.status, "succeeded");
+  assert.equal(r.data.execution.result.operation, "existing");
+  assert.equal(s.requests.filter((r) => r.method === "POST").length, 1);
+});
+test("CRM inspection reports configured versus verified state without exposing account secrets", async () => {
+  const s = await crmSetup();
+  const before = await s.call("/api/status");
+  assert.equal(before.data.crm.configured, true);
+  assert.equal(before.data.crm.readVerified, false);
+  assert.equal((await s.call("/api/crm/verify", {})).status, 200);
+  const after = await s.call("/api/status");
+  assert.equal(after.data.crm.mode, "test-only");
+  assert.equal(after.data.crm.readVerified, true);
+  assert.ok(!JSON.stringify(after.data).includes("fixture-hubspot-secret"));
+  assert.equal(
+    s.requests.some((r) => r.method !== "GET"),
+    false,
+  );
+});
+test("CRM permission and provider quota errors remain explicit and never trigger write retries", async () => {
+  for (const [flag, expected] of [
+    ["permissionDenied", "crm_permission_denied"],
+    ["rateLimited", "crm_rate_limited"],
+  ]) {
+    const s = await crmSetup();
+    s.mode[flag] = true;
+    const r = await s.call("/api/crm/contacts", approvedCRM);
+    assert.equal(r.data.execution.status, "failed");
+    assert.equal(r.data.execution.error.code, expected);
+    assert.equal(s.requests.length, 1);
+    assert.equal(s.contacts.size, 0);
+  }
+});
+test("CRM reads and updates reject expired ownership receipts without provider access", async () => {
+  const s = await crmSetup();
+  const created = await s.call("/api/crm/contacts", approvedCRM);
+  const id = created.data.execution.result.contact.id;
+  s.env.DB.raw
+    .prepare("UPDATE executions SET expires_at=?")
+    .run(Date.now() - 1);
+  const before = s.requests.length;
+  assert.equal((await s.call("/api/crm/contacts/" + id)).status, 404);
+  const update = await s.call(`/api/crm/contacts/${id}/update`, approvedCRM);
+  assert.equal(update.data.execution.status, "failed");
+  assert.equal(s.requests.length, before);
+});
 test("production health checks storage and provides traceable build", async () => {
   const s = await setup();
   const r = await s.call("/api/health");

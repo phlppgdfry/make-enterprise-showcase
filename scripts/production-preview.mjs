@@ -6,6 +6,9 @@ import { createRequire } from "node:module";
 import { createApp } from "../production/src/app.js";
 const require = createRequire(import.meta.url),
   knowledge = require("./make-knowledge-agent.js").buildKnowledge();
+const port = Number(process.env.SHOWCASE_PREVIEW_PORT || 4179);
+if (!Number.isInteger(port) || port < 1024 || port > 65535)
+  throw Error("SHOWCASE_PREVIEW_PORT must be an integer from 1024 to 65535");
 const sqlite = new DatabaseSync(":memory:");
 sqlite.exec(
   fs.readFileSync("production/drizzle/0000_cuddly_madrox.sql", "utf8"),
@@ -58,7 +61,7 @@ const server = http.createServer(async (req, res) => {
     let raw = "";
     for await (const chunk of req) raw += chunk;
     const r = await app(
-      new Request("http://127.0.0.1:4179" + req.url, {
+      new Request(`http://127.0.0.1:${port}` + req.url, {
         method: req.method,
         headers: req.headers,
         ...(raw ? { body: raw } : {}),
@@ -72,8 +75,8 @@ const server = http.createServer(async (req, res) => {
     res.end("Preview failed");
   }
 });
-server.listen(4179, "127.0.0.1", () =>
+server.listen(port, "127.0.0.1", () =>
   console.log(
-    "Production preview: http://127.0.0.1:4179 — local-preview-only access key; no Make model credentials.",
+    `Production preview: http://127.0.0.1:${port} — local-preview-only access key; no Make model credentials.`,
   ),
 );

@@ -8,6 +8,8 @@ const publicPaths = new Set(["/api/health", "/api/status"]);
 const workflowNames = {
   "repository-agent": "Repository knowledge",
   "company-research": "Company website research",
+  "crm-contact-create": "HubSpot test contact create",
+  "crm-contact-update": "HubSpot test contact update",
 };
 function message(target, text, error = false) {
   target.replaceChildren();
@@ -112,6 +114,23 @@ async function status() {
       ? `${s.make.verification.agent.knowledgeDocuments} documents · read-only · checked ${new Date(s.make.observedAt).toLocaleString()}${fresh ? "" : ". Inspect the connection to refresh."}`
       : "Actual execution requires operator access.";
     $("research-detail").textContent = s.research.allowedDomains.join(" · ");
+    const crmFresh =
+      s.crm.readVerified &&
+      s.crm.observedAt &&
+      Date.now() - Date.parse(s.crm.observedAt) < 86400000;
+    $("crm-status").textContent = !s.crm.configured
+      ? "Unconfigured"
+      : crmFresh
+        ? "HubSpot · test contacts"
+        : "Configured · check connection";
+    $("crm-status").closest("article").dataset.state = crmFresh
+      ? "ready"
+      : "stale";
+    $("crm-detail").textContent =
+      s.crm.reason +
+      (s.crm.observedAt
+        ? ` Checked ${new Date(s.crm.observedAt).toLocaleString()}.`
+        : "");
     const selected = $("company").value;
     $("company").replaceChildren(
       ...s.research.allowedDomains.map((d) => new Option(d, d)),
@@ -188,7 +207,7 @@ function renderExecution(target, execution, replayed = false) {
     if (execution.status === "uncertain") {
       const warning = document.createElement("p");
       warning.textContent =
-        "The provider may have executed this request. Refresh its record and inspect Make before creating a new request.";
+        "The provider may have executed this request. Refresh its record and inspect the destination before creating a new request.";
       target.append(warning);
     }
     return;
@@ -209,6 +228,8 @@ function renderExecution(target, execution, replayed = false) {
     note.className = "hint";
     note.textContent = `Knowledge snapshot ${result.sourceCommit.slice(0, 12)}. ${result.chargedCenticredits === null ? "Reported usage unavailable." : "Reported usage for this execution: " + result.chargedCenticredits / 100 + " Make credits."} Source and quote verified; review the answer for correctness.`;
     target.append(note);
+  } else if (execution.workflow.startsWith("crm-contact-")) {
+    renderContact(target, result);
   } else {
     const title = document.createElement("p");
     title.textContent = result.title || "No title provided";
@@ -252,6 +273,7 @@ async function run(button, target, path, body) {
     if (current !== session) return;
     renderExecution(target, data.execution, data.replayed);
     await history();
+    if (current === session) return data.execution;
   } catch (e) {
     if (current !== session) return;
     message(
@@ -359,7 +381,7 @@ function lockView() {
   $("access-key").value = "";
   $("access-form").removeAttribute("aria-busy");
   for (const button of document.querySelectorAll(
-    "#access-form button,#ask-button,#research-button,#verify,#reconcile,#backup",
+    "#access-form button,#ask-button,#research-button,#verify,#reconcile,#backup,#crm-form button",
   ))
     button.disabled = false;
   for (const id of [
@@ -368,11 +390,14 @@ function lockView() {
     "verify-result",
     "budget-result",
     "backup-result",
+    "crm-result",
   ]) {
     $(id).replaceChildren();
     $(id).removeAttribute("aria-busy");
   }
   history();
+  $("crm-id").value = "";
+  $("crm-confirm").checked = false;
 }
 $("lock").addEventListener("click", lockView);
 
@@ -387,6 +412,99 @@ $("research-form").addEventListener("submit", (e) => {
   run($("research-button"), $("research-result"), "/api/leads/research", {
     domain: $("company").value,
   });
+});
+function renderContact(target, result) {
+  const title = document.createElement("p");
+  title.textContent =
+    result.operation === "existing"
+      ? "Existing test contact found; no contact was overwritten."
+      : result.operation === "updated"
+        ? "Test contact updated and read back."
+        : "Test contact read back from HubSpot.";
+  target.append(title);
+  for (const field of ["id", "email", "firstname", "lastname", "company"]) {
+    const line = document.createElement("p");
+    line.textContent = `${field}: ${result.contact[field]}`;
+    target.append(line);
+  }
+  const note = document.createElement("p");
+  note.className = "hint";
+  note.textContent =
+    "Actual HubSpot test record. No message was sent. A separate confirmed update is required to change an existing contact.";
+  target.append(note);
+}
+const crmBody = () => ({
+  email: $("crm-email").value,
+  firstname: $("crm-firstname").value,
+  lastname: $("crm-lastname").value,
+  confirmed: $("crm-confirm").checked,
+});
+async function writeContact(update) {
+  if (!$("crm-form").reportValidity()) return;
+  const id = $("crm-id").value;
+  if (update && !/^[0-9]{1,30}$/.test(id)) {
+    message($("crm-result"), "Create or find a test contact first.", true);
+    return;
+  }
+  const current = session;
+  const execution = await run(
+    $(update ? "crm-update" : "crm-create"),
+    $("crm-result"),
+    update ? `/api/crm/contacts/${id}/update` : "/api/crm/contacts",
+    crmBody(),
+  );
+  if (current !== session) return;
+  $("crm-confirm").checked = false;
+  if (execution?.status === "succeeded")
+    $("crm-id").value = execution.result.contact.id;
+}
+$("crm-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  writeContact(false);
+});
+$("crm-update").addEventListener("click", () => writeContact(true));
+for (const id of ["crm-email", "crm-firstname", "crm-lastname"])
+  $(id).addEventListener("input", () => {
+    $("crm-confirm").checked = false;
+    if (id === "crm-email") $("crm-id").value = "";
+  });
+$("crm-read").addEventListener("click", async () => {
+  const current = session,
+    id = $("crm-id").value;
+  if (!key || !/^[0-9]{1,30}$/.test(id)) {
+    message(
+      $("crm-result"),
+      "Unlock access and create or find a test contact first.",
+      true,
+    );
+    return;
+  }
+  try {
+    const result = await api(`/api/crm/contacts/${id}`);
+    if (current !== session) return;
+    $("crm-result").replaceChildren();
+    renderContact($("crm-result"), result);
+  } catch (e) {
+    if (current === session) message($("crm-result"), e.message, true);
+  }
+});
+$("crm-verify").addEventListener("click", async () => {
+  const current = session;
+  if (!key) {
+    message($("crm-result"), "Unlock operator access first.", true);
+    return;
+  }
+  try {
+    await api("/api/crm/verify", {});
+    if (current !== session) return;
+    message(
+      $("crm-result"),
+      "HubSpot contact read access verified. Write access is verified by an explicitly approved contact round trip.",
+    );
+    await status();
+  } catch (e) {
+    if (current === session) message($("crm-result"), e.message, true);
+  }
 });
 $("refresh").addEventListener("click", history);
 $("status-refresh").addEventListener("click", status);

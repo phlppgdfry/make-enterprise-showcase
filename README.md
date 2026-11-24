@@ -6,7 +6,9 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 
 [**Open the operational application**](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site) · [Health](https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site/api/health) · [Current status and remaining work](docs/PRODUCTION-READINESS.md) · [Reference lab](https://phlppgdfry.github.io/make-enterprise-showcase/)
 
-## Version 2.3
+## Version 2.4
+
+Version 2.4 adds a server-side HubSpot adapter and a confirmation-gated test-contact workspace. It validates destination readback, handles duplicates without overwriting, retains ambiguous writes for review and rejects customer/unowned records. See [HubSpot setup and verification](docs/HUBSPOT-INTEGRATION.md). Desktop/mobile browser acceptance is now a separate GitHub Actions gate; provider fixtures are distinguished from live integration proof.
 
 Patch 2.3.1 closes expired-idempotency result disclosure, bounds Make response consumption while streaming, and extends free public monitoring to icons, the manifest and protected read endpoints. [Current readiness and prioritized completion criteria](docs/PRODUCTION-READINESS.md) distinguish the finished public showcase from integrations still requiring external configuration.
 
@@ -23,9 +25,9 @@ Operators can download a private, consistent database snapshot and validate it w
 | Execution ledger | D1 persistence, request IDs, audit events, idempotency and uncertain-state handling | Single operator; seven-day retrieval period; physical retention purge is operator-triggered |
 | Credit control | Server-side allocation, provider usage receipts and atomic reconciliation | Existing approved 50-credit allowance; no purchases or automatic model retries |
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
-| CRM | Explicit `crm_unconfigured` error | No configured CRM, no contact writes and no outbound communications |
+| CRM | HubSpot create/find/read/update adapter with confirmed writes and destination readback | Operator-only, application-marked test contacts; no customer writes, messages, enrollment or deletions |
 
-Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The 24 November hardening audit invokes no model. The latest local suite has **117 passing Node tests**, plus the legacy local pattern experiments. These numbers do not establish a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links the dated acceptance receipts and remaining prerequisites.
+Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The latest local suite has **127 passing Node tests and ten desktop/mobile browser checks**, plus the legacy local pattern experiments. Browser provider fixtures do not establish live HubSpot operation, a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links dated acceptance receipts and remaining prerequisites.
 
 ## Architecture
 
@@ -70,13 +72,17 @@ For the original synthetic lab, run `npm start` and open `http://127.0.0.1:4173`
 | `OPERATOR_API_KEY` | Independent high-entropy operator bearer secret |
 | `RESEARCH_DOMAINS` | Optional approved domains; defaults to `make.com,cloudflare.com,github.com` |
 | `DB` | D1 binding provisioned from `production/.openai/hosting.json` |
+| `HUBSPOT_ACCESS_TOKEN` | Approved contact-only HubSpot key; encrypted runtime secret |
+| `HUBSPOT_PORTAL_ID` | Selected account, stored in runtime configuration |
+| `CRM_MODE` | Must be `test-only`; customer operations are not enabled |
 
-The owner explicitly approved secure runtime credential storage and at most 50 existing Make credits. No credentials are in source control. The locally generated operator key is in the ignored owner-readable `exports/production-operator-key.txt`; do not publish it. No CRM credential is configured.
+The owner approved secure runtime storage, the contact-only HubSpot key and at most 50 existing Make credits. No credentials are in source control. The operator key remains in ignored, owner-readable `exports/production-operator-key.txt`. HubSpot credentials are not provided to local preview or CI.
 
 ## Verification and deployment
 
 ```bash
-npm run test:all          # 117 Node tests, local experiments and static blueprint audit
+npm run test:all          # 127 Node tests, local experiments and static blueprint audit
+npm run test:browser      # 10 desktop/mobile UI checks with local provider fixtures
 npm run format:check     # Production source formatting
 npm run build:production # Bundle Worker and public assets
 npm run smoke:production # Actual public checks; no metered AI calls
@@ -95,4 +101,4 @@ The older blueprint deployment tooling still defaults to a plan and requires exp
 
 ## Limits before real customer operations
 
-CRM integration requires an authorized destination, credentials, sandbox fields and explicit approval for test writes. Research provides self-published website metadata, not a contact discovery service. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention maintenance remains manual at the owner’s request. Continuous customer operations also need an approved backup/restore process, access governance and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill have not been verified. The showcase is publicly deployed and its working flows are verified; it is not represented as an unrestricted enterprise production system.
+CRM is restricted to confirmed, application-marked test contacts in the authorized HubSpot account. Customer operations require individual access governance and an approved business schema. Research provides self-published website metadata, not contact discovery. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention remains manual at the owner’s request. Continuous customer operations also need approved backup custody/recovery and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill remain unverified; this showcase is not represented as an unrestricted enterprise production system.

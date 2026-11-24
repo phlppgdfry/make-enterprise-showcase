@@ -14,7 +14,7 @@ The build reads the seven public documents from the pinned Git commit; clone ful
 
 Set `MAKE_API_KEY`, `MAKE_ZONE` and `OPERATOR_API_KEY` through Sites runtime environment management. All are marked secrets. The existing Make token was transferred only after explicit owner approval. It may have broader account permissions than the application needs: rotate to a dedicated least-privilege token when available. The application itself exposes no Make mutation route. Never put secrets in `.openai/hosting.json`, static assets, Git, CLI arguments or query strings.
 
-`RESEARCH_DOMAINS` is optional, default `make.com,cloudflare.com,github.com`. Adding domains changes outbound research scope and requires a deliberate terms/privacy/SSRF review. No CRM secret is configured. An operator key is held locally in ignored, owner-readable `exports/production-operator-key.txt`; retrieve it locally without publishing it. Rotate it with the Sites environment tool and redeploy if lost or disclosed.
+`RESEARCH_DOMAINS` defaults to `make.com,cloudflare.com,github.com`; broadening it needs a terms/privacy/SSRF review. HubSpot uses encrypted `HUBSPOT_ACCESS_TOKEN`, `HUBSPOT_PORTAL_ID` and `CRM_MODE=test-only`, approved by the owner. It is excluded from CI/local preview. An operator key remains locally in ignored, owner-readable `exports/production-operator-key.txt`; never publish it. Rotate it through Sites environment management and redeploy if lost or disclosed.
 
 ## Publish
 
@@ -35,7 +35,7 @@ Rollback deploys a previously saved compatible Site version. A Worker rollback d
 
 ## API contract
 
-Public: `GET /api/health`, `GET /api/status`. Protected: `GET /api/workflows`, `POST /api/integrations/verify`, `POST /api/agent/ask` (`question`), `POST /api/leads/research` (`domain`), `POST /api/workflows/:id/execute`, `GET /api/executions`, `GET /api/executions/:id`, `GET /api/leads/:id`, `POST /api/maintenance/retention`, `POST /api/budget/reconcile`. CRM routes return `crm_unconfigured` (503).
+Public: `GET /api/health`, `GET /api/status`. Protected: `GET /api/workflows`, `POST /api/integrations/verify`, `POST /api/agent/ask` (`question`), `POST /api/leads/research` (`domain`), `POST /api/workflows/:id/execute`, `GET /api/executions`, `GET /api/executions/:id`, `GET /api/leads/:id`, `POST /api/maintenance/retention`, `POST /api/budget/reconcile`, `GET /api/backup`. The protected [HubSpot routes](HUBSPOT-INTEGRATION.md) support confirmed test-contact operations and return `crm_unconfigured` (503) when runtime prerequisites are absent.
 
 Execution POSTs require an `Idempotency-Key` header of 8–100 safe characters. Successful acceptance returns an execution record, whose `status` is authoritative: `succeeded`, `failed`, `uncertain`, or an in-progress record for a duplicate. HTTP 201 means the execution record was created, not that the upstream operation succeeded. Validation/auth failures return `{error:{code,message,requestId}}`. No webhook endpoint or privileged unauthenticated write is exposed.
 

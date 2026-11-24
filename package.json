@@ -1,6 +1,6 @@
 {
   "name": "make-enterprise-showcase",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Evidence-based Make automation reference with shared policy tools, authenticated API and an interactive workbench",
   "main": "scripts/validate-blueprints.js",
   "scripts": {
@@ -28,7 +28,8 @@
     "db:generate": "drizzle-kit generate --config=production/drizzle.config.cjs",
     "format:check": "prettier --check production/src production/public production/db tests/production.test.js scripts/build-production.mjs scripts/production-preview.mjs scripts/production-smoke.mjs scripts/production-retention.mjs scripts/build-brand-assets.mjs scripts/public-assets.mjs scripts/verify-production-backup.mjs",
     "smoke:production": "node scripts/production-smoke.mjs",
-    "backup:verify": "node scripts/verify-production-backup.mjs"
+    "backup:verify": "node scripts/verify-production-backup.mjs",
+    "test:browser": "playwright test"
   },
   "keywords": [
     "make",
@@ -50,6 +51,7 @@
     "parse5": "8.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "drizzle-kit": "0.31.11",
     "drizzle-orm": "0.45.4",
     "esbuild": "0.28.2",

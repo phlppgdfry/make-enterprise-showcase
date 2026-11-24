@@ -26,9 +26,9 @@ Add a broader research provider only with authorized credentials, reviewed terms
 
 ## CRM
 
-There is **no configured CRM**. Account inspection found only the Make AI Provider connection; the existing HubSpot scenario is inactive/unlinked. The backend returns authenticated `503 crm_unconfigured` for CRM routes. No record is created and no email is sent.
+Version 2.4 adds a direct server-side HubSpot adapter using the owner's explicitly approved contact-only service key and existing EU1 account. `CRM_MODE=test-only` permits only clearly marked test contacts and explicit write confirmation. Create/find/read/update operations persist execution receipts and verify destination readback; duplicate email never silently overwrites a contact. See [HubSpot configuration, limits and live evidence](HUBSPOT-INTEGRATION.md).
 
-To enable this feature, provide the intended CRM and authorized sandbox, scoped credentials, required contact schema, duplicate policy and explicit approval for test writes. Then implement the provider adapter, idempotent create/retrieve/update behavior and destination readback tests. No unverified HubSpot adapter or invented local CRM is presented as operational.
+The legacy Make HubSpot/Slack scenario remains inactive/unlinked and is not invoked by this adapter. Its Slack messages are not authorized by connecting HubSpot. This does not make the knowledge agent write-capable or enable customer-data automation. Missing/misconfigured HubSpot settings still return `503 crm_unconfigured` without writes.
 
 ## Existing scenarios
 

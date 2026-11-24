@@ -1,5 +1,7 @@
 # Current readiness and remaining work
 
+Version 2.4 adds an owner-approved HubSpot test-contact adapter and a ten-check desktop/mobile browser CI gate. The account/service key and encrypted secret are configured; final real destination evidence is added after publication in [HubSpot integration](HUBSPOT-INTEGRATION.md). The dated 2.3.1 audit below remains historical. These changes do not activate cleanup, customer-data writes, Slack messages or the legacy scenarios.
+
 Audited 24 November 2026. This is the current completion checklist; older acceptance reports retain their original dates and measurements.
 
 **The public showcase has working agent, company-metadata research, persistent receipts and private export paths. The complete enterprise integration mission is not finished.** Adding more decorative features is lower priority than completing the external connections, recovery and operational ownership below.
