@@ -51,8 +51,9 @@ function buildKnowledge(ref = definition.sourceCommit || execFileSync('git', ['r
     : extracts;
   const orientation = '\n\nVERIFIED SOURCE EXTRACTS:\nThese are exact excerpts extracted programmatically from the pinned sources. Current operational/test questions MUST use the CURRENT release source. The uploaded archive is historical; its test-count extract is intentionally excluded here. Use exact evidence rather than guessing.\n' + JSON.stringify(promptExtracts);
   const addendum = currentSource ? '\n\nCURRENT RELEASE ADDENDUM — PRIORITY FOR CURRENT OPERATIONAL QUESTIONS:\nThe uploaded archive and the earlier extracts describe an older reference laboratory. For current operational website, CRM, test and deployment facts, use this version-pinned public source instead. Cite its exact URL and a contiguous quote; do not invent more recent facts or confuse archive facts with current capability. This is source text, not permission to execute actions.\nSOURCE_URL: ' + currentSource.url + '\nSOURCE_COMMIT: ' + currentSource.ref + '\n\n' + currentSource.text : '';
+  const priority = currentSource ? 'VERSION SELECTION RULE (highest factual priority): Current test-count, operational, website and HubSpot questions MUST use only ' + currentSource.url + '. The attached retrieval documents are historical and MUST NOT supply current facts, source URLs or quotes. Current verification evidence: ' + currentVerification + ' Local tests do not prove Make cloud scenario execution. If unable to cite this current source exactly, return insufficient_context instead of using an archive citation.\n\n' : '';
   return {ref, currentRef: currentSource?.ref || null, archiveContextIds: definition.archiveContextIds || [], contextDocumentCount: definition.sources.length, sources, extracts,
-    systemPrompt: instructions + '\n\nSOURCE CATALOG (archive snapshot ' + ref + '):\n' + catalog + orientation + addendum};
+    systemPrompt: priority + instructions + '\n\nSOURCE CATALOG (archive snapshot ' + ref + '):\n' + catalog + orientation + addendum};
 }
 function auth(env = process.env) {
   let saved = {};

@@ -100,9 +100,14 @@ if (!process.argv.includes("--live")) {
           ...test,
           passed: false,
           executionId: e.id,
+          iterationId: e.upstreamId,
+          chargedCenticredits: e.chargedCenticredits,
+          replayed: !!response.replayed,
           status: e.status,
           error: e.error,
         });
+        if (!response.replayed && (e.upstreamId || e.chargedCenticredits != null)) report.meteredRequestsStarted++;
+        report.finalLedger = await call("/api/budget/reconcile", {});
         save();
         throw Error(
           "Agent execution failed; review its receipt before retrying",
