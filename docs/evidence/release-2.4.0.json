@@ -1,0 +1,43 @@
+{
+  "localAuditDate": "2026-11-24",
+  "runtimeCommit": "46a4eb85d70156258c93020f17e0a7d47c342795",
+  "artifactCommit": "0a9c3e8c88a8fcd9741d8912aeae1f6c1e579987",
+  "savedVersion": 10,
+  "deployment": {
+    "id": "appgdep_6b0515331a548191bf832d1d329879dc",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "title": "Make Enterprise Workbench",
+    "version_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_450a10b5e2388191a705716aef5a8776",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "failure_message": null,
+    "env_set_revision": 2,
+    "updated_at": "2026-11-24T04:40:30.734629+00:00"
+  },
+  "localNodeTests": 127,
+  "localBrowserChecks": 10,
+  "knownCredentialScan": {
+    "filesChecked": 168,
+    "matches": 0
+  },
+  "ci": {
+    "node": "https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45327649121",
+    "browser": "https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45327649233",
+    "pages": "https://github.com/phlppgdfry/make-enterprise-showcase/actions/runs/45327648257"
+  },
+  "hubspotUI": {
+    "portalId": "149828901",
+    "contactId": "936971617524",
+    "visibleName": "Make Showcase TEST Verified update 20261124",
+    "searchMatchedContacts": 1,
+    "observedCompanyAssociation": "example.com",
+    "companyAPICalls": 0
+  },
+  "meteredModelCalls": 0,
+  "messagingApiCalls": 0,
+  "cleanupActivated": false
+}

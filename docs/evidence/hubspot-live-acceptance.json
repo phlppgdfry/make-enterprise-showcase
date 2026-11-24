@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-11-24T04:41:11.792Z",
+  "source": "actual public browser -> authenticated Worker -> actual HubSpot API; no provider mocks",
+  "portalId": "149828901",
+  "created": {
+    "httpStatus": 201,
+    "execution": {
+      "id": "92add862-83e2-4ef0-aeb1-92d63c4e84e6",
+      "workflow": "crm-contact-create",
+      "status": "succeeded",
+      "createdAt": "2026-11-24T04:41:08.530Z",
+      "updatedAt": "2026-11-24T04:41:09.459Z",
+      "result": {
+        "contact": {
+          "id": "936971617524",
+          "email": "make-showcase-test-release-20261124@example.com",
+          "firstname": "Make Showcase",
+          "lastname": "TEST Verification 20261124",
+          "company": "Make Enterprise Showcase - TEST"
+        },
+        "operation": "created",
+        "readBackVerified": true,
+        "duplicate": false,
+        "mode": "test-only"
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": "936971617524"
+    }
+  },
+  "duplicate": {
+    "httpStatus": 201,
+    "execution": {
+      "id": "0f4909a1-affb-4a1a-b6fe-b075816d8d9b",
+      "workflow": "crm-contact-create",
+      "status": "succeeded",
+      "createdAt": "2026-11-24T04:41:09.711Z",
+      "updatedAt": "2026-11-24T04:41:09.930Z",
+      "result": {
+        "contact": {
+          "id": "936971617524",
+          "email": "make-showcase-test-release-20261124@example.com",
+          "firstname": "Make Showcase",
+          "lastname": "TEST Verification 20261124",
+          "company": "Make Enterprise Showcase - TEST"
+        },
+        "operation": "existing",
+        "readBackVerified": true,
+        "duplicate": true,
+        "mode": "test-only"
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": "936971617524"
+    }
+  },
+  "updated": {
+    "httpStatus": 201,
+    "execution": {
+      "id": "c26e82f4-d586-4bd5-b22a-30509f20d9a5",
+      "workflow": "crm-contact-update",
+      "status": "succeeded",
+      "createdAt": "2026-11-24T04:41:10.448Z",
+      "updatedAt": "2026-11-24T04:41:11.146Z",
+      "result": {
+        "contact": {
+          "id": "936971617524",
+          "email": "make-showcase-test-release-20261124@example.com",
+          "firstname": "Make Showcase",
+          "lastname": "TEST Verified update 20261124",
+          "company": "Make Enterprise Showcase - TEST"
+        },
+        "operation": "updated",
+        "readBackVerified": true,
+        "duplicate": false,
+        "mode": "test-only"
+      },
+      "error": null,
+      "chargedCenticredits": null,
+      "upstreamId": "936971617524"
+    }
+  },
+  "readback": {
+    "contact": {
+      "id": "936971617524",
+      "email": "make-showcase-test-release-20261124@example.com",
+      "firstname": "Make Showcase",
+      "lastname": "TEST Verified update 20261124",
+      "company": "Make Enterprise Showcase - TEST"
+    },
+    "mode": "test-only",
+    "readBackVerified": true
+  },
+  "pageErrors": [],
+  "meteredModelCalls": 0,
+  "messagingApiCalls": 0,
+  "automaticCleanupActivated": false
+}

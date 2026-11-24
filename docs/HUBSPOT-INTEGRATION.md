@@ -1,5 +1,11 @@
 # HubSpot contact integration
 
+## Live acceptance — 24 November 2026
+
+The public website created contact **936971617524**, returned the same record on a duplicate-email request, separately updated its last name to **TEST Verified update 20261124**, and read that value back from HubSpot. The logged-in HubSpot interface independently showed the same updated name and exactly one search match. [Actual API/browser receipts](evidence/hubspot-live-acceptance.json) and [deployment/CI evidence](evidence/release-2.4.0.json) preserve execution IDs and provenance. No provider mocks were used in this live journey.
+
+HubSpot displayed an association to the `example.com` company. The application made no companies API call and does not claim whether that company pre-existed or was associated automatically. Account-level HubSpot automation can cause such associations; existing linked records were preserved. No messaging API was called. This proves the controlled test-contact flow, not unrestricted customer operations or the inactive legacy Make CRM/Slack scenario.
+
 Version 2.4 uses the owner's existing EU1 HubSpot account, portal `149828901`, selected through the kippieg Google identity. The owner approved creating **Make Enterprise Showcase CRM** with only `crm.objects.contacts.read` and `crm.objects.contacts.write`, and encrypted storage in the existing Sites backend. No subscription or marketing/email scopes are involved.
 
 ## Security boundary
