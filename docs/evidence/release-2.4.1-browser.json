@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-24T17:58:25.095Z",
+  "runtimeCommit": "80e63447f6018b3562d6c4cedd1f3e8735e2f8c0",
+  "source": "actual public Chromium browser and backend; real stored Make answer replay; no provider mocks",
+  "desktop": [
+    1440,
+    1000
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "currentCitationRendered": true,
+  "executionId": "835c6a21-1380-49ae-9e9f-b82586c540ef",
+  "replayed": true,
+  "meteredModelCalls": 0,
+  "crmWrites": 0,
+  "operatorKeyClearedOnLock": true,
+  "horizontalMobileOverflow": false,
+  "pageErrors": [],
+  "networkFailures": []
+}

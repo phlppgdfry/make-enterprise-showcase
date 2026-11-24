@@ -82,6 +82,9 @@ test('rendered table cells preserve provenance and cannot change numbers',()=>{
  assert.equal(validateAnswer(a,knowledge).status,'answered');a.citations[0].quote=a.citations[0].quote.replace('78','999');assert.throws(()=>validateAnswer(a,knowledge),/Unverified/);
 });
 test('acceptance checks reject the earlier contradictory browser-model answer',()=>{
+ const {evaluate:evaluateWorkflow}=require('../scripts/evaluate-make-agent');
+ assert.equal(evaluateWorkflow({id:'workflows',expected:'answered'},{status:'answered',answer:'Support triage, knowledge search and lead qualification; browserdemo uses no language model.'}),true);
+ assert.equal(evaluateWorkflow({id:'workflows',expected:'answered'},{status:'answered',answer:'Support triage, knowledge search and lead qualification; browserdemo uses a language model.'}),false);
  const {evaluate}=require('../scripts/evaluate-make-agent');
  const testCase={id:'workflows',expected:'answered'};
  assert.equal(evaluate(testCase,{status:'answered',answer:'support, knowledge, lead. Ja, de browserdemo gebruikt een echt taalmodel; elders staat geen LLM.',citations:[]}),false);

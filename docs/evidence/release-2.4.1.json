@@ -1,0 +1,62 @@
+{
+  "runtimeCommit": "80e63447f6018b3562d6c4cedd1f3e8735e2f8c0",
+  "currentKnowledgeCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+  "archiveKnowledgeCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+  "successfulCurrentAcceptance": {
+    "cases": 8,
+    "passed": 8,
+    "distinctProviderExecutions": 8,
+    "chargedCenticredits": 1263,
+    "lastEvaluationMeteredRequests": 0,
+    "note": "Final report re-evaluates the same eight actual executions idempotently. The first seven-case pass report had one false negative because the answer used English no language model; the evaluator now tests English negation and rejection of the positive opposite."
+  },
+  "earlierAttempts": {
+    "initialCases": 8,
+    "initialPassed": 7,
+    "chargedCenticredits": 1266,
+    "followupRejectedExecutions": [
+      {
+        "executionId": "051759bd-64ef-4294-87dd-a18795264c4e",
+        "iterationId": "0eca9aac-76cf-4f77-883e-af3c8c7fe26c",
+        "chargedCenticredits": 187
+      },
+      {
+        "executionId": "e9ef2ee5-9e3b-405f-b17d-f292f3704851",
+        "iterationId": "b31ba0e3-2f1e-4687-a608-a499a1b218cd",
+        "chargedCenticredits": 181
+      }
+    ],
+    "rootCause": "The initial model preferred historical test evidence. Version validation then revealed that the Worker build omitted each source ref and inline metadata. Prompt priority and generated runtime metadata were corrected; a regression now builds and validates the actual generated knowledge."
+  },
+  "creditLedger": {
+    "allocatedCredits": 44.16,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 5.84,
+    "limitChanged": false
+  },
+  "creditBeforeThisRefresh": 15.19,
+  "creditUsedByThisRefresh": 28.97,
+  "newCallsCurrentlyBlocked": true,
+  "blockingRule": "5.84 remaining is below the unchanged seven-credit pre-dispatch allocation. No allowance increase or credit purchase.",
+  "localTests": 132,
+  "desktopMobileChecks": 10,
+  "knownCredentialScan": {
+    "trackedFilesAndCompiledWorker": 184,
+    "matches": 0,
+    "credentialsChecked": [
+      "HubSpot service key",
+      "dedicated Make runtime key",
+      "operator key"
+    ]
+  },
+  "automaticCleanupActivated": false,
+  "releaseChecks": {
+    "nodeTestsPassed": 132,
+    "nodeTestsFailed": 0,
+    "desktopMobileBrowserChecksPassed": 10,
+    "formatCheck": "passed",
+    "dependencyAuditReportedVulnerabilities": 0,
+    "publicSmoke": "passed",
+    "hostedRestoreVerified": false
+  }
+}

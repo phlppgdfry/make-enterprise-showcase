@@ -1,0 +1,45 @@
+{
+  "queriedAt": "2026-11-24T18:00:11.459Z",
+  "windowMinutes": 5,
+  "errorsOnly": true,
+  "events": [
+    {
+      "timestamp": 1795543148181,
+      "path": "/api/leads/research",
+      "status": 410,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795543106770,
+      "path": "/api/agent/ask",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795543106688,
+      "path": "/api/workflows",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795543106592,
+      "path": "/api/executions",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795543106511,
+      "path": "/api/backup",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795543104850,
+      "path": "/api/executions",
+      "status": null,
+      "outcome": "canceled"
+    }
+  ],
+  "http5xxCount": 0,
+  "note": "401 probes and 410 expired replay are deliberate security checks; canceled history request followed operator locking. No raw headers, IP addresses or provider trace bodies retained."
+}

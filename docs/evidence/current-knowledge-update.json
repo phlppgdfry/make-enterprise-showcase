@@ -1,0 +1,17 @@
+{
+  "agentId": "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
+  "archiveCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+  "currentSourceCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+  "uploadedDocuments": 7,
+  "inlineCurrentSources": 1,
+  "contextIdsUnchanged": true,
+  "beforePromptSha256": "8e7d4bc01187c5d10c11e23ae6ab92331127ceb59c27e813ab423c94d12b6e67",
+  "afterPromptSha256": "90db7d042b0a89cf9618fbdc21f1f4b72d2817aedf95e9a0da82b1beb3fd810b",
+  "scenarioTools": 0,
+  "mcpTools": 0,
+  "model": "medium",
+  "maxTokens": 2400,
+  "modelCalls": 0,
+  "contextUploads": 0,
+  "updatedAt": "2026-11-24T17:44:46.417Z"
+}

@@ -4,7 +4,7 @@ const cases = require('../agents/repository/acceptance-cases.json');
 function evaluate(test, answer, result = {}) {
   if (answer.status !== test.expected) return false;
   if (test.id === 'tenant-boundary-retrieval') return /gateway/i.test(answer.answer) && /niet|nooit|geen|never/i.test(answer.answer) && (result.retrievalSteps || []).some(step => step.toolResponse?.toolType === 'rag' && step.toolResponse?.status === 'ok');
-  if (test.id === 'workflows') return /support/i.test(answer.answer) && /kennis|knowledge/i.test(answer.answer) && /lead/i.test(answer.answer) && /geen|niet|nee/i.test(answer.answer) && !/ja,? de browserdemo|browserdemo gebruikt een echt/i.test(answer.answer);
+  if (test.id === 'workflows') return /support/i.test(answer.answer) && /kennis|knowledge/i.test(answer.answer) && /lead/i.test(answer.answer) && /geen|niet|nee|no (?:language model|llm)|does not (?:use|call)/i.test(answer.answer) && !/ja,? de browserdemo|browserdemo gebruikt een echt|browserdemo uses (?:a|an) (?:language model|llm)/i.test(answer.answer);
   if (test.id === 'test-evidence') return new RegExp('\\b'+(test.expectedNodeTests || 78)+'\\b').test(answer.answer) && /niet|geen|nee/i.test(answer.answer);
   if (test.id === 'current-hubspot') return /hubspot/i.test(answer.answer) && /test/i.test(answer.answer) && /operator|bevestig|goedkeur|toestemming/i.test(answer.answer) && /niet|geen/i.test(answer.answer);
   if (test.id === 'missing-private-data') return answer.citations.length === 0;

@@ -1,0 +1,38 @@
+{
+  "verifiedAt": "2026-11-24T17:44:59.190Z",
+  "archiveCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+  "currentSourceCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+  "results": [
+    {
+      "id": "test-evidence",
+      "question": "Hoeveel regressietests zijn volgens de huidige verificatie uitgevoerd, en bewijzen die dat de Make-cloudkoppeling werkt?",
+      "expected": "answered",
+      "expectedNodeTests": 132,
+      "passed": false,
+      "executionId": "e9ef2ee5-9e3b-405f-b17d-f292f3704851",
+      "iterationId": "b31ba0e3-2f1e-4687-a608-a499a1b218cd",
+      "chargedCenticredits": 181,
+      "replayed": false,
+      "status": "failed",
+      "error": {
+        "code": "unverified_agent_answer",
+        "message": "The answer failed source validation and has been withheld."
+      }
+    }
+  ],
+  "meteredRequestsStarted": 1,
+  "runtimeCommit": "7fd183f5e01afec10541306cd3b83a5a540eab0e",
+  "startingLedger": {
+    "allocatedCredits": 29.72,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 20.28,
+    "limitChanged": false
+  },
+  "finalLedger": {
+    "allocatedCredits": 31.53,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 18.47,
+    "limitChanged": false
+  },
+  "failure": "Agent execution failed; review its receipt before retrying"
+}

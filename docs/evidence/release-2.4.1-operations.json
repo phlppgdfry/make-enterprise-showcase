@@ -1,0 +1,95 @@
+{
+  "checkedAt": "2026-11-24T17:59:08.199Z",
+  "localAuditDate": "2026-11-24",
+  "health": {
+    "status": "healthy",
+    "storage": "D1",
+    "sourceCommit": "80e63447f6018b3562d6c4cedd1f3e8735e2f8c0",
+    "knowledgeCommit": "21dad08c5aaed036a2057e6f993911d3b051d776"
+  },
+  "agent": {
+    "id": "0a8be23e-73f4-4856-9b7b-f2932f82e84a",
+    "name": "Make Repo Kennisagent",
+    "model": "medium",
+    "knowledgeDocuments": 7,
+    "sourceCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+    "archiveCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+    "inlineAddendum": true,
+    "readOnly": true
+  },
+  "scenarios": [
+    {
+      "id": 8199349,
+      "name": "02 - High-Throughput Idempotent Webhook Engine & Dead Letter Queue (DLQ)",
+      "active": true,
+      "linked": true
+    },
+    {
+      "id": 8199345,
+      "name": "01 - Autonomous Multi-Tool AI Agent & Human-in-the-Loop Orchestrator",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199351,
+      "name": "03 - Bi-Directional CRM & Billing Differential Sync Engine",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199353,
+      "name": "04 - Self-Healing ETL Pipeline with Rate-Limit Governor & Transaction Rollback",
+      "active": false,
+      "linked": false
+    },
+    {
+      "id": 8199357,
+      "name": "05 - Multi-Tenant Enterprise Knowledge RAG Engine",
+      "active": false,
+      "linked": false
+    }
+  ],
+  "backupRecovery": {
+    "verified": true,
+    "mode": "isolated in-memory SQLite restore; no hosted writes",
+    "sourceCommit": "80e63447f6018b3562d6c4cedd1f3e8735e2f8c0",
+    "backupCreatedAt": "2026-11-24T17:59:08.035Z",
+    "checksum": "827df53499b6b47d69f6dd8a5da2ffb3e3d33b3a3728e6af574629771a6ce4f5",
+    "rows": {
+      "budget": 1,
+      "executions": 38,
+      "audit_events": 129,
+      "leads": 3,
+      "integration_cache": 2
+    },
+    "budget": {
+      "used_centi": 4416,
+      "limit_centi": 5000
+    }
+  },
+  "crm": {
+    "provider": "HubSpot",
+    "mode": "test-only",
+    "readVerified": true,
+    "observedAt": "2026-11-24T17:59:07.412Z"
+  },
+  "contactReadback": {
+    "id": "936971617524",
+    "verified": true
+  },
+  "ledger": {
+    "allocatedCredits": 44.16,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 5.84,
+    "limitChanged": false
+  },
+  "expiredReplay": {
+    "tested": true,
+    "status": 410,
+    "code": "idempotency_expired",
+    "privateResultReturned": false
+  },
+  "meteredModelCalls": 0,
+  "crmWrites": 0,
+  "automaticCleanupActivated": false
+}

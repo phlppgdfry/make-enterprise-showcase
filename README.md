@@ -10,7 +10,7 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 
 Version 2.4 adds a server-side HubSpot adapter and a confirmation-gated test-contact workspace. It validates destination readback, handles duplicates without overwriting, retains ambiguous writes for review and rejects customer/unowned records. See [HubSpot setup and verification](docs/HUBSPOT-INTEGRATION.md). Desktop/mobile browser acceptance is now a separate GitHub Actions gate; provider fixtures are distinguished from live integration proof.
 
-Patch 2.4.1 preserves the seven uploaded archive documents and supplies a separate current-release source directly in the agent instructions. Both source versions use immutable GitHub URLs and independent quote validation. Controlled updates refuse unexpected archive IDs/tools and modify only the existing agent's instructions, not its tools or documents. Release model acceptance uses the backend's unchanged credit ledger; it does not bypass the allowance through direct unbudgeted API calls.
+Patch 2.4.1 preserves the seven uploaded archive documents and supplies a separate current-release source directly in the agent instructions. Both source versions use immutable GitHub URLs and independent quote validation. Controlled updates refuse unexpected archive IDs/tools and modify only the existing agent's instructions, not its tools or documents. Current operational questions reject historical source versions; the production build preserves and tests source-version metadata. Eight real current-version cases passed. Release model acceptance uses the backend's unchanged credit ledger; it does not bypass the allowance through direct unbudgeted API calls.
 
 Patch 2.3.1 closes expired-idempotency result disclosure, bounds Make response consumption while streaming, and extends free public monitoring to icons, the manifest and protected read endpoints. [Current readiness and prioritized completion criteria](docs/PRODUCTION-READINESS.md) distinguish the finished public showcase from integrations still requiring external configuration.
 
@@ -22,14 +22,14 @@ Operators can download a private, consistent database snapshot and validate it w
 
 | Capability | Operational behavior | Boundary |
 | --- | --- | --- |
-| Repository knowledge | Browser → authenticated backend → existing Make Repo Kennisagent → validated citations | Seven public documents pinned to `885c72b6a247ef9f9aabe7bc540339888397f403`; answers concern that historical snapshot |
+| Repository knowledge | Browser → authenticated backend → existing Make Repo Kennisagent → validated citations | Seven archive documents at `885c72b6a247ef9f9aabe7bc540339888397f403`, plus a separate current-release source at `21dad08c5aaed036a2057e6f993911d3b051d776`; both use immutable citations |
 | Company research | Actual HTTPS homepage metadata, robots checks, source excerpts and observation time | Approved domains only; no invented contacts, emails, fit scores or independently verified firmographics |
 | Execution ledger | D1 persistence, request IDs, audit events, idempotency and uncertain-state handling | Single operator; seven-day retrieval period; physical retention purge is operator-triggered |
 | Credit control | Server-side allocation, provider usage receipts and atomic reconciliation | Existing approved 50-credit allowance; no purchases or automatic model retries |
 | Integration inspection | Read-only inspection of the real agent and existing scenarios | Detailed inventory and execution history require operator access |
 | CRM | HubSpot create/find/read/update adapter with confirmed writes and destination readback | Operator-only, application-marked test contacts; no customer writes, messages, enrollment or deletions |
 
-Seven browser-to-Make acceptance cases passed, followed by three real UI release smokes: **ten provider executions and 15.19 reported credits through 22 November**, below the approved 50. The latest local suite has **132 passing Node tests and ten desktop/mobile browser checks**, plus the legacy local pattern experiments. Browser provider fixtures do not establish live HubSpot operation, a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links dated acceptance receipts and remaining prerequisites.
+Eight current-version Make acceptance cases passed after the controlled refresh; earlier failures are retained in [current acceptance](docs/PRODUCTION-ACCEPTANCE.md). Lifetime reported verification usage is **44.16/50 credits**, including unsuccessful attempts. The remaining 5.84 is below the seven-credit allocation, so fresh AI requests are currently blocked pending a new explicit allowance decision; stored answers replay without inference. The latest local suite has **132 passing Node tests and ten desktop/mobile browser checks**, plus the legacy local pattern experiments. Browser provider fixtures do not establish live HubSpot operation, a security certification or an enterprise SLA. [Current readiness](docs/PRODUCTION-READINESS.md) links dated acceptance receipts and remaining prerequisites.
 
 ## Architecture
 
@@ -50,7 +50,7 @@ The original GitHub Pages lab remains available with synthetic support, tenant-s
 
 ## Local setup
 
-Node.js **22.13+**, preferably Node 24, npm and a full Git clone are required. The build reads knowledge from the pinned historical commit.
+Node.js **22.13+**, preferably Node 24, npm and a full Git clone are required. The build reads seven archive sources and a separate current capability source from their pinned commits.
 
 ```bash
 git clone https://github.com/phlppgdfry/make-enterprise-showcase.git
@@ -103,4 +103,4 @@ The older blueprint deployment tooling still defaults to a plan and requires exp
 
 ## Limits before real customer operations
 
-CRM is restricted to confirmed, application-marked test contacts in the authorized HubSpot account. Customer operations require individual access governance and an approved business schema. Research provides self-published website metadata, not contact discovery. The agent's snapshot intentionally predates the operational application: use current status/docs for current deployment facts. Physical retention remains manual at the owner’s request. Continuous customer operations also need approved backup custody/recovery and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill remain unverified; this showcase is not represented as an unrestricted enterprise production system.
+CRM is restricted to confirmed, application-marked test contacts in the authorized HubSpot account. Customer operations require individual access governance and an approved business schema. Research provides self-published website metadata, not contact discovery. The seven uploaded documents are historical; a separate immutable release addendum supplies current capabilities. Live health/status remain authoritative for runtime identity. The dedicated Make token is organization-bound with agent read/write and scenario read only; agent-write is required by Make for inference and is broader than the agent’s read-only application role. Physical retention remains manual at the owner’s request. Continuous customer operations also need approved backup custody/recovery and operational ownership. Managed D1 point-in-time recovery and a cloud restore drill remain unverified; this showcase is not represented as an unrestricted enterprise production system.
