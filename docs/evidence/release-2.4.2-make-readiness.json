@@ -1,0 +1,170 @@
+{
+  "checkedAt": "2026-11-25T05:39:21.077Z",
+  "teamId": 3365938,
+  "results": [
+    {
+      "scenarioId": 8199349,
+      "active": true,
+      "modules": [
+        {
+          "id": 1,
+          "module": "gateway:CustomWebHook"
+        },
+        {
+          "id": 2,
+          "module": "datastore:AddRecord",
+          "literalWriteKey": true
+        },
+        {
+          "id": 3,
+          "module": "gateway:WebhookRespond"
+        }
+      ],
+      "executionReadiness": "BLOCKED",
+      "blockers": [
+        "Datastore write uses a literal shared key; do not dispatch test data against existing records"
+      ]
+    },
+    {
+      "scenarioId": 8199345,
+      "active": false,
+      "modules": [
+        {
+          "id": 1,
+          "module": "gateway:CustomWebHook"
+        },
+        {
+          "id": 2,
+          "module": "openai-gpt-3:CreateCompletion",
+          "connectionReferencePresent": false
+        },
+        {
+          "id": 3,
+          "module": "builtin:BasicRouter"
+        },
+        {
+          "id": 4,
+          "module": "slack:CreateMessage",
+          "connectionReferencePresent": false,
+          "messagingDestinationRequiresApproval": true
+        },
+        {
+          "id": 5,
+          "module": "gateway:WebhookRespond"
+        }
+      ],
+      "executionReadiness": "BLOCKED",
+      "blockers": [
+        "External module has no configured connection reference; provider health is not established",
+        "Slack destination and specific message authorization are required before execution",
+        "Scenario is inactive; no activation or live execution performed"
+      ]
+    },
+    {
+      "scenarioId": 8199351,
+      "active": false,
+      "modules": [
+        {
+          "id": 1,
+          "module": "gateway:CustomWebHook"
+        },
+        {
+          "id": 2,
+          "module": "builtin:BasicFeeder"
+        },
+        {
+          "id": 3,
+          "module": "hubspotcrm:createContact",
+          "connectionReferencePresent": false
+        },
+        {
+          "id": 4,
+          "module": "builtin:BasicAggregator"
+        },
+        {
+          "id": 5,
+          "module": "slack:CreateMessage",
+          "connectionReferencePresent": false,
+          "messagingDestinationRequiresApproval": true
+        },
+        {
+          "id": 6,
+          "module": "gateway:WebhookRespond"
+        }
+      ],
+      "executionReadiness": "BLOCKED",
+      "blockers": [
+        "External module has no configured connection reference; provider health is not established",
+        "Slack destination and specific message authorization are required before execution",
+        "Scenario is inactive; no activation or live execution performed"
+      ]
+    },
+    {
+      "scenarioId": 8199353,
+      "active": false,
+      "modules": [
+        {
+          "id": 1,
+          "module": "gateway:CustomWebHook"
+        },
+        {
+          "id": 2,
+          "module": "builtin:BasicRouter"
+        },
+        {
+          "id": 3,
+          "module": "slack:CreateMessage",
+          "connectionReferencePresent": false,
+          "messagingDestinationRequiresApproval": true
+        },
+        {
+          "id": 4,
+          "module": "builtin:BasicFeeder"
+        },
+        {
+          "id": 5,
+          "module": "builtin:BasicAggregator"
+        },
+        {
+          "id": 6,
+          "module": "gateway:WebhookRespond"
+        }
+      ],
+      "executionReadiness": "BLOCKED",
+      "blockers": [
+        "External module has no configured connection reference; provider health is not established",
+        "Slack destination and specific message authorization are required before execution",
+        "Scenario is inactive; no activation or live execution performed"
+      ]
+    },
+    {
+      "scenarioId": 8199357,
+      "active": false,
+      "modules": [
+        {
+          "id": 1,
+          "module": "gateway:CustomWebHook"
+        },
+        {
+          "id": 2,
+          "module": "openai-gpt-3:CreateCompletion",
+          "connectionReferencePresent": false
+        },
+        {
+          "id": 3,
+          "module": "gateway:WebhookRespond"
+        }
+      ],
+      "executionReadiness": "BLOCKED",
+      "blockers": [
+        "External module has no configured connection reference; provider health is not established",
+        "Scenario is inactive; no activation or live execution performed"
+      ]
+    }
+  ],
+  "structuralInspectionOnly": true,
+  "scenarioExecutions": 0,
+  "modelCalls": 0,
+  "configurationChanges": 0,
+  "note": "Connection references are configuration evidence, not a successful live connection test. Scenario names do not establish HMAC, DLQ, idempotency or production behavior."
+}

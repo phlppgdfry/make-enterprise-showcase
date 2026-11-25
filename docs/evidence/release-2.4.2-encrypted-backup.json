@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-11-25T05:59:39.193Z",
+  "verified": true,
+  "mode": "isolated in-memory SQLite restore; no hosted writes",
+  "sourceCommit": "21038894ca4ec9331fe2b51c4519d1b7493e5d29",
+  "backupCreatedAt": "2026-11-25T05:59:04.158Z",
+  "checksum": "1f51bef6ce1fcccee8a0ece68f8415f616be46c49cdc4f9d337f3bea5782c216",
+  "rows": {
+    "budget": 1,
+    "executions": 39,
+    "audit_events": 133,
+    "leads": 3,
+    "integration_cache": 2
+  },
+  "budget": {
+    "used_centi": 4607,
+    "limit_centi": 5000
+  },
+  "authenticatedEncryption": true,
+  "plaintextFileWritten": false,
+  "actualStoredArtifactVerified": true,
+  "tamperRejected": true,
+  "keyFileMode": "600",
+  "artifactFileMode": "600",
+  "keyInSeparateLocalDirectory": true,
+  "offsiteCopyCreated": false,
+  "hostedRestorePerformed": false,
+  "automaticCleanupActivated": false
+}

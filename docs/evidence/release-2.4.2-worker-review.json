@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-11-25T06:01:32.733Z",
+  "windowMinutes": 5,
+  "events": [
+    {
+      "timestamp": 1795586350311,
+      "path": "/api/leads/research",
+      "status": 410,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795586320243,
+      "path": "/api/executions",
+      "status": null,
+      "outcome": "canceled"
+    },
+    {
+      "timestamp": 1795586302699,
+      "path": "/api/agent/ask",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795586302638,
+      "path": "/api/workflows",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795586302471,
+      "path": "/api/executions",
+      "status": 401,
+      "outcome": "ok"
+    },
+    {
+      "timestamp": 1795586302419,
+      "path": "/api/backup",
+      "status": 401,
+      "outcome": "ok"
+    }
+  ],
+  "http5xxCount": 0,
+  "note": "401 and 410 are deliberate unauthorized/expired probes. Canceled history reads can follow locking. Raw headers, IP addresses and provider traces are excluded."
+}

@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-11-25T06:06:05.707Z",
+  "httpStatus": 201,
+  "execution": {
+    "id": "7075e56b-db80-43e6-bb2d-93f3e5b02800",
+    "workflow": "company-research",
+    "status": "succeeded",
+    "createdAt": "2026-11-25T06:06:05.540Z",
+    "updatedAt": "2026-11-25T06:06:05.609Z",
+    "result": {
+      "title": "Cloudflare: Build for the agent era",
+      "description": "Welcome to Cloudflare - Powering the next generation of applications",
+      "contacts": [],
+      "employeeCount": null,
+      "fitScore": null,
+      "limitations": [
+        "Website metadata only; claims have not been independently corroborated.",
+        "No person data, contact addresses or AI fit scores are inferred."
+      ],
+      "domain": "cloudflare.com",
+      "source": "https://www.cloudflare.com/",
+      "observedAt": "2026-11-22T20:27:57.414Z",
+      "evidence": [
+        {
+          "field": "title",
+          "quote": "Cloudflare: Build for the agent era",
+          "url": "https://www.cloudflare.com/"
+        },
+        {
+          "field": "description",
+          "quote": "Welcome to Cloudflare - Powering the next generation of applications",
+          "url": "https://www.cloudflare.com/"
+        }
+      ],
+      "leadId": "d7e2d084-9470-4697-85d8-4e73a860ba66",
+      "reused": true
+    },
+    "error": null,
+    "chargedCenticredits": null,
+    "upstreamId": null
+  },
+  "modelCalls": 0,
+  "customerWrites": 0
+}

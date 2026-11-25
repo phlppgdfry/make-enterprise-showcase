@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-11-25T06:01:31.719Z",
+  "runtimeCommit": "21038894ca4ec9331fe2b51c4519d1b7493e5d29",
+  "knowledgeCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+  "startingLedger": {
+    "allocatedCredits": 46.07,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 3.93,
+    "limitChanged": false
+  },
+  "finalLedger": {
+    "allocatedCredits": 46.07,
+    "approvedLimitCredits": 50,
+    "remainingAllocationCredits": 3.93,
+    "limitChanged": false
+  },
+  "replayed": true,
+  "execution": {
+    "id": "8b78271c-6950-4ef7-9ad6-3fe6a8410dba",
+    "workflow": "repository-agent-verification",
+    "status": "succeeded",
+    "createdAt": "2026-11-25T05:58:16.133Z",
+    "updatedAt": "2026-11-25T05:58:25.382Z",
+    "result": {
+      "status": "answered",
+      "answer": "HubSpot-toegang is beperkt tot door de applicatie gemarkeerde testcontacten; er is een operator-sleutel en expliciete bevestiging nodig voor elke test-write. Er worden geen klantschrijf\"s uitgevoerd.",
+      "citations": [
+        {
+          "source": "https://github.com/phlppgdfry/make-enterprise-showcase/blob/21dad08c5aaed036a2057e6f993911d3b051d776/docs/CURRENT-CAPABILITIES.md",
+          "quote": "HubSpot access is limited to application-marked test contacts. The owner approved a contact-read/write service key, stored as an encrypted server secret. The website requires an operator key and explicit confirmation before each test write; it creates, finds, reads and updates marked test contacts and verifies actual provider readback. Existing email duplicates are returned without overwriting them. Customer records, messages, marketing enrollment and deletions are outside this flow. The Make knowledge agent itself remains read-only and cannot execute CRM writes."
+        }
+      ],
+      "sourceCommit": "21dad08c5aaed036a2057e6f993911d3b051d776",
+      "archiveCommit": "885c72b6a247ef9f9aabe7bc540339888397f403",
+      "executionTimeMs": 8843,
+      "chargedCenticredits": 191,
+      "iterationId": "f17e9ce5-b905-4df4-8287-5cc906297426",
+      "verificationProfile": "fixed-single-step",
+      "allocatedCenticredits": 500,
+      "citationValidation": "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven.",
+      "retrievalSteps": []
+    },
+    "error": null,
+    "chargedCenticredits": 191,
+    "upstreamId": "f17e9ce5-b905-4df4-8287-5cc906297426"
+  },
+  "modelCallsStarted": 0,
+  "automaticRetries": 0,
+  "scenarioExecutions": 0,
+  "customerWrites": 0
+}

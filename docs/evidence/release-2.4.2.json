@@ -1,0 +1,49 @@
+{
+  "runtimeCommit": "21038894ca4ec9331fe2b51c4519d1b7493e5d29",
+  "artifactSource": "33e9e67616225f70bb0bf7d76d09d025df627de7",
+  "savedVersion": 15,
+  "deployment": {
+    "id": "appgdep_6b0678c22c9c8191aa52bdf532646fa9",
+    "project_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "title": "Make Enterprise Workbench",
+    "version_id": "appgprj_6aefbbe5a6ac8191b3edbcdcc0566df1~appgver_7ba0ce4b08588191a0ac829cb30fbf5a",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://make-enterprise-workbench-phlppgdfry.kippieg.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aefbbe5a6ac8191b3edbcdcc0566df1",
+    "failure_message": null,
+    "env_set_revision": 3,
+    "updated_at": "2026-11-25T05:57:33.874962+00:00"
+  },
+  "tests": {
+    "node": 132,
+    "browser": 10,
+    "format": "passed",
+    "dependencyAuditVulnerabilities": 0
+  },
+  "knownCredentialScan": {
+    "filesChecked": 199,
+    "matches": 0,
+    "credentialClasses": [
+      "Make CLI token",
+      "operator key",
+      "raw and encoded backup key"
+    ]
+  },
+  "scenarioMutations": 0,
+  "scenarioExecutions": 0,
+  "automaticCleanupActivated": false,
+  "actualNewModelCalls": 1,
+  "actualNewModelCredits": 1.91,
+  "finalLedger": {
+    "usedCredits": 46.07,
+    "approvedLimitCredits": 50,
+    "remainingCredits": 3.93,
+    "limitIncreased": false
+  },
+  "authenticatedLocalEncryptedBackupVerified": true,
+  "offsiteBackupCreated": false,
+  "hostedRestoreVerified": false
+}
