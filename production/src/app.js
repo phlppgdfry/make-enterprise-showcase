@@ -1,3 +1,8 @@
+import {
+  VERIFICATION_RESERVATION,
+  VERIFICATION_QUESTION,
+  verificationConfig,
+} from "./agent-verification.js";
 import { exportBackup } from "./backup.js";
 import {
   crmConfiguration,
@@ -229,6 +234,7 @@ export function createApp({
     if (
       ![
         "repository-agent",
+        "repository-agent-verification",
         "company-research",
         "crm-contact-create",
         "crm-contact-update",
@@ -236,7 +242,12 @@ export function createApp({
     )
       fail(404, "workflow_not_found", "Workflow is not available.");
     let input;
-    if (workflow === "repository-agent") {
+    if (workflow === "repository-agent-verification") {
+      strict(b, []);
+      input = { question: VERIFICATION_QUESTION };
+      if (!env.MAKE_API_KEY)
+        fail(503, "make_unconfigured", "Make credentials are not configured.");
+    } else if (workflow === "repository-agent") {
       strict(b, ["question"]);
       if (
         typeof b.question !== "string" ||
@@ -319,18 +330,24 @@ export function createApp({
       upstream = null;
     try {
       let result;
-      if (workflow === "repository-agent") {
+      if (
+        ["repository-agent", "repository-agent-verification"].includes(workflow)
+      ) {
+        const verifying = workflow === "repository-agent-verification";
+        const runConfig = verifying ? verificationConfig(knowledge) : {};
+        const allocationCenti = verifying ? VERIFICATION_RESERVATION : 700;
         await inspectAgent(env);
         await db
           .prepare(
             "INSERT INTO budget (id) VALUES (1) ON CONFLICT(id) DO NOTHING",
           )
           .run();
-        // Conservative allocation: at most seven unreconciled dispatches per approved 50-credit allowance.
+        // Normal calls reserve seven credits. A fixed, bounded verification reserves five; the lifetime ceiling is unchanged.
         const allocation = await db
           .prepare(
-            "UPDATE budget SET used_centi=used_centi+700 WHERE id=1 AND used_centi+700<=limit_centi",
+            "UPDATE budget SET used_centi=used_centi+? WHERE id=1 AND used_centi+?<=limit_centi",
           )
+          .bind(allocationCenti, allocationCenti)
           .run();
         if (allocation.meta.changes !== 1)
           fail(
@@ -340,8 +357,8 @@ export function createApp({
           );
         reserved = true;
         await db
-          .prepare("UPDATE executions SET reserved_centi=700 WHERE id=?")
-          .bind(id)
+          .prepare("UPDATE executions SET reserved_centi=? WHERE id=?")
+          .bind(allocationCenti, id)
           .run();
         dispatched = true;
         const r = await make(
@@ -350,7 +367,7 @@ export function createApp({
           {
             messages: [{ role: "user", content: input.question }],
             threadId: id,
-            config: {},
+            config: runConfig,
           },
         );
         const consumption =
@@ -396,6 +413,12 @@ export function createApp({
           executionTimeMs: r.executionTimeMs || null,
           chargedCenticredits: charged,
           iterationId: upstream,
+          ...(verifying
+            ? {
+                verificationProfile: "fixed-single-step",
+                allocatedCenticredits: allocationCenti,
+              }
+            : {}),
           citationValidation:
             "Source URL and quoted text verified against the pinned repository snapshot; semantic entailment is not automatically proven.",
           retrievalSteps: (Array.isArray(r.executionSteps)
@@ -810,17 +833,20 @@ export function createApp({
           } else if (
             req.method === "POST" &&
             (path === "/api/agent/ask" ||
+              path === "/api/agent/verify" ||
               path === "/api/leads/research" ||
               /^\/api\/workflows\/[^/]+\/execute$/.test(path))
           )
             response = await execute(
               req,
               env,
-              path === "/api/agent/ask"
-                ? "repository-agent"
-                : path === "/api/leads/research"
-                  ? "company-research"
-                  : path.split("/")[3],
+              path === "/api/agent/verify"
+                ? "repository-agent-verification"
+                : path === "/api/agent/ask"
+                  ? "repository-agent"
+                  : path === "/api/leads/research"
+                    ? "company-research"
+                    : path.split("/")[3],
               await bodyOf(req),
               requestId,
             );
@@ -873,7 +899,7 @@ export function createApp({
             strict(await bodyOf(req), []);
             // D1 batch is atomic. Unknown charges retain their full allocation; settled receipts never reset lifetime spend.
             const settled =
-              "workflow='repository-agent' AND charged_centi IS NOT NULL AND status IN ('succeeded','failed')";
+              "workflow IN ('repository-agent','repository-agent-verification') AND charged_centi IS NOT NULL AND status IN ('succeeded','failed')";
             await env.DB.batch([
               env.DB.prepare(
                 "INSERT INTO budget (id) VALUES (1) ON CONFLICT(id) DO NOTHING",

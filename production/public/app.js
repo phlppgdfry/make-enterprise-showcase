@@ -7,6 +7,7 @@ const pending = new Map(),
 const publicPaths = new Set(["/api/health", "/api/status"]);
 const workflowNames = {
   "repository-agent": "Repository knowledge",
+  "repository-agent-verification": "Bounded release verification",
   "company-research": "Company website research",
   "crm-contact-create": "HubSpot test contact create",
   "crm-contact-update": "HubSpot test contact update",

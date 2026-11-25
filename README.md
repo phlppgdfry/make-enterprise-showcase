@@ -8,6 +8,8 @@ A traceable automation showcase by Philippe Godfroy: ask an actual Make knowledg
 
 ## Version 2.4
 
+Patch 2.4.2 adds authenticated AES-256-GCM backup files with isolated recovery verification ([secure backup CLI](docs/SECURE-BACKUP.md)). A separate operator-only fixed release probe reserves five credits and limits output to 1,200 tokens and one model iteration; normal arbitrary questions still reserve seven. The existing lifetime allowance remains 50. `npm run smoke:agent` and `npm run audit:make` default to plans; explicit `--live` is required for their documented network behavior. The scenario audit is read-only and never executes a scenario.
+
 Version 2.4 adds a server-side HubSpot adapter and a confirmation-gated test-contact workspace. It validates destination readback, handles duplicates without overwriting, retains ambiguous writes for review and rejects customer/unowned records. See [HubSpot setup and verification](docs/HUBSPOT-INTEGRATION.md). Desktop/mobile browser acceptance is now a separate GitHub Actions gate; provider fixtures are distinguished from live integration proof.
 
 Patch 2.4.1 preserves the seven uploaded archive documents and supplies a separate current-release source directly in the agent instructions. Both source versions use immutable GitHub URLs and independent quote validation. Controlled updates refuse unexpected archive IDs/tools and modify only the existing agent's instructions, not its tools or documents. Current operational questions reject historical source versions; the production build preserves and tests source-version metadata. Eight real current-version cases passed. Release model acceptance uses the backend's unchanged credit ledger; it does not bypass the allowance through direct unbudgeted API calls.

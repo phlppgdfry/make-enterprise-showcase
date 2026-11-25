@@ -13,3 +13,8 @@ test-results/
 production/dist/
 production/src/*.generated.json
 production/.wrangler/
+
+# Local recovery artifacts and raw encryption keys
+*.sealed-backup.json
+*.backup.key
+backup.key

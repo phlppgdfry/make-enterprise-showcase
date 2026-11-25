@@ -52,6 +52,27 @@ async function setup(fetcher) {
     async function (url, options) {
       if (url.includes("/run?")) {
         calls++;
+        const config = JSON.parse(options.body).config;
+        if (config.systemPrompt) {
+          assert.equal(config.llmConfig.settings.maxTokens, 1200);
+          assert.equal(config.invocationConfig.recursionLimit, 1);
+          assert.equal(config.historyConfig.iterationsFromHistoryCount, 0);
+          assert.deepEqual(config.scenarios, []);
+          assert.deepEqual(config.mcpConfigs, []);
+          const source = knowledge.sources.find((s) => s.inline);
+          return Response.json({
+            jsonResponse: {
+              status: "answered",
+              answer:
+                "HubSpot gebruikt alleen testcontacten, met operatorbevestiging; geen klantwrites.",
+              source: source.url,
+              quote:
+                "HubSpot access is limited to application-marked test contacts.",
+            },
+            centicreditsConsumption: { totalCenticreditsConsumption: 125 },
+            lastAgentIterationId: "bounded-iteration-test",
+          });
+        }
         return Response.json({
           jsonResponse: {
             status: "answered",
@@ -583,6 +604,60 @@ test("conservative credit allowance admits at most seven metered calls and never
     s.env.DB.raw.prepare("SELECT used_centi FROM budget").get().used_centi,
     4900,
   );
+  const compact = await setup();
+  compact.env.DB.raw.exec(
+    "INSERT INTO budget (id,used_centi,limit_centi) VALUES (1,4416,5000)",
+  );
+  assert.equal(
+    (await compact.call("/api/agent/verify", { question: "override" })).status,
+    400,
+  );
+  assert.equal(
+    (
+      await compact.call(
+        "/api/agent/verify",
+        {},
+        { headers: { Authorization: "" } },
+      )
+    ).status,
+    401,
+  );
+  const bounded = await compact.call(
+    "/api/agent/verify",
+    {},
+    { key: "test-001" },
+  );
+  assert.equal(bounded.data.execution.status, "succeeded");
+  assert.equal(bounded.data.execution.result.allocatedCenticredits, 500);
+  assert.equal(
+    bounded.data.execution.result.verificationProfile,
+    "fixed-single-step",
+  );
+  assert.equal(
+    compact.env.DB.raw.prepare("SELECT used_centi FROM budget").get()
+      .used_centi,
+    4916,
+  );
+  assert.equal(
+    (await compact.call("/api/agent/verify", {}, { key: "test-001" }))
+      .data.replayed,
+    true,
+  );
+  assert.equal(
+    (await compact.call("/api/agent/verify", {}, { key: "test-002" }))
+      .data.execution.error.code,
+    "credit_budget_exhausted",
+  );
+  assert.equal(compact.calls(), 1);
+  assert.equal(
+    (await compact.call("/api/budget/reconcile", {})).data.allocatedCredits,
+    45.41,
+  );
+  const normal = await compact.call("/api/agent/ask", {
+    question: "Normal question",
+  });
+  assert.equal(normal.data.execution.error.code, "credit_budget_exhausted");
+  assert.equal(compact.calls(), 1);
 });
 test("timeouts after dispatch persist uncertain status without duplicate provider requests", async () => {
   let calls = 0;
@@ -934,6 +1009,65 @@ test("operator backup round-trips through an isolated restore and preserves know
   assert.equal(restored.rows.executions, 2);
   assert.equal(restored.budget.used_centi, 175);
   assert.equal(restored.budget.limit_centi, 5000);
+
+  const { sealBackup, openBackup, readPrivateFile, writePrivateFile } =
+    await import("../scripts/secure-production-backup.mjs");
+  const { randomBytes } = require("node:crypto"),
+    key = randomBytes(32);
+  const envelope = await sealBackup(r.data, key),
+    second = await sealBackup(r.data, key);
+  assert.notEqual(envelope.iv, second.iv);
+  assert.ok(!JSON.stringify(envelope).includes("cloudflare.com"));
+  assert.equal(
+    (await verifyRestore(await openBackup(envelope, key))).budget.used_centi,
+    175,
+  );
+  await assert.rejects(openBackup(envelope, randomBytes(32)), /authentication/);
+  for (const field of ["ciphertext", "iv", "tag"]) {
+    const tampered = structuredClone(envelope);
+    const bytes = Buffer.from(tampered[field], "base64");
+    bytes[0] ^= 1;
+    tampered[field] = bytes.toString("base64");
+    await assert.rejects(openBackup(tampered, key), /authentication/);
+  }
+  await assert.rejects(
+    openBackup({ ...envelope, version: 2 }, key),
+    /Unsupported/,
+  );
+  await assert.rejects(
+    openBackup({ ...envelope, tag: "AA==" }, key),
+    /Unsupported/,
+  );
+  const dir = fs.mkdtempSync(
+    require("node:path").join(
+      fs.realpathSync(require("node:os").tmpdir()),
+      "make-sealed-test-",
+    ),
+  );
+  try {
+    const file = dir + "/backup.json";
+    writePrivateFile(file, JSON.stringify(envelope));
+    assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+    assert.throws(() => writePrivateFile(file, "overwrite"), /EEXIST/);
+    assert.equal(
+      (
+        await openBackup(
+          JSON.parse(readPrivateFile(file, 9 * 1024 * 1024)),
+          key,
+        )
+      ).sha256,
+      r.data.sha256,
+    );
+    fs.symlinkSync(file, dir + "/link");
+    assert.throws(() => readPrivateFile(dir + "/link", 100), /ELOOP/);
+    fs.chmodSync(file, 0o644);
+    assert.throws(() => readPrivateFile(file, 9 * 1024 * 1024), /owner-only/);
+    fs.chmodSync(file, 0o600);
+    assert.throws(() => readPrivateFile(file, 2), /size limit/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+    key.fill(0);
+  }
   const changed = structuredClone(r.data);
   changed.tables.budget[0].used_centi = 0;
   await assert.rejects(verifyRestore(changed), /checksum/);
