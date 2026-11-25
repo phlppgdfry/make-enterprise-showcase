@@ -639,13 +639,13 @@ test("conservative credit allowance admits at most seven metered calls and never
     4916,
   );
   assert.equal(
-    (await compact.call("/api/agent/verify", {}, { key: "test-001" }))
-      .data.replayed,
+    (await compact.call("/api/agent/verify", {}, { key: "test-001" })).data
+      .replayed,
     true,
   );
   assert.equal(
-    (await compact.call("/api/agent/verify", {}, { key: "test-002" }))
-      .data.execution.error.code,
+    (await compact.call("/api/agent/verify", {}, { key: "test-002" })).data
+      .execution.error.code,
     "credit_budget_exhausted",
   );
   assert.equal(compact.calls(), 1);
