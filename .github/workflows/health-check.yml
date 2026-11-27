@@ -3,6 +3,9 @@ name: Synthetic Health Probing (On-Demand)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   probe:
     runs-on: ubuntu-latest
