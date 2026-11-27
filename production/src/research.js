@@ -148,8 +148,7 @@ export function robotsAllowed(text, path = "/") {
         rule.path
           .split("*")
           .map((x) => x.replace(/[.+?^{}()|[\]\\]/g, "\\$&"))
-          .join(".*")
-          .replace(/\$$/, "$");
+          .join(".*");
       if (
         new RegExp(regex).test(path) &&
         (!best ||
